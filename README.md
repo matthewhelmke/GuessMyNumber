@@ -8,4 +8,6 @@ To run on Linux, from the directory where the file exists, enter:
 ./guessnumber.py
 ```
 
-Code contributions via PR welcome. Comments about how lame anyone thinks this silly little game is are sent to `/dev/null`.
+Code contributions via PR welcome. Low hanging fruit include instructions to run on MacOS and Windows (I don't have systems running either).
+
+Comments about how lame anyone thinks this silly little game is are sent to `/dev/null`, LOL.
