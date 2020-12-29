@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Guess my number game
 #
@@ -8,6 +8,9 @@
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 # Copyright (c) 2020 Matthew Helmke for the Bash version (this one)
+#
+# To run (Linux):
+#   ./guessmynumber.sh
 #
 # This program is free software; you can redistribute it and\or
 # modify it under the terms of the GNU General Public License
