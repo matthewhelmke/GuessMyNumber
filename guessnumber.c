@@ -37,11 +37,6 @@
 int
 main()
 {
-  // // set all our initial values
-  // userguess = 0
-  // totalguesses = 0
-  // lowmax = 0
-  // highmax = 100
   char userguessunvalidated;
   char characters;
 	int userguess;
@@ -69,12 +64,11 @@ main()
 
     (void) fprintf(stdout, "What is your guess? ");
 
-    // let the user input any number they want, then check if an integer between 1-10
+    // let the user input any number they want, then check if an integer between 1-100
     int c;
     for(;;) {
       if(((c = scanf("%hhd", &userguessunvalidated)) == 1 || c == EOF) && userguessunvalidated > 0 && userguessunvalidated <101 && ((c = getchar()) == EOF || c == '\n'))
-      /* If the user enters a valid integer and it is a positive number and if the next character is either EOF or '\n' */
-        break; /* Get out of the loop */
+        break;
 
       printf("Invalid! Please enter a whole number between 1 and 100: ");
       while((c = getchar()) != EOF && c != '\n');
