@@ -3,7 +3,7 @@
 
 I assume you will run each of these on Linux.
 
-I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleashed-2021-14th-dp-0136778852/dp/0136778852/) for shell scripting, Python, Perl, and PHP. I figured they are all must-haves. The other languages are here because I was in the mood to either remember or learn how to use it for this simple use case that day.
+I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleashed-2021-14th-dp-0136778852/dp/0136778852/) for shell scripting, Python, Perl, and PHP. I figured they are all must-have languages here. The other languages are here because I was in the mood to either remember or learn how to use it for this simple use case that day.
 
 I wrote these, in this order:
 - Python
