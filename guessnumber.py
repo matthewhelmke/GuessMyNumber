@@ -30,7 +30,7 @@
 import random
 
 # Print a description of the game, with rules, to the screen
-print ('''Welcome to Guess My Number!
+print('''Welcome to Guess My Number!
 
 The computer will select a random whole number between 1 and 100.
 Your goal is to guess that number. You will get a turn, then a computer
@@ -62,42 +62,43 @@ while True:
 
     # verify the guess is a number
     if not str.isdigit(userguessunvalidated):
-        print ('''Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n''')
+        print('''Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n''')
         continue
     else:
         userguess = int(userguessunvalidated)
 
     # make sure the guess is an integer in the right range
-    if (userguess <=0 or userguess >=101):
-        print ('''Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n''')
+    if (userguess <= 0 or userguess >= 101):
+        print('''Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n''')
         continue
 
     # some taunts for silly errors in user guesses
     if (userguess < lowmax):
-        print ("That guess was lower than a previous guess that was too low. Pay attention!\n")
+        print(
+            "That guess was lower than a previous guess that was too low. Pay attention!\n")
     if (userguess > highmax):
-        print ("Wake up! That guess was higher than an earlier guess that was too high.\n")
+        print("Wake up! That guess was higher than an earlier guess that was too high.\n")
 
     totalguesses += 1
 
     # evaluate the guess
     if (userguess > secretnumber):
-        print ("Your guess is too high.\n")
+        print("Your guess is too high.\n")
         if (userguess <= highmax):
             highmax = (userguess - 1)
             # don't let the computer choose this number or anything higher than this as long as a reasonable user guess was made
 
     if (userguess < secretnumber):
-        print ("Your guess is too low.\n")
+        print("Your guess is too low.\n")
         if (userguess >= lowmax):
             lowmax = (userguess + 1)
             # don't let the computer choose this number or anything lower than this as long as a reasonable user guess was made
 
     if (userguess == secretnumber):
-        print ("\n*********************************************")
-        print ("   Your guess is correct! Congratulations!")
-        print ("   It took", totalguesses, "total guesses.")
-        print ("*********************************************\n")
+        print("\n*********************************************")
+        print("   Your guess is correct! Congratulations!")
+        print("   It took", totalguesses, "total guesses.")
+        print("*********************************************\n")
         input("\n\nPress the enter key to exit.\n")
         break
 
@@ -111,32 +112,32 @@ while True:
     totalguesses += 1
 
     if (computerguess > secretnumber):
-        print ("The computer guessed", computerguess, "and that was too high.")
-        print ("Please try again.\n")
+        print("The computer guessed", computerguess, "and that was too high.")
+        print("Please try again.\n")
         highmax = (computerguess - 1)
 
     if (computerguess < secretnumber):
-        print ("The computer guessed", computerguess, "and that was too low.")
-        print ("Please try again.\n")
+        print("The computer guessed", computerguess, "and that was too low.")
+        print("Please try again.\n")
         lowmax = (computerguess + 1)
 
     if (computerguess == secretnumber):
-        print ("**********************************************")
-        print ("   The computer's guess of", computerguess, "is correct!")
-        print ("   It took", totalguesses, "total guesses.")
-        print ("**********************************************\n")
+        print("**********************************************")
+        print("   The computer's guess of", computerguess, "is correct!")
+        print("   It took", totalguesses, "total guesses.")
+        print("**********************************************\n")
         input("\n\nPress the enter key to exit.\n")
         break
 
     # these taunts are just for my amusement and to keep the game from being too terribly long
     if (totalguesses == 8):
-        print ("\nThis is a hard number, isn't it?\n")
+        print("\nThis is a hard number, isn't it?\n")
 
     if (totalguesses == 12):
-        print ("\nWow! You are really bad at this.\n")
+        print("\nWow! You are really bad at this.\n")
 
     if (totalguesses >= 16):
-        print ("\nYou're taking too long, I can't handle it any more.\n\n")
-        print ("G A M E   O V E R\n")
+        print("\nYou're taking too long, I can't handle it any more.\n\n")
+        print("G A M E   O V E R\n")
         input("\n\nPress the enter key to exit.\n")
         break

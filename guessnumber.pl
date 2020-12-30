@@ -42,8 +42,8 @@ use IO::Prompt::Hooked;
 
 # set all our initial values
 my $totalguesses = 0;
-my $lowmax = 0;
-my $highmax = 100;
+my $lowmax       = 0;
+my $highmax      = 100;
 my $userguess;
 my $guessrange;
 my $computerguess;
@@ -66,18 +66,23 @@ my $secretnumber = 1 + int rand 99;
 
 # the main bit
 while ( $userguess != $secretnumber ) {
+
     # let the user input any number they want
     #$userguessunvalidated = <STDIN>;
 
     my $userguessunvalidated = prompt(
-      message   =>  "What is your guess? ",
-      error     =>  "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n",
-      validate  =>  sub {
-        my $userguessunvalidated = shift;
-        # make sure the guess is an integer
-        # make sure the guess is in the right range
-        return ( $userguessunvalidated =~ /^[1-9]\d?$/ and $userguessunvalidated >= 1 and $userguessunvalidated <=100 );
-      },
+        message => "What is your guess? ",
+        error =>
+          "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n",
+        validate => sub {
+            my $userguessunvalidated = shift;
+
+            # make sure the guess is an integer
+            # make sure the guess is in the right range
+            return (  $userguessunvalidated =~ /^[1-9]\d?$/
+                  and $userguessunvalidated >= 1
+                  and $userguessunvalidated <= 100 );
+        },
     );
 
     my $userguess = $userguessunvalidated;
@@ -85,77 +90,79 @@ while ( $userguess != $secretnumber ) {
     ++$totalguesses;
 
     # some taunts for silly errors in user guesses
-    if($userguess < $lowmax) {
-      print "\nThat guess was lower than a previous guess that was too low. Pay attention!\n";
+    if ( $userguess < $lowmax ) {
+        print
+"\nThat guess was lower than a previous guess that was too low. Pay attention!\n";
     }
 
-    if($userguess > $highmax) {
-      print "\nWake up! That guess was higher than an earlier guess that was too high.\n";
+    if ( $userguess > $highmax ) {
+        print
+"\nWake up! That guess was higher than an earlier guess that was too high.\n";
     }
 
     # evaluate the guess
-    if($userguess < $secretnumber) {
-      print  "\nYour guess is too low.\n\n";
-      $lowmax = ($userguess + 1);
+    if ( $userguess < $secretnumber ) {
+        print "\nYour guess is too low.\n\n";
+        $lowmax = ( $userguess + 1 );
     }
 
-    if($userguess > $secretnumber) {
-      print  "\nYour guess is too high.\n\n";
-      $highmax = ($userguess - 1);
+    if ( $userguess > $secretnumber ) {
+        print "\nYour guess is too high.\n\n";
+        $highmax = ( $userguess - 1 );
     }
 
-    if($userguess == $secretnumber) {
-      print "\n*********************************************\n";
-      print "   Your guess is correct! Congratulations!\n";
-      print "   It took $totalguesses total guesses.\n";
-      print "*********************************************\n";
-      exit;
+    if ( $userguess == $secretnumber ) {
+        print "\n*********************************************\n";
+        print "   Your guess is correct! Congratulations!\n";
+        print "   It took $totalguesses total guesses.\n";
+        print "*********************************************\n";
+        exit;
     }
 
     # computer guess routine
 
     # this is to prevent trying to generate a random number from a range of 0
-    $guessrange = ($highmax - $lowmax);
-    if($guessrange <= 0) {
-      $guessrange = 1;
+    $guessrange = ( $highmax - $lowmax );
+    if ( $guessrange <= 0 ) {
+        $guessrange = 1;
     }
 
-    # the computer's guess is random, within the range of current reasonable values
-    #     computerguess = (random.randrange(guessrange) + lowmax)
-    #     totalguesses += 1
-    $computerguess = ($lowmax + int rand ($guessrange));
+ # the computer's guess is random, within the range of current reasonable values
+ #     computerguess = (random.randrange(guessrange) + lowmax)
+ #     totalguesses += 1
+    $computerguess = ( $lowmax + int rand($guessrange) );
     ++$totalguesses;
 
-    if($computerguess < $secretnumber) {
-      print  "The computer guessed $computerguess and that was too low.\n\n";
-      $lowmax = ($computerguess + 1);
+    if ( $computerguess < $secretnumber ) {
+        print "The computer guessed $computerguess and that was too low.\n\n";
+        $lowmax = ( $computerguess + 1 );
     }
 
-    if($computerguess > $secretnumber) {
-      print  "The computer guessed $computerguess and that was too high.\n\n";
-      $highmax = ($computerguess - 1);
+    if ( $computerguess > $secretnumber ) {
+        print "The computer guessed $computerguess and that was too high.\n\n";
+        $highmax = ( $computerguess - 1 );
     }
 
-    if($computerguess == $secretnumber) {
-      print "\n*********************************************\n";
-      print "   The computer's guess of $computerguess is correct!\n";
-      print "   It took $totalguesses total guesses.\n";
-      print "*********************************************\n";
-      exit;
+    if ( $computerguess == $secretnumber ) {
+        print "\n*********************************************\n";
+        print "   The computer's guess of $computerguess is correct!\n";
+        print "   It took $totalguesses total guesses.\n";
+        print "*********************************************\n";
+        exit;
     }
 
-    # these taunts are just for my amusement and to keep the game from being too terribly long
-    if($totalguesses == 8) {
-      print "\nThis is a hard number, isn't it?\n";
+# these taunts are just for my amusement and to keep the game from being too terribly long
+    if ( $totalguesses == 8 ) {
+        print "\nThis is a hard number, isn't it?\n";
     }
 
-    if($totalguesses == 12) {
-      print "\nWow! You are really bad at this.\n";
+    if ( $totalguesses == 12 ) {
+        print "\nWow! You are really bad at this.\n";
     }
 
-    if($totalguesses >= 16) {
-      print "\nYou're taking too long, I can't handle it any more.\n\n";
-      print "G A M E   O V E R\n";
+    if ( $totalguesses >= 16 ) {
+        print "\nYou're taking too long, I can't handle it any more.\n\n";
+        print "G A M E   O V E R\n";
     }
 
 }
