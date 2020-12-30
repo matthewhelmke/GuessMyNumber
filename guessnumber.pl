@@ -84,16 +84,6 @@ while ( $userguess != $secretnumber ) {
 
     ++$totalguesses;
 
-    # TESTING DATA
-    print "secretnumber = $secretnumber \n";
-    print "lowmax = $lowmax \n";
-    print "highmax = $highmax \n";
-    print "guessrange = $guessrange \n";
-    print "totalguesses = $totalguesses \n";
-    print "userguessunvalidated = $userguessunvalidated \n";
-    print "userguess = $userguess \n";
-    print "computerguess = $computerguess \n";
-
     # some taunts for silly errors in user guesses
     if($userguess < $lowmax) {
       print "\nThat guess was lower than a previous guess that was too low. Pay attention!\n";
@@ -103,6 +93,7 @@ while ( $userguess != $secretnumber ) {
       print "\nWake up! That guess was higher than an earlier guess that was too high.\n";
     }
 
+    # evaluate the guess
     if($userguess < $secretnumber) {
       print  "\nYour guess is too low.\n\n";
       $lowmax = ($userguess + 1);

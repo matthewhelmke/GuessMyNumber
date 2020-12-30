@@ -84,6 +84,7 @@ main()
     if (userguess > highmax)
       (void) fprintf(stdout, "Wake up! That guess was higher than an earlier guess that was too high.\n");
 
+    // evaluate the guess
     if (userguess < secretnumber) {
       (void) fprintf(stdout, "Your guess is too low.\n");
       if (userguess >= lowmax)

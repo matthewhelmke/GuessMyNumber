@@ -80,6 +80,7 @@ while True:
 
     totalguesses += 1
 
+    # evaluate the guess
     if (userguess > secretnumber):
         print ("Your guess is too high.\n")
         if (userguess <= highmax):
