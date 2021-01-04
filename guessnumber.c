@@ -76,7 +76,7 @@ main()
 
                 (userguess=userguessunvalidated);
 
-                (totalguesses++);
+                ++totalguesses;
 
                 // some taunts for silly errors in user guesses
                 if (userguess < lowmax)
@@ -111,7 +111,7 @@ main()
                 //     computerguess = (random.randrange(guessrange) + lowmax)
                 //     totalguesses += 1
                 computerguess = (rand() % (guessrange)) + lowmax;
-                (totalguesses++);
+                ++totalguesses;
 
                 if (computerguess < secretnumber) {
                         (void) fprintf(stdout, "The computer guessed %d and that was too low.\n\n", computerguess);
