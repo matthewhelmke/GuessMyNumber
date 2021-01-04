@@ -12,4 +12,9 @@ I wrote these, in this order:
 - Perl
 - PHP
 
+Future ideas/plans:
+ - Go
+ - Ruby
+ - ??
+
 Code contributions via PR welcome. This repo exists because all my other work on GitHub is in repos I don't own and I thought I should have something here that is mine.
