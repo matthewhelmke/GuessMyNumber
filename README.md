@@ -11,6 +11,7 @@ I wrote these, in this order:
 - C
 - Perl
 - PHP
+- Racket (based on Scheme, which is based on Lisp)
 
 Future ideas/plans:
  - Go
