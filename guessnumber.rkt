@@ -41,13 +41,19 @@ Here we go!")
 (define (inquire-user secretnumber)
   (display "What is your guess? ")
   (define userguess (string->number (read-line)))
-  ; Validate input against multiple criteria
+  ; Validate userguess against multiple criteria
   (cond [(not (integer? userguess)) (displayln "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
         [(< userguess 1) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
         [(> userguess 100) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
-        [(> secretnumber userguess) (displayln "Your guess is too low.") (inquire-user secretnumber)]
-        [(< secretnumber userguess) (displayln "Your guess is too high.") (inquire-user secretnumber)]
-        [else (displayln "Your guess is correct! Congratulations!")]))
+        [(> secretnumber userguess) (displayln "Your guess is too low.")]
+        [(< secretnumber userguess) (displayln "Your guess is too high.")]
+        [(= secretnumber userguess) (displayln "Your guess is correct! Congratulations!") (exit)])
+  ; Computer gets a turn
+  (define computerguess (random 1 100))
+    (cond [(> secretnumber computerguess) (displayln "The computer guess is too low.")]
+        [(< secretnumber computerguess) (displayln "The computer guess is too high.")]
+        [(= secretnumber computerguess) (displayln "The computer guess is correct!") (exit)])
+  (inquire-user secretnumber))
 
 ; Call the function with "secretnumber" defined as a random number between 1 and 100
 (inquire-user (random 1 100))
