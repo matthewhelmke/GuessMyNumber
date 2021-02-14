@@ -26,20 +26,6 @@
 ; along with this program; if not, write to the Free Software
 ; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-; Set variables
-(define (inquire-user number)
-
-; the main bit
-(display "What is your guess? ")
-(define userguess (string->number (read-line)))
-; Validate input against multiple criteria
-(cond [(not (integer? userguess)) (displayln "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user number)]
-      [(< userguess 1) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user number)]
-      [(> userguess 100) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user number)]
-      [(> number userguess) (displayln "Your guess is too low.") (inquire-user number)]
-      [(< number userguess) (displayln "Your guess is too high.") (inquire-user number)]
-      [else (displayln "Correct!")]))
-
 ; Print a description of the game, with rules, to the screen
 (displayln "Welcome to Guess My Number!
 
@@ -51,6 +37,17 @@ as few turns as possible.
 
 Here we go!")
 
-; Start the process by getting user input for the first time and comparing to a random number
-; then go back up to cond line for first comparison and additional input if not high or low
-(inquire-user (random 1 101))
+; Define the guessing function, with validation rules
+(define (inquire-user secretnumber)
+  (display "What is your guess? ")
+  (define userguess (string->number (read-line)))
+  ; Validate input against multiple criteria
+  (cond [(not (integer? userguess)) (displayln "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
+        [(< userguess 1) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
+        [(> userguess 100) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
+        [(> secretnumber userguess) (displayln "Your guess is too low.") (inquire-user secretnumber)]
+        [(< secretnumber userguess) (displayln "Your guess is too high.") (inquire-user secretnumber)]
+        [else (displayln "Your guess is correct! Congratulations!")]))
+
+; Call the function with "secretnumber" defined as a random number between 1 and 100
+(inquire-user (random 1 100))
