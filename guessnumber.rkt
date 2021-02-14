@@ -37,7 +37,7 @@ as few turns as possible.
 
 Here we go!\n\n")
 
-; Define computerguess initial guess
+; Define initial values
 (define computerguess (random 1 101))
 (define highmax 100)
 (define lowmax 1)
@@ -59,18 +59,11 @@ Here we go!\n\n")
         [(< secretnumber userguess) (printf "Your guess is too high.\n") (set! highmax userguess)]
         [(= secretnumber userguess) (printf "\n*********************************************\nYour guess is correct! Congratulations!\nIt took ~a turns.\n*********************************************\n" totalguesses) (exit)])
   ; Computer gets a turn
-  (printf "highmax = ~a. \n" highmax) ;testing
-  (printf "lowmax = ~a. \n" lowmax) ;testing
-  (printf "totalguesses = ~a. \n" totalguesses) ;testing
   (set! totalguesses (add1 totalguesses))
   (set! computerguess (+ (random (- highmax lowmax)) lowmax))
   (cond [(> secretnumber computerguess) (printf "The computer guessed ~a and that is too low.\n" computerguess) (set! lowmax computerguess)]
         [(< secretnumber computerguess) (printf "The computer guessed ~a and that is too high.\n" computerguess) (set! highmax computerguess)]
         [(= secretnumber computerguess) (printf "\n*********************************************\nThe computer guess of ~a is correct!\nIt took ~b turns.\n**********************************************\n" computerguess totalguesses) (exit)])
-  (printf "highmax = ~a. \n" highmax) ;testing
-  (printf "lowmax = ~a. \n" lowmax) ;testing
-  (printf "secretnumber = ~a. \n" secretnumber) ;testing
-  (printf "totalguesses = ~a. \n" totalguesses) ;testing
   ; Taunts based on taking a long time to guess correctly
   (cond [(= totalguesses 8) (printf "\nThis is a hard number, isn't it?\n")]
         [(= totalguesses 12) (printf "\nWow! You are really bad at this.\n")]
