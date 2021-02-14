@@ -52,11 +52,12 @@ Here we go!\n\n")
   (cond [(not (integer? userguess)) (printf "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
         [(< userguess 1) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
         [(> userguess 100) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
+        ; A couple taunts
         [(< userguess lowmax) (printf "That guess was lower than a previous guess that was too low. Pay attention!\n")]
         [(> userguess highmax) (printf "Wake up! That guess was higher than an earlier guess that was too high.\n")]
         [(> secretnumber userguess) (printf "Your guess is too low.\n") (set! lowmax userguess)]
         [(< secretnumber userguess) (printf "Your guess is too high.\n") (set! highmax userguess)]
-        [(= secretnumber userguess) (printf "\n*********************************************\nYour guess is correct! Congratulations!\n*********************************************\n") (exit)])
+        [(= secretnumber userguess) (printf "\n*********************************************\nYour guess is correct! Congratulations!\nIt took ~a turns.\n*********************************************\n" totalguesses) (exit)])
   ; Computer gets a turn
   (printf "highmax = ~a. \n" highmax) ;testing
   (printf "lowmax = ~a. \n" lowmax) ;testing
@@ -65,12 +66,16 @@ Here we go!\n\n")
   (set! computerguess (+ (random (- highmax lowmax)) lowmax))
   (cond [(> secretnumber computerguess) (printf "The computer guessed ~a and that is too low.\n" computerguess) (set! lowmax computerguess)]
         [(< secretnumber computerguess) (printf "The computer guessed ~a and that is too high.\n" computerguess) (set! highmax computerguess)]
-        [(= secretnumber computerguess) (printf "\n*********************************************\nThe computer guess of ~a is correct!\n**********************************************\n" computerguess) (exit)])
+        [(= secretnumber computerguess) (printf "\n*********************************************\nThe computer guess of ~a is correct!\nIt took ~b turns.\n**********************************************\n" computerguess totalguesses) (exit)])
   (printf "highmax = ~a. \n" highmax) ;testing
   (printf "lowmax = ~a. \n" lowmax) ;testing
   (printf "secretnumber = ~a. \n" secretnumber) ;testing
   (printf "totalguesses = ~a. \n" totalguesses) ;testing
- 
+  ; Taunts based on taking a long time to guess correctly
+  (cond [(= totalguesses 8) (printf "\nThis is a hard number, isn't it?\n")]
+        [(= totalguesses 12) (printf "\nWow! You are really bad at this.\n")]
+        [(= totalguesses 16) (printf "\nYou're taking too long, I can't handle it any more.\nG A M E   O V E R\n") (exit)])
+  
   (inquire-user secretnumber))
 
 ; Call the function with "secretnumber" defined as a random number between 1 and 100
