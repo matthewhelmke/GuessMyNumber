@@ -40,13 +40,15 @@ Here we go!\n\n")
 ; Define computerguess initial guess
 (define computerguess (random 1 101))
 (define highmax 100)
-
 (define lowmax 1)
+(define totalguesses 0)
+
 ; Define the guessing function, with validation rules
 (define (inquire-user secretnumber)
   (printf "What is your guess? ")
   (define userguess (string->number (read-line)))
   ; Validate userguess against multiple criteria
+  (set! totalguesses (add1 totalguesses))
   (cond [(not (integer? userguess)) (printf "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
         [(< userguess 1) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
         [(> userguess 100) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
@@ -58,6 +60,8 @@ Here we go!\n\n")
   ; Computer gets a turn
   (printf "highmax = ~a. \n" highmax) ;testing
   (printf "lowmax = ~a. \n" lowmax) ;testing
+  (printf "totalguesses = ~a. \n" totalguesses) ;testing
+  (set! totalguesses (add1 totalguesses))
   (set! computerguess (+ (random (- highmax lowmax)) lowmax))
   (cond [(> secretnumber computerguess) (printf "The computer guessed ~a and that is too low.\n" computerguess) (set! lowmax computerguess)]
         [(< secretnumber computerguess) (printf "The computer guessed ~a and that is too high.\n" computerguess) (set! highmax computerguess)]
@@ -65,6 +69,7 @@ Here we go!\n\n")
   (printf "highmax = ~a. \n" highmax) ;testing
   (printf "lowmax = ~a. \n" lowmax) ;testing
   (printf "secretnumber = ~a. \n" secretnumber) ;testing
+  (printf "totalguesses = ~a. \n" totalguesses) ;testing
  
   (inquire-user secretnumber))
 
