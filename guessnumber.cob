@@ -73,9 +73,6 @@
 
     ENTERUSERGUESS. *> Start the guessing loop
 
-    DISPLAY "Secret number is:" *> TK remember to remove this
-    DISPLAY SECRETNUMBER . *> TK remember to remove this
-
     *> Print a description of the game, with rules, to the screen
     *> I need to come back and print complete instructions with nice formatting
     DISPLAY "Guess the number between 1 and 100.".
