@@ -12,7 +12,7 @@ I wrote these, in this order:
 - Perl
 - PHP
 - Racket (based on Scheme, which is based on Lisp)
-- COBOL (still in progress, but what I have written is here)
+- COBOL
 
 Future ideas/plans:
  - Go
