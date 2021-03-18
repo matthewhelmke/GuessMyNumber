@@ -51,6 +51,10 @@
     01 TOTALGUESSES PIC 99.
     01 LOWMAX PIC 99.
     01 HIGHMAX PIC 999.
+    *> the following is for random number generation needs and comes from
+    *> an example in https://gnucobol.sourceforge.io/faq/index.html#function-random
+    01 Pseudo-Random-Number usage comp-1.
+
 
 *> ***************************************************************
 
@@ -60,12 +64,14 @@
     COMPUTE LOWMAX = 0.
     COMPUTE HIGHMAX = 100.
 
-    COMPUTE SECRETNUMBER = 43.  *> Random number generation is not a core
-                                *> COBOL function as far as I can tell, so
-                                *> for the moment this is hard-coded.
-                                *> Fix TK
-
-    *> Get a random number -- need to figure out TK
+    *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
+    *> for this game. It will, however, always select the same set of numbers
+    *> unless I come back and change how the function is seeded.
+    *> https://gnucobol.sourceforge.io/faq/index.html#function-random
+    ComputeSecretNumber.
+      MOVE FUNCTION RANDOM    TO Pseudo-Random-Number
+      COMPUTE SECRETNUMBER = Pseudo-Random-Number * 100
+      DISPLAY SECRETNUMBER . *> TK remember to remove this
 
     ENTERUSERGUESS. *> Start the guessing loop
 
@@ -101,16 +107,53 @@
       END-IF.
 
     *> ***********************************************************
+    *> Taunts for when it's taking too long
+    *> ***********************************************************
+
+    IF TOTALGUESSES = 8
+      DISPLAY "This is a hard number, isn't it?"
+      END-IF.
+
+    IF TOTALGUESSES = 12
+      DISPLAY "Wow! You are really bad at this."
+      END-IF.
+
+    IF TOTALGUESSES = 16
+      DISPLAY "You're taking too long, I can't handle it any more. GAME OVER."
+      STOP RUN
+      END-IF.
+
+   *> ***********************************************************
+   *> Taunts for carelessness - they lose their turn
+   *> ***********************************************************
+
+    IF USERGUESS < LOWMAX
+      DISPLAY "That guess was lower than a previous guess that was too low. Pay attention!"
+      GO TO ENTERUSERGUESS
+      END-IF.
+
+    IF USERGUESS > HIGHMAX
+      DISPLAY "Wake up! That guess was higher than an earlier guess that was too high."
+      GO TO ENTERUSERGUESS
+      END-IF.
+
+    *> ***********************************************************
     *> Evaluate guess against answer
     *> ***********************************************************
 
     IF USERGUESS > SECRETNUMBER
       DISPLAY "Your guess is too high! Guess again."
+      IF USERGUESS <= HIGHMAX
+        *> make highmax equal userguess minus one
+        COMPUTE HIGHMAX = USERGUESS - 1
+        END-IF
       GO TO ENTERUSERGUESS
       END-IF.
 
     IF USERGUESS < SECRETNUMBER
       DISPLAY "Your guess is too low! Guess again."
+      *> make lowmax equal userguess plus one
+      COMPUTE LOWMAX = USERGUESS + 1
       GO TO ENTERUSERGUESS
       END-IF.
 
