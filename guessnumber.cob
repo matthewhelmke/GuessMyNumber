@@ -33,10 +33,8 @@
 *> Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *> ***************************************************************
 
-*> Throughout, TK means "to come". This program is unfinished as long as
-*> this note remains.
-
-
+*> I've forgotten so much and GnuCOBOL changed some of what I do recall. LOL.
+*> This could be improved as noted in comments.
 
  IDENTIFICATION DIVISION.
  PROGRAM-ID. GuessMyNumber.
@@ -47,14 +45,15 @@
  WORKING-STORAGE SECTION.
     *> Define variables
     01 USERGUESS PIC 999.
+    01 COMPUTERGUESS PIC 999.
     01 SECRETNUMBER PIC 999.
+    01 GUESSRANGE PIC 999.
     01 TOTALGUESSES PIC 99.
     01 LOWMAX PIC 99.
     01 HIGHMAX PIC 999.
     *> the following is for random number generation needs and comes from
     *> an example in https://gnucobol.sourceforge.io/faq/index.html#function-random
     01 Pseudo-Random-Number usage comp-1.
-
 
 *> ***************************************************************
 
@@ -70,13 +69,15 @@
     *> https://gnucobol.sourceforge.io/faq/index.html#function-random
     ComputeSecretNumber.
       MOVE FUNCTION RANDOM    TO Pseudo-Random-Number
-      COMPUTE SECRETNUMBER = Pseudo-Random-Number * 100
-      DISPLAY SECRETNUMBER . *> TK remember to remove this
+      COMPUTE SECRETNUMBER = Pseudo-Random-Number * 100 .
 
     ENTERUSERGUESS. *> Start the guessing loop
 
+    DISPLAY "Secret number is:" *> TK remember to remove this
+    DISPLAY SECRETNUMBER . *> TK remember to remove this
+
     *> Print a description of the game, with rules, to the screen
-    *> TK - print complete instructions with nice formatting
+    *> I need to come back and print complete instructions with nice formatting
     DISPLAY "Guess the number between 1 and 100.".
 
     ACCEPT USERGUESS.
@@ -94,7 +95,7 @@
       GO To ENTERUSERGUESS
       END-IF.
 
-    *> Check if positive integer - TK
+    *> Missing a check to see if input is a positive integer
 
     IF USERGUESS > 100
       DISPLAY "Guesses must be between 1 and 100."
@@ -129,12 +130,12 @@
 
     IF USERGUESS < LOWMAX
       DISPLAY "That guess was lower than a previous guess that was too low. Pay attention!"
-      GO TO ENTERUSERGUESS
+      GO TO CALCULATECOMPUTERGUESS
       END-IF.
 
     IF USERGUESS > HIGHMAX
       DISPLAY "Wake up! That guess was higher than an earlier guess that was too high."
-      GO TO ENTERUSERGUESS
+      GO TO CALCULATECOMPUTERGUESS
       END-IF.
 
     *> ***********************************************************
@@ -147,16 +148,55 @@
         *> make highmax equal userguess minus one
         COMPUTE HIGHMAX = USERGUESS - 1
         END-IF
-      GO TO ENTERUSERGUESS
+      GO TO CALCULATECOMPUTERGUESS
       END-IF.
 
     IF USERGUESS < SECRETNUMBER
       DISPLAY "Your guess is too low! Guess again."
       *> make lowmax equal userguess plus one
       COMPUTE LOWMAX = USERGUESS + 1
-      GO TO ENTERUSERGUESS
+      GO TO CALCULATECOMPUTERGUESS
       END-IF.
 
-    DISPLAY "You got it! Total guesses:".
-    DISPLAY TOTALGUESSES.
+    IF USERGUESS = SECRETNUMBER
+      DISPLAY "Your guess is correct! Congratulations!! Total guesses:".
+      DISPLAY TOTALGUESSES
+      STOP RUN.
+
+    CALCULATECOMPUTERGUESS. *> This isn't great, but c'est la vie. It would be
+                            *> better if the random calculation was a number
+                            *> within the guessrange.
+      ADD 1 TO TOTALGUESSES.
+      COMPUTE GUESSRANGE = HIGHMAX - LOWMAX
+      MOVE FUNCTION RANDOM TO Pseudo-Random-Number
+      COMPUTE COMPUTERGUESS = Pseudo-Random-Number * 100 .
+
+      IF COMPUTERGUESS > SECRETNUMBER
+        DISPLAY "The computer's guess is too high."
+        DISPLAY COMPUTERGUESS
+        IF COMPUTERGUESS <= HIGHMAX
+          *> make highmax equal userguess minus one
+          COMPUTE HIGHMAX = COMPUTERGUESS - 1
+          GO TO ENTERUSERGUESS
+          END-IF
+        GO TO ENTERUSERGUESS
+        END-IF.
+
+      IF COMPUTERGUESS < SECRETNUMBER
+        DISPLAY "The computer's guess is too low."
+        DISPLAY COMPUTERGUESS
+        IF COMPUTERGUESS >= LOWMAX
+          *> make lowmax equal userguess plus one
+          COMPUTE LOWMAX = COMPUTERGUESS + 1
+          GO TO ENTERUSERGUESS
+          END-IF
+        GO TO ENTERUSERGUESS
+        END-IF.
+
+      DISPLAY "The computer guessed correctly!".
+      DISPLAY COMPUTERGUESS.
+      DISPLAY "Total guesses:".
+      DISPLAY TOTALGUESSES.
+      STOP RUN.
+
     STOP RUN.
