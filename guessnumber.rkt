@@ -26,22 +26,8 @@
 ; along with this program; if not, write to the Free Software
 ; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-; Set variables
-(define (inquire-user number)
-
-; the main bit
-(display "What is your guess? ")
-(define userguess (string->number (read-line)))
-; Validate input against multiple criteria
-(cond [(not (integer? userguess)) (displayln "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user number)]
-      [(< userguess 1) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user number)]
-      [(> userguess 100) (displayln "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user number)]
-      [(> number userguess) (displayln "Your guess is too low.") (inquire-user number)]
-      [(< number userguess) (displayln "Your guess is too high.") (inquire-user number)]
-      [else (displayln "Correct!")]))
-
 ; Print a description of the game, with rules, to the screen
-(displayln "Welcome to Guess My Number!
+(printf "Welcome to Guess My Number!
 
 The computer will select a random whole number between 1 and 100.
 Your goal is to guess that number. You will get a turn, then a computer
@@ -49,8 +35,41 @@ player will get a turn. Each of you are aware of the other's guesses.
 The first one to guess the number correctly will win. Try to guess in
 as few turns as possible.
 
-Here we go!")
+Here we go!\n\n")
 
-; Start the process by getting user input for the first time and comparing to a random number
-; then go back up to cond line for first comparison and additional input if not high or low
+; Define initial values
+(define computerguess (random 1 101))
+(define highmax 100)
+(define lowmax 1)
+(define totalguesses 0)
+
+; Define the guessing function, with validation rules
+(define (inquire-user secretnumber)
+  (printf "What is your guess? ")
+  (define userguess (string->number (read-line)))
+  ; Validate userguess against multiple criteria
+  (set! totalguesses (add1 totalguesses))
+  (cond [(not (integer? userguess)) (printf "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
+        [(< userguess 1) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
+        [(> userguess 100) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
+        ; A couple taunts
+        [(< userguess lowmax) (printf "That guess was lower than a previous guess that was too low. Pay attention!\n")]
+        [(> userguess highmax) (printf "Wake up! That guess was higher than an earlier guess that was too high.\n")]
+        [(> secretnumber userguess) (printf "Your guess is too low.\n") (set! lowmax userguess)]
+        [(< secretnumber userguess) (printf "Your guess is too high.\n") (set! highmax userguess)]
+        [(= secretnumber userguess) (printf "\n*********************************************\nYour guess is correct! Congratulations!\nIt took ~a turns.\n*********************************************\n" totalguesses) (exit)])
+  ; Computer gets a turn
+  (set! totalguesses (add1 totalguesses))
+  (set! computerguess (+ (random (- highmax lowmax)) lowmax))
+  (cond [(> secretnumber computerguess) (printf "The computer guessed ~a and that is too low.\n" computerguess) (set! lowmax computerguess)]
+        [(< secretnumber computerguess) (printf "The computer guessed ~a and that is too high.\n" computerguess) (set! highmax computerguess)]
+        [(= secretnumber computerguess) (printf "\n*********************************************\nThe computer guess of ~a is correct!\nIt took ~b turns.\n**********************************************\n" computerguess totalguesses) (exit)])
+  ; Taunts based on taking a long time to guess correctly
+  (cond [(= totalguesses 8) (printf "\nThis is a hard number, isn't it?\n")]
+        [(= totalguesses 12) (printf "\nWow! You are really bad at this.\n")]
+        [(= totalguesses 16) (printf "\nYou're taking too long, I can't handle it any more.\nG A M E   O V E R\n") (exit)])
+  
+  (inquire-user secretnumber))
+
+; Call the function with "secretnumber" defined as a random number between 1 and 100
 (inquire-user (random 1 101))
