@@ -1,5 +1,5 @@
 # GuessMyNumber
-**Guess My Number** is a silly little game that I heard about and then first wrote a version on my programmable calculator during a bored moment in math class in 1987. My versions here are hopefully cleanly written and include a couple of additions like input validation and computer guesses.
+**Guess My Number** is a silly little game that I first heard about and wrote a version of on my [Casio fx-7200G](http://www.rskey.org/fx7200g) programmable calculator during a bored moment in math class in 1987. The versions here include a couple of additions like input validation and computer guesses.
 
 I assume you will run each of these on Linux.
 
@@ -11,5 +11,11 @@ I wrote these, in this order:
 - C
 - Perl
 - PHP
+- Racket (based on Scheme, which is based on Lisp)
+
+Future ideas/plans:
+ - Go
+ - Ruby
+ - ??
 
 Code contributions via PR welcome. This repo exists because all my other work on GitHub is in repos I don't own and I thought I should have something here that is mine.
