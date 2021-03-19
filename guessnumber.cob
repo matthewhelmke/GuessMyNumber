@@ -44,13 +44,13 @@
  DATA DIVISION.
  WORKING-STORAGE SECTION.
     *> Define variables
-    01 USERGUESS PIC 999.
-    01 COMPUTERGUESS PIC 999.
-    01 SECRETNUMBER PIC 999.
+    01 USERGUESS PIC 999 usage comp-6.
+    01 COMPUTERGUESS PIC 999 usage comp-6.
+    01 SECRETNUMBER PIC 999 usage comp-6.
     01 GUESSRANGE PIC 999.
     01 TOTALGUESSES PIC 99.
-    01 LOWMAX PIC 99.
-    01 HIGHMAX PIC 999.
+    01 LOWMAX PIC 99 usage comp-6.
+    01 HIGHMAX PIC 999 usage comp-6.
     *> the following is for random number generation needs and comes from
     *> an example in https://gnucobol.sourceforge.io/faq/index.html#function-random
     01 Pseudo-Random-Number usage comp-1.
@@ -73,20 +73,26 @@
 
     *> Print a description of the game, with rules, to the screen
     DISPLAY "Welcome to Guess My Number!".
+    DISPLAY " ".
     DISPLAY "The computer will select a random whole number between 1 and 100.".
     DISPLAY "Your goal is to guess that number. You will get a turn, then a computer".
     DISPLAY "player will get a turn. Each of you are aware of the other's guesses.".
     DISPLAY "The first one to guess the number correctly will win. Try to guess in".
-    DISPLAY "as few turns as possible.".
+    DISPLAY "as few turns as possible. NOTE: Negative numbers are automatically".
+    DISPLAY "changed to positive before being evaluated."
+    DISPLAY " ".
     DISPLAY "Here we go!".
+    DISPLAY " ".
 
     ENTERUSERGUESS. *> Start the guessing loop, which continues to the file end
 
-    DISPLAY "Guess the number between 1 and 100.".
+    DISPLAY "What is your guess?".
 
     ACCEPT USERGUESS.
 
     ADD 1 TO TOTALGUESSES.
+
+    DISPLAY "User guessed: " USERGUESS.
 
     *> ***********************************************************
     *> Input validation section
@@ -94,12 +100,22 @@
 
     *> Non-numerics read as 0, so this checks for guesses like "F" or
     *> "throw mamma from the train" and rejects them.
+    *> NO IDEA why "USERGUESS IS NOT NUMERIC" didn't work; glad this does.
     IF USERGUESS = 0
       DISPLAY "Guesses must be integers between 1 and 100."
       GO To ENTERUSERGUESS
       END-IF.
 
-    *> Missing a check to see if input is a positive integer
+    *> Because of the data type used for USERGUESS, we don't need a check to
+    *> make sure the guess is positive...negative values are made positive
+    *> with comp-6.
+
+    *> Missing a working check or checks to see if input is an integer
+
+    IF USERGUESS IS NEGATIVE
+      DISPLAY "Guesses must be integers between 1 and 100."
+      GO To ENTERUSERGUESS
+      END-IF.
 
     IF USERGUESS > 100
       DISPLAY "Guesses must be between 1 and 100."
@@ -163,21 +179,27 @@
       END-IF.
 
     IF USERGUESS = SECRETNUMBER
-      DISPLAY "Your guess is correct! Congratulations!! Total guesses:".
-      DISPLAY TOTALGUESSES
+      DISPLAY "Your guess is correct! Congratulations!!".
+      DISPLAY "Total guesses: " TOTALGUESSES.
       STOP RUN.
 
-    CALCULATECOMPUTERGUESS. *> This isn't great, but c'est la vie. It would be
-                            *> better if the random calculation was a number
-                            *> within the guessrange.
+    *> This isn't great, but c'est la vie. It would be better if the random
+    *> calculation was a number within the guessrange.
+    CALCULATECOMPUTERGUESS.
       ADD 1 TO TOTALGUESSES.
       COMPUTE GUESSRANGE = HIGHMAX - LOWMAX
+      *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
+      *> for this game. It will, however, always select the same set of numbers
+      *> unless I come back and change how the function is seeded.
+      *> https://gnucobol.sourceforge.io/faq/index.html#function-random
       MOVE FUNCTION RANDOM TO Pseudo-Random-Number
       COMPUTE COMPUTERGUESS = Pseudo-Random-Number * 100 .
 
+      DISPLAY "The computer guessed: " COMPUTERGUESS.
+
       IF COMPUTERGUESS > SECRETNUMBER
         DISPLAY "The computer's guess is too high."
-        DISPLAY COMPUTERGUESS
+        DISPLAY " "
         IF COMPUTERGUESS <= HIGHMAX
           *> make highmax equal userguess minus one
           COMPUTE HIGHMAX = COMPUTERGUESS - 1
@@ -188,7 +210,7 @@
 
       IF COMPUTERGUESS < SECRETNUMBER
         DISPLAY "The computer's guess is too low."
-        DISPLAY COMPUTERGUESS
+        DISPLAY " "
         IF COMPUTERGUESS >= LOWMAX
           *> make lowmax equal userguess plus one
           COMPUTE LOWMAX = COMPUTERGUESS + 1
@@ -198,9 +220,8 @@
         END-IF.
 
       DISPLAY "The computer guessed correctly!".
-      DISPLAY COMPUTERGUESS.
-      DISPLAY "Total guesses:".
-      DISPLAY TOTALGUESSES.
+      DISPLAY " ".
+      DISPLAY "Total guesses: " TOTALGUESSES.
       STOP RUN.
 
     STOP RUN.
