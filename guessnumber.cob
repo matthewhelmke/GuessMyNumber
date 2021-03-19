@@ -71,10 +71,17 @@
       MOVE FUNCTION RANDOM    TO Pseudo-Random-Number
       COMPUTE SECRETNUMBER = Pseudo-Random-Number * 100 .
 
-    ENTERUSERGUESS. *> Start the guessing loop
-
     *> Print a description of the game, with rules, to the screen
-    *> I need to come back and print complete instructions with nice formatting
+    DISPLAY "Welcome to Guess My Number!".
+    DISPLAY "The computer will select a random whole number between 1 and 100.".
+    DISPLAY "Your goal is to guess that number. You will get a turn, then a computer".
+    DISPLAY "player will get a turn. Each of you are aware of the other's guesses.".
+    DISPLAY "The first one to guess the number correctly will win. Try to guess in".
+    DISPLAY "as few turns as possible.".
+    DISPLAY "Here we go!".
+
+    ENTERUSERGUESS. *> Start the guessing loop, which continues to the file end
+
     DISPLAY "Guess the number between 1 and 100.".
 
     ACCEPT USERGUESS.
