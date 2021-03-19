@@ -34,7 +34,6 @@
 *> ***************************************************************
 
 *> I've forgotten so much and GnuCOBOL changed some of what I do recall. LOL.
-*> This could be improved as noted in comments.
 
  IDENTIFICATION DIVISION.
  PROGRAM-ID. GuessMyNumber.
@@ -44,16 +43,16 @@
  DATA DIVISION.
  WORKING-STORAGE SECTION.
     *> Define variables
-    01 USERGUESS PIC 999 usage comp-6.
+    01 USERGUESS PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+                                       *> defined by the number of 9s
     01 COMPUTERGUESS PIC 999 usage comp-6.
     01 SECRETNUMBER PIC 999 usage comp-6.
-    01 GUESSRANGE PIC 999.
-    01 TOTALGUESSES PIC 99.
+    01 GUESSRANGE PIC 999 usage comp-6.
+    01 TOTALGUESSES PIC 99 usage comp-6.
     01 LOWMAX PIC 99 usage comp-6.
     01 HIGHMAX PIC 999 usage comp-6.
-    *> the following is for random number generation needs and comes from
-    *> an example in https://gnucobol.sourceforge.io/faq/index.html#function-random
-    01 Pseudo-Random-Number usage comp-1.
+    01 SEED PIC 999999999 usage comp-6.
+    01 PSEUDO-RANDOM-NUMBER usage comp-1. *> float-short
 
 *> ***************************************************************
 
@@ -62,14 +61,13 @@
     COMPUTE TOTALGUESSES = 0.
     COMPUTE LOWMAX = 0.
     COMPUTE HIGHMAX = 100.
-
+    MOVE FUNCTION CURRENT-DATE(1:16) to SEED.
     *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
-    *> for this game. It will, however, always select the same set of numbers
-    *> unless I come back and change how the function is seeded.
-    *> https://gnucobol.sourceforge.io/faq/index.html#function-random
+    *> for this game. Using the date, formatted as a number, provides a
+    *> constantly-changing seed value, which helps.
     ComputeSecretNumber.
-      MOVE FUNCTION RANDOM    TO Pseudo-Random-Number
-      COMPUTE SECRETNUMBER = Pseudo-Random-Number * 100 .
+      MOVE FUNCTION RANDOM(SEED) TO PSEUDO-RANDOM-NUMBER
+      COMPUTE SECRETNUMBER = PSEUDO-RANDOM-NUMBER * 100 .
 
     *> Print a description of the game, with rules, to the screen
     DISPLAY "Welcome to Guess My Number!".
@@ -183,17 +181,16 @@
       DISPLAY "Total guesses: " TOTALGUESSES.
       STOP RUN.
 
-    *> This isn't great, but c'est la vie. It would be better if the random
-    *> calculation was a number within the guessrange.
+
     CALCULATECOMPUTERGUESS.
       ADD 1 TO TOTALGUESSES.
       COMPUTE GUESSRANGE = HIGHMAX - LOWMAX
       *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
-      *> for this game. It will, however, always select the same set of numbers
-      *> unless I come back and change how the function is seeded.
-      *> https://gnucobol.sourceforge.io/faq/index.html#function-random
-      MOVE FUNCTION RANDOM TO Pseudo-Random-Number
-      COMPUTE COMPUTERGUESS = Pseudo-Random-Number * 100 .
+      *> for this game. What helps is that I adjust the computer guesses to
+      *> fit within the guessrange, so the parameters are always changing.
+      *> I believe the function RANDOM uses the same seed throughout after the
+      *> seed is used once, which it is in the initial SECRETNUMBER generation.
+      MOVE FUNCTION RANDOM(LOWMAX,HIGHMAX) to COMPUTERGUESS.
 
       DISPLAY "The computer guessed: " COMPUTERGUESS.
 
