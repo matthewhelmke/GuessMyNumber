@@ -14,9 +14,10 @@ I wrote these, in this order:
 - Racket (based on Scheme, which is based on Lisp)
 - COBOL
 
+Current work in progress:
+ - Go - see comments for TODO notes
+
 Future ideas/plans:
- - Go
- - Ruby
  - ??
 
 Code contributions via PR welcome. This repo exists because all my other work on GitHub is in repos I don't own and I thought I should have something here that is mine.
