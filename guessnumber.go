@@ -5,7 +5,7 @@
  *   additions like input validation and computer guesses.
  *
  * Copyright (c) 2007 Matthew Helmke for the old Python 2 version
- * Copyright (c) 2020 Matthew Helmke for the C version (this one)
+ * Copyright (c) 2023 Matthew Helmke for the Golang version (this one)
  *
  * To run:
  *   go run guessnumber.go
@@ -75,6 +75,6 @@ func main() {
         }
         
         //TODO: computer does a random guess, within the range of current reasonable values
-        //TODO: evaluate computer guess and pring it's guess and whether it was high/low
+        //TODO: evaluate computer guess and print its guess and whether it was high/low
     }
 }
