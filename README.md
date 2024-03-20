@@ -1,5 +1,5 @@
 # GuessMyNumber
-**Guess My Number** is a silly little game that I first heard about and wrote a version of on my [Casio fx-7000G](https://www.rskey.org/fx7000g) programmable calculator during a bored moment in math class in 1987. The versions here include a couple of additions like input validation and computer guesses.
+**Guess My Number** is a silly little game that I first heard about and wrote a version of on my [Casio fx-7000G](https://rskey.org/fx7000g) programmable calculator during a bored moment in math class in 1987. The versions here include a couple of additions like input validation and computer guesses.
 
 I assume you will run each of these on Linux.
 
