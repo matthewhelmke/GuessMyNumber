@@ -17,10 +17,11 @@ I wrote these, in this order:
 - PHP
 - Racket (based on Scheme, which is based on Lisp)
 - COBOL
+- Go
 
 Current work in progress:
 
-- Go - see comments for TODO notes
+- Haven't yet decided
 
 Future ideas/plans:
 
