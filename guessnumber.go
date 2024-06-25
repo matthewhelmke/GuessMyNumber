@@ -71,24 +71,31 @@ func main() {
 		// check if between 1 and 100
 		if userguess > 0 && userguess < 101 {
 
+			// TODO: some taunts for silly errors in user guesses
+			if userguess < minNumber {
+				fmt.Println("That guess was lower than a previous guess that was too low. Pay attention!\n")
+			}
+			if userguess > maxNumber {
+				fmt.Println("Wake up! That guess was higher than an earlier guess that was too high.\n")
+			}
+
 			// evaluate the guess
 			if userguess < secretNumber {
 				fmt.Println("Your guess is too low.\n")
-			} else if userguess > secretNumber {
+				minNumber = (userguess + 1)
+			}
+			if userguess > secretNumber {
 				fmt.Println("Your guess is too high.\n")
-			} else {
-				fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
-				break
+				maxNumber = (userguess - 1)
 			}
 		} else {
-			fmt.Println("Invalid! Please enter a whole number between 1 and 100: ")
-			continue
+			fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
+			break
 		}
 
-		// TODO: some taunts for silly errors in user guesses
+		// TODO: computer does a random guess, within the range of current reasonable values
 
-		//TODO: computer does a random guess, within the range of current reasonable values
+		// TODO: evaluate computer guess and print its guess and whether it was high/low
 
-		//TODO: evaluate computer guess and print its guess and whether it was high/low
 	}
 }
