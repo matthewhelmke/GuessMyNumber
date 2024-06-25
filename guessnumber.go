@@ -50,6 +50,7 @@ func main() {
 
 	var userguessunvalidated string
 	var userguess int
+
 	totalGuesses := 0
 
 	// the main bit
@@ -90,10 +91,22 @@ func main() {
 			fmt.Println("Invalid! Please enter a whole number between 1 and 100: ")
 		}
 
-		// TODO: computer does a random guess, within the range of current reasonable values
+		// computer does a random guess, within the range of current reasonable values
+		computerguess := rand.Intn(maxNumber-minNumber+1) + minNumber
 
-		// TODO: evaluate computer guess and print its guess and whether it was high/low
+		// evaluate computer guess and print its guess and whether it was high/low
+		if computerguess < secretNumber {
+			fmt.Println("The computer guessed", computerguess, "and it is too low.\n")
+			minNumber = (computerguess + 1)
+		} else if computerguess > secretNumber {
+			fmt.Println("The computer guessed", computerguess, "and it is too high.\n")
+			maxNumber = (computerguess - 1)
+		} else if computerguess == secretNumber {
+			fmt.Printf("\n*********************************************\n   The computer guess is correct! You lose, human!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
+			break
+		}
 
+		// more taunts and add a guess limit
 		if totalGuesses == 8 {
 			fmt.Println("\nThis is a hard number, isn't it?\n")
 		} else if totalGuesses == 12 {
