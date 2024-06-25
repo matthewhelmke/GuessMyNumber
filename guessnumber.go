@@ -30,11 +30,16 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
+	"time"
 )
 
 func main() {
 	minNumber := 1
 	maxNumber := 100
+
+	// Set the seed value for the random number generator.
+	rand.Seed(time.Now().UnixNano())
 
 	// Get a random number
 	secretNumber := rand.Intn(maxNumber-minNumber+1) + minNumber
@@ -43,35 +48,47 @@ func main() {
 	fmt.Println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n")
 	fmt.Printf("I'm thinking of a number between %d and %d. Can you guess it?\n", minNumber, maxNumber)
 
-	var guess int
+	var userguessunvalidated string
+	var userguess int
 	totalGuesses := 0
 
 	// the main bit
 	for {
 		fmt.Print("What is your guess? ")
+
+		totalGuesses++
+
 		// let the user input any number they want, then
-		// TODO: check if an integer between 1-100 - current check does not work
-		_, err := fmt.Scanf("%d", &guess)
+		// check if an integer
+		_, err := fmt.Scanf("%s", &userguessunvalidated)
+		userguess, err = strconv.Atoi(userguessunvalidated)
+
 		if err != nil {
 			fmt.Println("Invalid! Please enter a whole number between 1 and 100: ")
 			continue
 		}
 
-		totalGuesses++
+		// check if between 1 and 100
+		if userguess > 0 && userguess < 101 {
+
+			// evaluate the guess
+			if userguess < secretNumber {
+				fmt.Println("Your guess is too low.\n")
+			} else if userguess > secretNumber {
+				fmt.Println("Your guess is too high.\n")
+			} else {
+				fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
+				break
+			}
+		} else {
+			fmt.Println("Invalid! Please enter a whole number between 1 and 100: ")
+			continue
+		}
 
 		// TODO: some taunts for silly errors in user guesses
 
-		// evaluate the guess
-		if guess < secretNumber {
-			fmt.Println("Your guess is too low.\n")
-		} else if guess > secretNumber {
-			fmt.Println("Your guess is too high.\n")
-		} else {
-			fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
-			break
-		}
-
 		//TODO: computer does a random guess, within the range of current reasonable values
+
 		//TODO: evaluate computer guess and print its guess and whether it was high/low
 	}
 }
