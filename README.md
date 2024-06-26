@@ -18,13 +18,10 @@ I wrote these, in this order:
 - Racket (based on Scheme, which is based on Lisp)
 - COBOL
 - Go
-
-Current work in progress:
-
-- Haven't yet decided
+- Ruby
 
 Future ideas/plans:
 
-- Dunno. Maybe Ruby? Java? Erlang? gForth? Rust? Something else??
+- Dunno. Maybe Java? Erlang? gForth? Rust? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
