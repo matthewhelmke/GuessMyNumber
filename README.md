@@ -19,9 +19,10 @@ I wrote these, in this order:
 - COBOL
 - Go
 - Ruby
+- Java
 
 Future ideas/plans:
 
-- Dunno. Maybe Java? Erlang? gForth? Rust? Something else??
+- Dunno. Maybe Rust? Erlang? gForth? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
