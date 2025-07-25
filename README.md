@@ -20,9 +20,10 @@ I wrote these, in this order:
 - Go
 - Ruby
 - Java
+- Fortran
 
 Future ideas/plans:
 
-- Dunno. Maybe Rust? Erlang? gForth? Something else??
+- Dunno. Maybe Rust? Erlang? Forth? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
