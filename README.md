@@ -21,9 +21,11 @@ I wrote these, in this order:
 - Ruby
 - Java
 - Fortran
+- JavaScript in an HTML context that runs in a browser
 
 Future ideas/plans:
 
+- JavaScript in a Node.js context that runs at the command line
 - Dunno. Maybe Rust? Erlang? Forth? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
