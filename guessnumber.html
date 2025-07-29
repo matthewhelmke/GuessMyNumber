@@ -1,0 +1,153 @@
+<!--Guess my number game
+
+  --An HTML/javascript version of a silly game I made on my programmable
+   calculator when I was bored in math class in 1987, with a couple of
+   additions like input validation and computer guesses.
+ 
+ Copyright (c) 2007 Matthew Helmke for the old Python 2 version
+ Copyright (c) 2025 Matthew Helmke for the C version (this one)
+ 
+  To run, open guessnumber.html in your browser.
+ 
+ This program is free software; you can redistribute it and\or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess My Number</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    .taunt {
+      color: crimson;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    input[type="number"] {
+      width: 60px;
+    }
+    button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Guess My Number</h1>
+<div id="game">
+  <!--Print a description of the game, with rules, to the screen-->
+  <p>Welcome to Guess My Number!</p>
+  <p>The computer has selected a random number between 1 and 100.</p>
+  <p>Take turns guessing. The first one to get it wins!</p>
+  <p>Non-integers will be converted to integers by truncating at the decimal.</p>
+  <p>What is your guess?</p>
+
+  <!--Only allow numbers to be input between 1 and 100 by steps of whole numbers -->
+  <input id="userGuess" type="number" min="1" max="100" step="1" />
+  <button onclick="submitGuess()">Guess</button>
+
+  <p id="user-feedback"></p>
+  <p id="taunt" class="taunt"></p>
+  <p id="computer-feedback" class="hidden"></p>
+</div>
+
+<script>
+  let secretNumber = Math.floor(Math.random() * 100) + 1;
+  let tries = 0;
+  let lowestLow = 0;
+  let highestHigh = 100;
+  let compLow = 1;
+  let compHigh = 100;
+
+  function submitGuess() {
+    const guessInput = document.getElementById('userGuess');
+    const userFeedback = document.getElementById('user-feedback');
+    const compFeedback = document.getElementById('computer-feedback');
+    const taunt = document.getElementById('taunt');
+    
+    let guess = parseInt(guessInput.value, 10);
+    compFeedback.classList.remove("hidden");
+
+    // Allow the user input any number they want, then check if an number between 1-100
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+      userFeedback.textContent = "Please enter a valid number between 1 and 100.";
+      return;
+    }
+
+    taunt.textContent = `You guessed ${guess}.`;
+
+    tries++;
+
+    // Responses and some taunts for silly errors in user guesses
+    if (guess < secretNumber) {
+      userFeedback.textContent = "Your guess is too low.";
+      if (guess <= lowestLow) {
+        taunt.textContent = "That guess was lower than a previous guess that was too low. Pay attention!";
+      }
+      if (guess > lowestLow) lowestLow = guess;
+    } else if (guess > secretNumber) {
+      userFeedback.textContent = "Your guess is too high.";
+      if (guess >= highestHigh) {
+        taunt.textContent = "Wake up! That guess was higher than an earlier guess that was too high.";
+      }
+      if (guess < highestHigh) highestHigh = guess;
+    } else {
+      userFeedback.textContent = `Your guess is correct! Congratulations! It took ${tries} total guesses.`;
+      document.getElementById('game').classList.add('');
+      return;
+    }
+
+    if (tries === 8) {
+      taunt.textContent = "This is a hard number, isn't it?";
+    } else if (tries === 12) {
+      taunt.textContent = "Wow! You are really bad at this.";
+    } else if (tries === 16) {
+      taunt.textContent = "You're taking too long. \n G A M E   O V E R.";
+      document.getElementById('game').classList.add('');
+      return;
+    }
+
+    // Now computer guesses
+    let compGuess = Math.floor((lowestLow + highestHigh) / 2);
+    tries++;
+
+    if (guess === secretNumber) {
+      return;
+    } else if (compGuess < secretNumber) {
+      compFeedback.textContent = `The computer guessed ${compGuess} and that was too low.`;
+      if (compGuess > compLow) compLow = compGuess + 1;
+    } else if (compGuess > secretNumber) {
+      compFeedback.textContent = `The computer guessed ${compGuess} and that was too high.`;
+      if (compGuess < compHigh) compHigh = compGuess - 1;
+    } else {
+      compFeedback.textContent = `The computer's guess of ${compGuess} is correct! It took ${tries} total guesses!`;
+      document.getElementById('game').classList.add('');
+      return;
+    }
+  }
+</script>
+
+</body>
+</html>
