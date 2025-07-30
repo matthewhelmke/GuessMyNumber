@@ -22,6 +22,7 @@ I wrote these, in this order:
 - Java
 - Fortran
 - JavaScript in an HTML context that runs in a browser
+- JavaScript for the command line using Node.js
 
 Future ideas/plans:
 
