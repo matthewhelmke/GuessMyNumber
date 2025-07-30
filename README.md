@@ -22,10 +22,10 @@ I wrote these, in this order:
 - Java
 - Fortran
 - JavaScript in an HTML context that runs in a browser
+- JavaScript for the command line using Node.js
 
 Future ideas/plans:
 
-- JavaScript in a Node.js context that runs at the command line
 - Dunno. Maybe Rust? Erlang? Forth? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
