@@ -130,7 +130,7 @@ while gameover == 0
     end
     if computerguess < secretnumber
         puts " "
-        print "The computer guessed ", computerguess, " and that was too high. "
+        print "The computer guessed ", computerguess, " and that was too low. "
         puts "Please try again."
         lowmax = computerguess
     end
