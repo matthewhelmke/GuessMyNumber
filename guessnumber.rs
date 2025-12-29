@@ -32,10 +32,12 @@
  * $ cargo new guessnumber
  *
  * This created a new directory to house a new project called `guessnumber`.
- * In the new directory, replace the contents of the `main.rs` file with
- * the content of this file. Then, add the `rand` function and run:
+ * In the new directory, replace the contents of the `src/main.rs` file with
+ * the content of this file. Then, add the `rand` function:
  *
  * $ cargo add rand
+ *
+ * And run:
  *
  * $ cargo run
  *
@@ -54,14 +56,14 @@ fn read_line() -> String {
 }
 
 fn main() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     println!("\nWelcome to Guess My Number!\n");
     println!("The computer will select a random whole number between 1 and 100. Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n");
     println!("YHere we go!\n");
 
-    let secret = rng.gen_range(1..=100);
-
+    let secret = rng.random_range(1..=100);
+    
     let mut total_guesses = 0;
 
     /* Shared bounds based on all prior guesses */
