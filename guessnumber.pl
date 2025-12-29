@@ -7,7 +7,7 @@
 #   additions like input validation and computer guesses.
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
-# Copyright (c) 2024 Matthew Helmke for the Perl version (this one)
+# Copyright (c) 2020 Matthew Helmke for the Perl version (this one)
 #
 # Prerequisites:
 #   You must have CPAN installed. On most Linux distros, you can install with:

@@ -11,7 +11,7 @@
 *> additions like input validation and computer guesses.
 *>
 *> Copyright (c) 2007 Matthew Helmke for the old Python 2 version
-*> Copyright (c) 2024 Matthew Helmke for the COBOL version (this one)
+*> Copyright (c) 2021 Matthew Helmke for the COBOL version (this one)
 *>
 *> To compile (Linux with GnuCOBOL):
 *>    cobc -x guessnumber.cob
