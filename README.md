@@ -10,22 +10,23 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 I wrote these, in this order:
 
-- Python
-- Bash
-- C
-- Perl
-- PHP
-- Racket (based on Scheme, which is based on Lisp)
-- COBOL
-- Go
-- Ruby
-- Java
-- Fortran
-- JavaScript in an HTML context that runs in a browser
-- JavaScript for the command line using Node.js
+- Python                                                (`guessnumber.py`)
+- Bash                                                  (`guessnumber.sh`)
+- C                                                     (`guessnumber.c`)
+- Perl                                                  (`guessnumber.pl`)
+- PHP                                                   (`guessnumber.php`)
+- Racket (based on Scheme, which is based on Lisp)      (`guessnumber.rkt`)
+- COBOL                                                 (`guessnumber.cob`)
+- Go                                                    (`guessnumber.go`)
+- Ruby                                                  (`guessnumber.rb`)
+- Java                                                  (`guessnumber.java`)
+- Fortran                                               (`guessnumber.f90`)
+- JavaScript in an HTML context that runs in a browser  (`guessnumber.html`)
+- JavaScript for the command line using Node.js         (`guessnumber.js`)
+- Rust (using Cargo)                                    (`guessnumber.rs`)
 
 Future ideas/plans:
 
-- Dunno. Maybe Rust? Erlang? Forth? Something else??
+- Dunno. Maybe Erlang? Forth? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
