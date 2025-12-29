@@ -7,7 +7,7 @@
  *
  * Original versions:
  *   Copyright (c) 2007 Matthew Helmke
- *   Copyright (c) 2026 Matthew Helmke
+ *   Copyright (c) 2025 Matthew Helmke
  *
  * This Rust version is a direct behavioral port of the Python, Bash, C,
  * Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.

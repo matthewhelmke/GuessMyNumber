@@ -7,7 +7,7 @@
 #   additions like input validation and computer guesses.
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
-# Copyright (c) 2026 Matthew Helmke for the Ruby version (this one)
+# Copyright (c) 2024 Matthew Helmke for the Ruby version (this one)
 #
 # To run:
 #   ruby guessnumber.rb
