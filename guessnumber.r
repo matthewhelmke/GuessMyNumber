@@ -17,6 +17,9 @@
 # I used ChatGPT in the creation of this port, but then edited it further
 # myself.
 #
+# Note: this implementation avoids readline() and uses readLines("stdin")
+# to ensure correct blocking behavior under Rscript.
+#
 # To run on Linux, make sure R is installed and then:
 #
 # $ Rscript guessmynumber.r
