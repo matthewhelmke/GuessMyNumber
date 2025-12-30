@@ -24,6 +24,9 @@ I wrote these, in this order:
 - JavaScript in an HTML context that runs in a browser  (`guessnumber.html`)
 - JavaScript for the command line using Node.js         (`guessnumber.js`)
 - Rust (using Cargo)                                    (`guessnumber.rs`)
+- R                                                     (`guessnumber.r`)
+
+Some of these are being used far outside of typical use for the language and the game is not a natural fit. That was part of the fun and challenge for me, along with stretching my thinking a bit. This whole repo is just for silly fun, right?
 
 Future ideas/plans:
 
