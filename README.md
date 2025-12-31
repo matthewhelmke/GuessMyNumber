@@ -28,8 +28,10 @@ I wrote these, in this order:
 
 Some of these are being used far outside of typical use for the language and the game is not a natural fit. That was part of the fun and challenge for me, along with stretching my thinking a bit. This whole repo is just for silly fun, right?
 
+I originally hand-wrote all of these myself. Starting in late 2025, I began using ChatGPT to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since it's just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of each language version where I have used ChatGPT, at least that has been my intent.
+
 Future ideas/plans:
 
-- Dunno. Maybe Erlang? Forth? Something else??
+- Dunno. Maybe Erlang? Forth? Perhaps something like Algol or even Pascal? Something else??
 
 Code contributions via PR are welcome, but thus far everything here has been written by me. I'll edit this note if that changes.
