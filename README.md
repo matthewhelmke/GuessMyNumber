@@ -75,7 +75,7 @@ R is primarily known as a statistical and data-analysis language, not as a platf
 
 One important caveat:
 
-- `readline()` is intentionally not used.
+`readline()` is intentionally not used.
 
 When running under Rscript, `readline()` does not reliably block for user input and may immediately return an empty string, causing busy loops or premature termination. Instead, the R version uses:
 
