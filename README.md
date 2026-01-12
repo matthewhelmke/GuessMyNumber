@@ -69,6 +69,8 @@ Each version lives as a self-contained program and can be run independently usin
 
 ## Extra notes on a couple of languages
 
+Rust and R get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+
 ### R
 
 R is primarily known as a statistical and data-analysis language, not as a platform for interactive terminal programs. Nevertheless, it is fully capable of expressing this game.
