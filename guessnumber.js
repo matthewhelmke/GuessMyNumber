@@ -49,76 +49,76 @@ async function main() {
   console.log("Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n");
   console.log("Here we go!\n");
 
-  const secretNumber = Math.floor(Math.random() * 100) + 1;
-  let guess = 0;
-  let computerGuess = 0;
-  let tries = 0;
-  let lowestLow = 1;
-  let highestHigh = 100;
+  const secretnumber = Math.floor(Math.random() * 100) + 1;
+  let userguess = 0;
+  let computerguess = 0;
+  let totalguesses = 0;
+  let lowmax = 1;
+  let highmax = 100;
 
   // Let the user input any number they want, then check if an integer between 1-100
-  while (guess !== secretNumber) {
+  while (userguess !== secretnumber) {
     let input = await askQuestion("What is your guess? ");
 
     // Drop anything after a decimal point to make their guess an integer
-    guess = parseInt(input, 10);
+    userguess = parseInt(input, 10);
 
     // Check if between 1-100
-    if (isNaN(guess) || guess < 1 || guess > 100) {
+    if (isNaN(userguess) || userguess < 1 || userguess > 100) {
       console.log("Please enter a valid number between 1 and 100.");
       continue;
     }
 
-    console.log(`You guessed ${guess}.`);
+    console.log(`You guessed ${userguess}.`);
 
-    tries++;
+    totalguesses++;
 
     // Evaluations and some taunts for silly errors in user guesses
-    if (guess < secretNumber) {
+    if (userguess < secretnumber) {
       console.log("Your guess is too low.");
-      if (guess <= lowestLow) {
+      if (userguess <= lowmax) {
         console.log("That guess was lower than a previous guess that was too low. Pay attention!");
       }
-      if (guess > lowestLow) {
-        lowestLow = guess;
+      if (userguess > lowmax) {
+        lowmax = userguess;
       }
-    } else if (guess > secretNumber) {
+    } else if (userguess > secretnumber) {
       console.log("Your guess is too high.");
-      if (guess >= highestHigh) {
+      if (userguess >= highmax) {
         console.log("Wake up! That guess was higher than an earlier guess that was too high.");
       }
-      if (guess < highestHigh) {
-        highestHigh = guess;
+      if (userguess < highmax) {
+        highmax = userguess;
       }
     } else {
-      console.log(`Your guess is correct! Congratulations! It took ${tries} total guesses.\n`);
+      console.log(`Your guess is correct! Congratulations! It took ${totalguesses} total guesses.\n`);
       return process.exit(1);
     }
 
     // Time-based taunts
-    if (tries === 8) {
+    if (totalguesses === 8) {
       console.log("This is a hard number, isn't it?");
-    } else if (tries === 12) {
+    } else if (totalguesses === 12) {
       console.log("Wow! You are really bad at this.");
-    } else if (tries === 16) {
+    } else if (totalguesses === 16) {
       console.log("You're taking too long, I can't handle it any more. G A M E   O V E R");
       return process.exit(1);
     }
 
   // Now computer guesses
-    let compGuess = Math.floor((lowestLow + highestHigh) / 2);
-    tries++;
+    computerguess = Math.floor((lowmax + highmax) / 2);
+    totalguesses++;
 
-    if (guess === secretNumber) {
+    if (userguess === secretnumber) {
         return;
-    } else if (compGuess < secretNumber) {
-        console.log(`The computer guessed ${compGuess} and that was too low.`);
-        if (compGuess > lowestLow) lowestLow = compGuess + 1;
-    } else if (compGuess > secretNumber) {
-        console.log(`The computer guessed ${compGuess} and that was too high.`);
-        if (compGuess < highestHigh) highestHigh = compGuess - 1;
+    } else if (computerguess < secretnumber) {
+        console.log(`The computer guessed ${computerguess} and that was too low.`);
+        if (computerguess > lowmax) lowmax = computerguess + 1;
+    } else if (computerguess > secretnumber) {
+        console.log(`The computer guessed ${computerguess} and that was too high.`);
+        if (computerguess < highmax) highmax = computerguess - 1;
     } else {
-        console.log(`The computer's guess of ${compGuess} is correct! It took ${tries} total guesses!`);
+        console.log(`The computer's guess of ${computerguess} is correct! It took ${totalguesses} total guesses!`);
         return process.exit(1);
     }
   }

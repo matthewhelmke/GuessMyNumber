@@ -35,11 +35,9 @@ public class guessnumber {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
-        int min = 1;
-        int max = 100;
-        int secretnumber = random.nextInt(max - min + 1) + min; // Get a random number
         int lowmax = 1;
         int highmax = 100;
+        int secretnumber = random.nextInt(highmax - lowmax + 1) + lowmax; // Get a random number
         int userguess;
         int computerguess;
         int guessrange;
@@ -90,8 +88,8 @@ public class guessnumber {
                 guessrange = 1;
             }
 
-            // the computer's guess is random, within the range of current reasonable values
-            computerguess = (random.nextInt(guessrange) + lowmax);
+            // computer uses midpoint (binary search) within current reasonable values
+            computerguess = (lowmax + highmax) / 2;
             totalguesses++;
 
             // evaluate the computer guess

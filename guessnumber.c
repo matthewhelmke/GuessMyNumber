@@ -107,10 +107,8 @@ main()
                 if (guessrange <=0)
                         (guessrange = 1);
 
-                // the computer's guess is random, within the range of current reasonable values
-                //     computerguess = (random.randrange(guessrange) + lowmax)
-                //     totalguesses += 1
-                computerguess = (rand() % (guessrange)) + lowmax;
+                // the computer's guess uses the midpoint of the shared bounds (binary search)
+                computerguess = (lowmax + highmax) / 2;
                 ++totalguesses;
 
                 if (computerguess < secretnumber) {

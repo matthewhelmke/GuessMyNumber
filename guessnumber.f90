@@ -30,7 +30,7 @@
 
 PROGRAM GuessMyNumber
   IMPLICIT none
-  INTEGER :: secret, guess, playerGuess, computerGuess, totalGuesses
+    INTEGER :: secretnumber, userguess, computerguess, totalguesses, lowmax, highmax
   INTEGER :: playerTries, computerTries
   INTEGER :: seed, low, high
   CHARACTER(len=100) :: input
@@ -45,7 +45,7 @@ PROGRAM GuessMyNumber
   CALL RANDOM_NUMBER(random_real)
 
   ! Scale and convert to an integer between 1 and 100
-  secret = INT(random_real * 100) + 1
+    secretnumber = INT(random_real * 100) + 1
 
 
   PRINT *, "Welcome to Guess My Number!"
@@ -61,8 +61,8 @@ PROGRAM GuessMyNumber
   ! Initialize counters
   playerTries = 0
   computerTries = 0
-  low = 1
-  high = 100
+  lowmax = 1
+  highmax = 100
 
   DO
     ! Player's turn
@@ -71,10 +71,10 @@ PROGRAM GuessMyNumber
     ! Verify the guess is an integer between 1 and 100
     DO
       READ(*, '(A)') input
-      READ(input, *, iostat=iostat_val) playerGuess
+      READ(input, *, iostat=iostat_val) userguess
       IF (iostat_val == 0) THEN  ! Check if read was successful (no I/O error)
-        IF (playerGuess >= 1 .AND. playerGuess <= 100) THEN
-          WRITE(*,*) "Valid input:", playerGuess
+          IF (userguess >= 1 .AND. userguess <= 100) THEN
+            WRITE(*,*) "Valid input:", userguess
           EXIT  ! Exit the loop if input is valid
         ELSE
           WRITE(*,*) "Only whole numbers from 1 to 100 are allowed. Your guess is out of range. Try again."
@@ -85,58 +85,58 @@ PROGRAM GuessMyNumber
     END DO
 
     ! some taunts for silly errors in user guesses
-    IF (playerGuess < low) THEN
+    IF (userguess < lowmax) THEN
       PRINT *, "That guess was lower than a previous guess that was too low. Pay attention!"
-    ELSE IF (playerGuess > high) THEN
+    ELSE IF (userguess > highmax) THEN
       PRINT *, "Wake up! That guess was higher than an earlier guess that was too high."
     END IF
 
     playerTries = playerTries + 1
 
-    ! Evaluate player guess against secret
-    IF (playerGuess < secret) THEN
+    ! Evaluate player guess against secretnumber
+    IF (userguess < secretnumber) THEN
       PRINT *, "Too low!"
-      low = playerGuess + 1
-    ELSE IF (playerGuess > secret) THEN
+      lowmax = userguess + 1
+    ELSE IF (userguess > secretnumber) THEN
       PRINT *, "Too high!"
-      high = playerGuess - 1
+      highmax = userguess - 1
     ELSE
-      totalGuesses = playerTries + computerTries
+      totalguesses = playerTries + computerTries
       PRINT *, "*********************************************"
       PRINT *, "Your guess is correct! Congratulations!"
-      PRINT *, "It took", totalGuesses, "tries!"
+      PRINT *, "It took", totalguesses, "tries!"
       PRINT *, "*********************************************"
       EXIT
     END IF
 
     ! Computer's turn
-    computerGuess = (low + high) / 2
-    PRINT *, "Computer guesses: ", computerGuess
+    computerguess = (lowmax + highmax) / 2
+    PRINT *, "Computer guesses: ", computerguess
     computerTries = computerTries + 1
 
     ! Evaluate computer guess against secret
-    if (computerGuess < secret) THEN
+    if (computerguess < secretnumber) THEN
       PRINT *, "Computer: Too low!"
-      low = computerGuess + 1
-    ELSE IF (computerGuess > secret) THEN
+      lowmax = computerguess + 1
+    ELSE IF (computerguess > secretnumber) THEN
       PRINT *, "Computer: Too high!"
-      high = computerGuess - 1
+      highmax = computerguess - 1
     ELSE
-      totalGuesses = playerTries + computerTries
+      totalguesses = playerTries + computerTries
       PRINT *, "*********************************************"
-      PRINT *, "The computer's guess of", computerGuess, "is correct!"
-      PRINT *, "It took", totalGuesses, "tries!"
+      PRINT *, "The computer's guess of", computerguess, "is correct!"
+      PRINT *, "It took", totalguesses, "tries!"
       PRINT *, "*********************************************"
       EXIT
     END IF
 
     ! these taunts are for my amusement and to keep the game from being too long
-    IF (totalGuesses == 8) THEN
+    IF (totalguesses == 8) THEN
       PRINT *, "Is this a hard number?"
     ELSE IF (totalGuesses == 12) THEN
       PRINT *, "Wow! You are really bad at this."
-    ELSE IF (totalGuesses >= 16) THEN
-      PRINT *, "This is taking too long."
+    ELSE IF (totalguesses == 12) THEN
+    ELSE IF (totalguesses >= 16) THEN
       PRINT *, "G A M E   O V E R"
       EXIT
     END IF

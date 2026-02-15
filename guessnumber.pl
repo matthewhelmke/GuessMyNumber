@@ -121,16 +121,8 @@ while ( $userguess != $secretnumber ) {
 
     # computer guess routine
 
-    # this is to prevent trying to generate a random number from a range of 0
-    $guessrange = ( $highmax - $lowmax );
-    if ( $guessrange <= 0 ) {
-        $guessrange = 1;
-    }
-
- # the computer's guess is random, within the range of current reasonable values
- #     computerguess = (random.randrange(guessrange) + lowmax)
- #     totalguesses += 1
-    $computerguess = ( $lowmax + int rand($guessrange) );
+    # computer uses midpoint (binary search) within current reasonable values
+    $computerguess = int(($lowmax + $highmax) / 2);
     ++$totalguesses;
 
     if ( $computerguess < $secretnumber ) {

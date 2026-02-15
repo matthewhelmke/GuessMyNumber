@@ -116,14 +116,8 @@ while (!$won) {
             exit;
         }
 
-        // prevent trying to generate a random number from a range of 0
-        $guessrange = $highmax - $lowmax;
-        if ($guessrange <= 0) {
-            $guessrange = 1;
-        }
-
-        // create a random number for the computer's guess
-        $computerguess = (rand(1, ($guessrange - 1)) + $lowmax);
+        // computer uses midpoint (binary search) within current reasonable values
+        $computerguess = intval(($lowmax + $highmax) / 2);
 
         $totalguesses++;
 

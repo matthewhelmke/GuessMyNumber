@@ -35,29 +35,29 @@ import (
 )
 
 func main() {
-	minNumber := 1
-	maxNumber := 100
+	lowmax := 1
+	highmax := 100
 
 	// Set the seed value for the random number generator.
 	rand.Seed(time.Now().UnixNano())
 
 	// Get a random number
-	secretNumber := rand.Intn(maxNumber-minNumber+1) + minNumber
+	secretnumber := rand.Intn(highmax-lowmax+1) + lowmax
 
 	// Print a description of the game, with rules, to the screen
 	fmt.Println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n")
-	fmt.Printf("I'm thinking of a number between %d and %d. Can you guess it?\n", minNumber, maxNumber)
+	fmt.Printf("I'm thinking of a number between %d and %d. Can you guess it?\n", lowmax, highmax)
 
 	var userguessunvalidated string
 	var userguess int
 
-	totalGuesses := 0
+	totalguesses := 0
 
 	// the main bit
 	for {
 		fmt.Print("What is your guess? ")
 
-		totalGuesses++
+		totalguesses++
 
 		// let the user input any number they want, then
 		// check if an integer
@@ -73,45 +73,46 @@ func main() {
 		if userguess > 0 && userguess < 101 {
 
 			// some taunts for silly errors in user guesses then evaluate the guess
-			if userguess < minNumber {
+			if userguess < lowmax {
 				fmt.Println("That guess was lower than a previous guess that was too low. Pay attention!\n")
-			} else if userguess > maxNumber {
+			} else if userguess > highmax {
 				fmt.Println("Wake up! That guess was higher than an earlier guess that was too high.\n")
-			} else if userguess < secretNumber {
+			} else if userguess < secretnumber {
 				fmt.Println("Your guess is too low.\n")
-				minNumber = (userguess + 1)
-			} else if userguess > secretNumber {
+				lowmax = (userguess + 1)
+			} else if userguess > secretnumber {
 				fmt.Println("Your guess is too high.\n")
-				maxNumber = (userguess - 1)
-			} else if userguess == secretNumber {
-				fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
+				highmax = (userguess - 1)
+			} else if userguess == secretnumber {
+				fmt.Printf("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalguesses)
 				break
 			}
 		} else {
 			fmt.Println("Invalid! Please enter a whole number between 1 and 100: ")
 		}
 
-		// computer does a random guess, within the range of current reasonable values
-		computerguess := rand.Intn(maxNumber-minNumber+1) + minNumber
+		// computer uses midpoint (binary search) within current reasonable values
+		computerguess := (lowmax + highmax) / 2
+		totalguesses++
 
 		// evaluate computer guess and print its guess and whether it was high/low
-		if computerguess < secretNumber {
+		if computerguess < secretnumber {
 			fmt.Println("The computer guessed", computerguess, "and it is too low.\n")
-			minNumber = (computerguess + 1)
-		} else if computerguess > secretNumber {
+			lowmax = (computerguess + 1)
+		} else if computerguess > secretnumber {
 			fmt.Println("The computer guessed", computerguess, "and it is too high.\n")
-			maxNumber = (computerguess - 1)
-		} else if computerguess == secretNumber {
-			fmt.Printf("\n*********************************************\n   The computer guess is correct! You lose, human!\n   It took %d total guesses.\n*********************************************\n\n", totalGuesses)
+			highmax = (computerguess - 1)
+		} else if computerguess == secretnumber {
+			fmt.Printf("\n*********************************************\n   The computer guess is correct! You lose, human!\n   It took %d total guesses.\n*********************************************\n\n", totalguesses)
 			break
 		}
 
 		// more taunts and add a guess limit
-		if totalGuesses == 8 {
+		if totalguesses == 8 {
 			fmt.Println("\nThis is a hard number, isn't it?\n")
-		} else if totalGuesses == 12 {
+		} else if totalguesses == 12 {
 			fmt.Println("\nWow! You are really bad at this.\n")
-		} else if totalGuesses == 16 {
+		} else if totalguesses == 16 {
 			fmt.Printf("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
 			break
 		}
