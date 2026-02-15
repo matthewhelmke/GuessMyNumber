@@ -72,8 +72,15 @@ while ( $userguess != $secretnumber ) {
     my $userguessunvalidated;
     while (1) {
         print "What is your guess? ";
-        chomp($userguessunvalidated = <STDIN> // "");
-        if (defined $userguessunvalidated && $userguessunvalidated =~ /^\d+$/) {
+        my $input = <STDIN>;
+        # Handle EOF - exit gracefully
+        if (!defined $input) {
+            print "\nEnd of input. Game Over.\n";
+            exit;
+        }
+        chomp($input);
+        $userguessunvalidated = $input;
+        if ($userguessunvalidated =~ /^\d+$/) {
             if ($userguessunvalidated >= 1 && $userguessunvalidated <= 100) {
                 last;
             }
@@ -151,6 +158,7 @@ while ( $userguess != $secretnumber ) {
     if ( $totalguesses >= 16 ) {
         print "\nYou're taking too long, I can't handle it any more.\n\n";
         print "G A M E   O V E R\n";
+        exit;
     }
 
 }
