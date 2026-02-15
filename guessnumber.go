@@ -37,11 +37,11 @@ func main() {
 	lowmax := 1
 	highmax := 100
 
-	// Set the seed value for the random number generator.
-	rand.Seed(time.Now().UnixNano())
+	// Create a local random generator with current time as seed
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Get a random number
-	secretnumber := rand.Intn(highmax-lowmax+1) + lowmax
+	secretnumber := rng.Intn(highmax-lowmax+1) + lowmax
 
 	// Print a description of the game, with rules, to the screen
 	fmt.Println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n")
