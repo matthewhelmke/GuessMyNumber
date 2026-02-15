@@ -11,43 +11,14 @@
  *
  * This Rust version is a direct behavioral port of the Python, Bash, C,
  * Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
- * I used ChatGPT in the creation of this port, but then edited it further
- * myself.
- *
- * Because Rust is newer and I had to learn, I'm including the following
- * to make it easier for others in the same boat to try this out.
- *
- * To build and run, use Cargo.
- *
- * If you don't have Rust installed, use the official Rust installer:
- *
- * $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
- *
- * You may need to run `source $HOME/.cargo.env` for the automated changes
- * to your $PATH to take effect.
- *
- * Then, from the directory where this file is located, compile the source
- * code with Cargo:
- *
- * $ cargo new guessnumber
- *
- * This created a new directory to house a new project called `guessnumber`.
- * In the new directory, replace the contents of the `src/main.rs` file with
- * the content of this file. Then, add the `rand` function:
- *
- * $ cargo add rand
- *
- * And run:
- *
- * $ cargo run
+ * To build and run, use Cargo or `rustc` for a quick run.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License.
  */
-
-use rand::Rng;
 use std::io::{self, Write};
 use std::process::exit;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 fn read_line() -> String {
     let mut input = String::new();
@@ -56,27 +27,23 @@ fn read_line() -> String {
 }
 
 fn main() {
-    let mut rng = rand::rng();
-
     println!("\nWelcome to Guess My Number!\n");
     println!("The computer will select a random whole number between 1 and 100. Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n");
-    println!("YHere we go!\n");
+    println!("Here we go!\n");
 
-    let secret = rng.random_range(1..=100);
-    
-    let mut total_guesses = 0;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let secretnumber = (now % 100) as i32 + 1;
 
-    /* Shared bounds based on all prior guesses */
-    let mut lowmax = 1;
-    let mut highmax = 100;
+    let mut totalguesses: i32 = 0;
+    let mut lowmax: i32 = 1;
+    let mut highmax: i32 = 100;
 
     loop {
-        /* ----- User guess ----- */
         print!("Your guess: ");
         io::stdout().flush().unwrap();
 
         let guess_input = read_line();
-        let user_guess: i32 = match guess_input.parse() {
+        let userguess: i32 = match guess_input.parse() {
             Ok(n) => n,
             Err(_) => {
                 println!("Only whole numbers from 1 to 100 are allowed. Your guess is not a whole number.\nPlease try again.\n");
@@ -84,89 +51,79 @@ fn main() {
             }
         };
 
-        if user_guess < 1 || user_guess > 100 {
+        if userguess < 1 || userguess > 100 {
             println!("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
             continue;
         }
 
-        total_guesses += 1;
+        totalguesses += 1;
 
-        /* taunts for guesses outside of established limits */
-        if user_guess < lowmax {
+        if userguess < lowmax {
             println!("That guess was lower than a previous guess that was too low. Pay attention!");
         }
-
-        if user_guess > highmax {
+        if userguess > highmax {
             println!("Wake up! That guess was higher than an earlier guess that was too high.");
         }
 
-        if user_guess == secret {
+        if userguess == secretnumber {
             println!("\n*********************************************");
-            println!("   Your guess of {} is correct!", user_guess);
-            println!("    It took {} guesses!", total_guesses);
+            println!("   Your guess of {} is correct!", userguess);
+            println!("    It took {} guesses!", totalguesses);
             println!("*********************************************\n");
             break;
-        } else if user_guess < secret {
+        } else if userguess < secretnumber {
             println!("Too low.\n");
-            if user_guess >= lowmax {
-                lowmax = user_guess + 1;
+            if userguess >= lowmax {
+                lowmax = userguess + 1;
             }
         } else {
             println!("Too high.\n");
-            if user_guess <= highmax {
-                highmax = user_guess - 1;
+            if userguess <= highmax {
+                highmax = userguess - 1;
             }
         }
 
-        /* PHP-aligned taunt thresholds */
-        if total_guesses == 8 {
+        if totalguesses == 8 {
             println!("\nThis is a hard number, isn't it?\n");
         }
-
-        if total_guesses == 12 {
+        if totalguesses == 12 {
             println!("\nWow! You are really bad at this.\n");
         }
-
-        if total_guesses >= 16 {
+        if totalguesses >= 16 {
             println!("\nYou're taking too long, I can't handle it any more.\n");
             println!("G A M E   O V E R");
             exit(0);
         }
 
-        /* ----- Computer guess ----- */
+        let computerguess = (lowmax + highmax) / 2;
+        totalguesses += 1;
+        println!("The computer guesses {}.", computerguess);
 
-        let computer_guess = (lowmax + highmax) / 2;
-        total_guesses += 1;
-
-        println!("The computer guesses {}.", computer_guess);
-
-        if computer_guess == secret {
+        if computerguess == secretnumber {
             println!("\n*********************************************");
-            println!("   The computer's guess of {} is correct!", computer_guess);
-            println!("    It took {} guesses!", total_guesses);
+            println!("   The computer's guess of {} is correct!", computerguess);
+            println!("    It took {} guesses!", totalguesses);
             println!("*********************************************\n");
             break;
-        } else if computer_guess < secret {
+        } else if computerguess < secretnumber {
             println!("Too low.\n");
-            if computer_guess >= lowmax {
-                lowmax = computer_guess + 1;
+            if computerguess >= lowmax {
+                lowmax = computerguess + 1;
             }
         } else {
             println!("Too high.\n");
-            if computer_guess <= highmax {
-                highmax = computer_guess - 1;
+            if computerguess <= highmax {
+                highmax = computerguess - 1;
             }
         }
 
-        if total_guesses == 8 {
+        if totalguesses == 8 {
             println!("\nThis is a hard number, isn't it?\n");
         }
-
-        if total_guesses == 12 {
+        if totalguesses == 12 {
             println!("\nWow! You are really bad at this.\n");
         }
-
-        if total_guesses >= 16 {
+        if totalguesses >= 16 {
             println!("\nYou're taking too long, I can't handle it any more.\n");
             println!("G A M E   O V E R");
             exit(0);

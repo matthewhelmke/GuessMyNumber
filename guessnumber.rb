@@ -106,9 +106,9 @@ while gameover == 0
         lowmax = userguess
     end
 
-    # the computer's guess is random, within the range of current reasonable values
-
-    computerguess = (rand(lowmax..highmax) + 1)
+    # computer uses midpoint (binary search) within current reasonable values
+    computerguess = (lowmax + highmax) / 2
+    totalguesses += 1
 
     # evaluate computer guess
 

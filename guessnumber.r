@@ -55,9 +55,9 @@ cat(
 )
 cat("Here we go!\n\n")
 
-secret <- sample(1:100, 1)
+secretnumber <- sample(1:100, 1)
 
-total_guesses <- 0
+totalguesses <- 0
 lowmax <- 1
 highmax <- 100
 
@@ -77,9 +77,9 @@ repeat {
     quit(save = "no")
   }
 
-  user_guess <- suppressWarnings(as.integer(guess_input))
+  userguess <- suppressWarnings(as.integer(guess_input))
 
-  if (is.na(user_guess)) {
+  if (is.na(userguess)) {
     cat(
       "Only whole numbers from 1 to 100 are allowed. ",
       "Your guess is not a whole number.\nPlease try again.\n\n",
@@ -88,7 +88,7 @@ repeat {
     next
   }
 
-  if (user_guess < 1 || user_guess > 100) {
+  if (userguess < 1 || userguess > 100) {
     cat(
       "Only whole numbers from 1 to 100 are allowed. ",
       "Your guess is out of range.\nPlease try again.\n\n",
@@ -97,83 +97,83 @@ repeat {
     next
   }
 
-  total_guesses <- total_guesses + 1
+  totalguesses <- totalguesses + 1
 
   ## taunts for guesses outside of established limits
-  if (user_guess < lowmax) {
+  if (userguess < lowmax) {
     cat("That guess was lower than a previous guess that was too low. Pay attention!\n")
   }
 
-  if (user_guess > highmax) {
+  if (userguess > highmax) {
     cat("Wake up! That guess was higher than an earlier guess that was too high.\n")
   }
 
-  if (user_guess == secret) {
+  if (userguess == secretnumber) {
     cat("\n*********************************************\n")
-    cat(sprintf("   Your guess of %d is correct!\n", user_guess))
-    cat(sprintf("    It took %d guesses!\n", total_guesses))
+    cat(sprintf("   Your guess of %d is correct!\n", userguess))
+    cat(sprintf("    It took %d guesses!\n", totalguesses))
     cat("*********************************************\n\n")
     break
-  } else if (user_guess < secret) {
+  } else if (userguess < secretnumber) {
     cat("Too low.\n\n")
-    if (user_guess >= lowmax) {
-      lowmax <- user_guess + 1
+    if (userguess >= lowmax) {
+      lowmax <- userguess + 1
     }
   } else {
     cat("Too high.\n\n")
-    if (user_guess <= highmax) {
-      highmax <- user_guess - 1
+    if (userguess <= highmax) {
+      highmax <- userguess - 1
     }
   }
 
   ## PHP-aligned taunt thresholds
-  if (total_guesses == 8) {
+  if (totalguesses == 8) {
     cat("\nThis is a hard number, isn't it?\n\n")
   }
 
-  if (total_guesses == 12) {
+  if (totalguesses == 12) {
     cat("\nWow! You are really bad at this.\n\n")
   }
 
-  if (total_guesses >= 16) {
+  if (totalguesses >= 16) {
     cat("\nYou're taking too long, I can't handle it any more.\n")
     cat("G A M E   O V E R\n")
     quit(save = "no")
   }
 
   ## ----- Computer guess -----
-  computer_guess <- as.integer((lowmax + highmax) / 2)
-  total_guesses <- total_guesses + 1
+  computerguess <- as.integer((lowmax + highmax) / 2)
+  totalguesses <- totalguesses + 1
 
-  cat(sprintf("The computer guesses %d.\n", computer_guess))
+  cat(sprintf("The computer guesses %d.\n", computerguess))
 
-  if (computer_guess == secret) {
+  if (computerguess == secretnumber) {
     cat("\n*********************************************\n")
-    cat(sprintf("   The computer's guess of %d is correct!\n", computer_guess))
-    cat(sprintf("    It took %d guesses!\n", total_guesses))
+    cat(sprintf("   The computer's guess of %d is correct!\n", computerguess))
+    cat(sprintf("    It took %d guesses!\n", totalguesses))
     cat("*********************************************\n\n")
     break
-  } else if (computer_guess < secret) {
+  } else if (computerguess < secretnumber) {
     cat("Too low.\n\n")
-    if (computer_guess >= lowmax) {
-      lowmax <- computer_guess + 1
+    if (computerguess >= lowmax) {
+      lowmax <- computerguess + 1
     }
   } else {
     cat("Too high.\n\n")
-    if (computer_guess <= highmax) {
-      highmax <- computer_guess - 1
+    if (computerguess <= highmax) {
+      highmax <- computerguess - 1
     }
   }
 
-  if (total_guesses == 8) {
+  if (totalguesses == 8) {
     cat("\nThis is a hard number, isn't it?\n\n")
   }
 
-  if (total_guesses == 12) {
+  if (totalguesses == 12) {
     cat("\nWow! You are really bad at this.\n\n")
   }
 
-  if (total_guesses >= 16) {
+  if (totalguesses >= 16) {
     cat("\nYou're taking too long, I can't handle it any more.\n")
     cat("G A M E   O V E R\n")
     quit(save = "no")

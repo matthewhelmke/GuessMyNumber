@@ -26,16 +26,11 @@
 ! along with this program; if not, write to the Free Software
 ! Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-! Print a description of the game, with rules, to the screen
-
 PROGRAM GuessMyNumber
   IMPLICIT none
-  INTEGER :: secret, guess, playerGuess, computerGuess, totalGuesses
-  INTEGER :: playerTries, computerTries
-  INTEGER :: seed, low, high
+  INTEGER :: secretnumber, userguess, computerguess, totalguesses, lowmax, highmax
   CHARACTER(len=100) :: input
   INTEGER :: iostat_val
-  INTEGER :: random_integer
   REAL :: random_real
 
   ! Initialize the random number generator (call once at program start)
@@ -45,8 +40,12 @@ PROGRAM GuessMyNumber
   CALL RANDOM_NUMBER(random_real)
 
   ! Scale and convert to an integer between 1 and 100
-  secret = INT(random_real * 100) + 1
-
+  secretnumber = INT(random_real * 100) + 1
+  
+  ! Initialize counters
+  totalguesses = 0
+  lowmax = 1
+  highmax = 100
 
   PRINT *, "Welcome to Guess My Number!"
   PRINT *
@@ -58,87 +57,91 @@ PROGRAM GuessMyNumber
   PRINT *
   PRINT *, "Here we go!"
 
-  ! Initialize counters
-  playerTries = 0
-  computerTries = 0
-  low = 1
-  high = 100
-
   DO
     ! Player's turn
     PRINT *, "What is your guess? "
 
     ! Verify the guess is an integer between 1 and 100
     DO
-      READ(*, '(A)') input
-      READ(input, *, iostat=iostat_val) playerGuess
-      IF (iostat_val == 0) THEN  ! Check if read was successful (no I/O error)
-        IF (playerGuess >= 1 .AND. playerGuess <= 100) THEN
-          WRITE(*,*) "Valid input:", playerGuess
+      READ(*, '(A)', iostat=iostat_val) input
+      IF (iostat_val /= 0) THEN
+        PRINT *, "End of input. Game Over."
+        STOP
+      END IF
+      READ(input, *, iostat=iostat_val) userguess
+      IF (iostat_val == 0) THEN  ! Check if read was successful
+        IF (userguess >= 1 .AND. userguess <= 100) THEN
           EXIT  ! Exit the loop if input is valid
         ELSE
-          WRITE(*,*) "Only whole numbers from 1 to 100 are allowed. Your guess is out of range. Try again."
+          PRINT *, "Only whole numbers from 1 to 100 are allowed. Please try again."
         END IF
       ELSE
-        WRITE(*,*) "Only whole numbers from 1 to 100 are allowed. Please try again."
+        PRINT *, "Only whole numbers from 1 to 100 are allowed. Please try again."
       END IF
     END DO
 
     ! some taunts for silly errors in user guesses
-    IF (playerGuess < low) THEN
+    IF (userguess < lowmax) THEN
       PRINT *, "That guess was lower than a previous guess that was too low. Pay attention!"
-    ELSE IF (playerGuess > high) THEN
+    ELSE IF (userguess > highmax) THEN
       PRINT *, "Wake up! That guess was higher than an earlier guess that was too high."
     END IF
 
-    playerTries = playerTries + 1
+    totalguesses = totalguesses + 1
 
-    ! Evaluate player guess against secret
-    IF (playerGuess < secret) THEN
+    ! Evaluate player guess against secretnumber
+    IF (userguess < secretnumber) THEN
       PRINT *, "Too low!"
-      low = playerGuess + 1
-    ELSE IF (playerGuess > secret) THEN
+      lowmax = userguess + 1
+    ELSE IF (userguess > secretnumber) THEN
       PRINT *, "Too high!"
-      high = playerGuess - 1
+      highmax = userguess - 1
     ELSE
-      totalGuesses = playerTries + computerTries
       PRINT *, "*********************************************"
       PRINT *, "Your guess is correct! Congratulations!"
-      PRINT *, "It took", totalGuesses, "tries!"
+      PRINT *, "It took", totalguesses, "total guesses."
       PRINT *, "*********************************************"
       EXIT
     END IF
 
+    ! Check for game over condition
+    IF (totalguesses >= 16) THEN
+      PRINT *, "You're taking too long, I can't handle it any more."
+      PRINT *, ""
+      PRINT *, "G A M E   O V E R"
+      STOP
+    END IF
+
     ! Computer's turn
-    computerGuess = (low + high) / 2
-    PRINT *, "Computer guesses: ", computerGuess
-    computerTries = computerTries + 1
+    computerguess = (lowmax + highmax) / 2
+    PRINT *, "Computer guesses: ", computerguess
+    totalguesses = totalguesses + 1
 
     ! Evaluate computer guess against secret
-    if (computerGuess < secret) THEN
+    IF (computerguess < secretnumber) THEN
       PRINT *, "Computer: Too low!"
-      low = computerGuess + 1
-    ELSE IF (computerGuess > secret) THEN
+      lowmax = computerguess + 1
+    ELSE IF (computerguess > secretnumber) THEN
       PRINT *, "Computer: Too high!"
-      high = computerGuess - 1
+      highmax = computerguess - 1
     ELSE
-      totalGuesses = playerTries + computerTries
       PRINT *, "*********************************************"
-      PRINT *, "The computer's guess of", computerGuess, "is correct!"
-      PRINT *, "It took", totalGuesses, "tries!"
+      PRINT *, "The computer's guess of", computerguess, "is correct!"
+      PRINT *, "It took", totalguesses, "total guesses."
       PRINT *, "*********************************************"
       EXIT
     END IF
 
     ! these taunts are for my amusement and to keep the game from being too long
-    IF (totalGuesses == 8) THEN
+    IF (totalguesses == 8) THEN
       PRINT *, "Is this a hard number?"
-    ELSE IF (totalGuesses == 12) THEN
+    ELSE IF (totalguesses == 12) THEN
       PRINT *, "Wow! You are really bad at this."
-    ELSE IF (totalGuesses >= 16) THEN
-      PRINT *, "This is taking too long."
+    ELSE IF (totalguesses >= 16) THEN
+      PRINT *, "You're taking too long, I can't handle it any more."
+      PRINT *, ""
       PRINT *, "G A M E   O V E R"
-      EXIT
+      STOP
     END IF
 
   END DO

@@ -114,7 +114,8 @@ do
         guessrange=1
       fi
 
-      ((computerguess  = RANDOM % guessrange + lowmax ))
+      # computer uses midpoint (binary search) within current reasonable values
+      ((computerguess = (lowmax + highmax) / 2 ))
       ((totalguesses = totalguesses+1))
 
 

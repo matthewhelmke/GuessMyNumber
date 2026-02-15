@@ -107,8 +107,8 @@ while True:
     if (guessrange <= 0):
         guessrange = 1
 
-    # the computer's guess is random, within the range of current reasonable values
-    computerguess = (random.randrange(guessrange) + lowmax)
+    # the computer's guess uses a binary-search midpoint within current bounds
+    computerguess = (lowmax + highmax) // 2
     totalguesses += 1
 
     if (computerguess > secretnumber):

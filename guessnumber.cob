@@ -184,13 +184,8 @@
 
     CALCULATECOMPUTERGUESS.
       ADD 1 TO TOTALGUESSES.
-      COMPUTE GUESSRANGE = HIGHMAX - LOWMAX
-      *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
-      *> for this game. What helps is that I adjust the computer guesses to
-      *> fit within the guessrange, so the parameters are always changing.
-      *> I believe the function RANDOM uses the same seed throughout after the
-      *> seed is used once, which it is in the initial SECRETNUMBER generation.
-      MOVE FUNCTION RANDOM(LOWMAX,HIGHMAX) to COMPUTERGUESS.
+      *> computer uses midpoint (binary search) within current reasonable values
+      COMPUTE COMPUTERGUESS = (LOWMAX + HIGHMAX) / 2
 
       DISPLAY "The computer guessed: " COMPUTERGUESS.
 
