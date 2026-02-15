@@ -10,7 +10,7 @@
 
   This Haskell version is a direct behavioral port of the Python, Bash, C,
   Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
-  I used GitHub Copilot, which at this moment used Claude Haiku 4.5, in the
+  I used GitHub Copilot, which at this moment used Claude Haiku 4.5 • 1x, in the
   creation of this port, but then edited it further myself.
 
   To run:

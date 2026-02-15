@@ -47,27 +47,6 @@ Comprehensive testing of all 16 language implementations of the "Guess My Number
 
 ---
 
-## Issues Encountered & Resolved
-
-| Language | File | Issue | Resolution |
-|----------|------|-------|-----------|
-| **Java** | `guessnumber.java` | Undefined `min`/`max` variables | Replaced with `lowmax`/`highmax` |
-| **Java** | `guessnumber.java` | Typo: "TWake up!" | Fixed to "Wake up!" |
-| **Rust** | `guessnumber.rs` | Missing `rand` crate dependency | Replaced with `SystemTime` for secret generation |
-| **Rust** | `guessnumber.rs` | Non-canonical variable names | Fixed to match canonical set |
-| **Perl** | `guessnumber.pl` | Missing `IO::Prompt::Hooked` CPAN module | Removed dependency; added inline stdin validation |
-| **Perl** | `guessnumber.pl` | stdin loop infinite on EOF | Added EOF detection to exit gracefully |
-| **Perl** | `guessnumber.pl` | No exit on GAME OVER (≥16 guesses) | Added `exit;` statement |
-| **Fortran** | `guessnumber.f90` | Malformed input validation logic | Rewrote validation with proper IF/ELSE structure |
-| **Fortran** | `guessnumber.f90` | Non-canonical variable casing | Standardized all variable names |
-| **Fortran** | `guessnumber.f90` | Infinite loop on EOF | Added EOF detection in READ with proper STOP |
-| **Fortran** | `guessnumber.f90` | Missing GAME OVER logic | Added exit conditions at ≥16 guesses |
-| **Haskell** | `guessnumber.hs` | New implementation needed | Created with canonical contract and structure |
-| **HTML** | `guessnumber.html` | Non-canonical variable names | Standardized to canonical identifiers |
-| **Racket** | `guessnumber.rkt` | Uninitialized variables | Initialized `computerguess` to 0 |
-
----
-
 ## Runtimes & Compilers
 
 All implementations were tested with the following runtimes/compilers:
@@ -105,30 +84,6 @@ This approach:
 - Tests the midpoint/binary-search strategy convergence
 - Typically results in game completion within 10-16 guesses
 - Verifies GAME OVER logic triggers correctly at ≥16 total guesses
-
----
-
-## Test Output Files
-
-All test output files saved to `./test_outputs/`:
-
-```
-bash.txt           (32 lines) - Bash test run
-c.txt              (37 lines) - C compiled and run
-cobol.txt          (36 lines) - COBOL compiled with GnuCOBOL
-fortran.txt        (53 lines) - Fortran compiled and run
-go.txt             (16 lines) - Go test run
-haskell.txt        (48 lines) - Haskell test run
-java.txt           (60 lines) - Java compiled and run
-node.txt           (10 lines) - Node.js test run
-perl.txt           (15 lines) - Perl test run
-php.txt            (27 lines) - PHP test run
-python.txt         (59 lines) - Python test run
-racket.txt         (26 lines) - Racket test run
-r.txt              (14 lines) - R test run
-ruby.txt           (70 lines) - Ruby test run
-rust.txt           (35 lines) - Rust compiled and run
-```
 
 ---
 

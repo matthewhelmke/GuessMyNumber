@@ -1,29 +1,28 @@
-/* Guess my number game
- *
- * --A Golang version of a silly game I made on my programmable
- *   calculator when I was bored in math class in 1987, with a couple of
- *   additions like input validation and computer guesses.
- *
- * Copyright (c) 2007 Matthew Helmke for the old Python 2 version
- * Copyright (c) 2023 Matthew Helmke for the Golang version (this one)
- *
- * To run:
- *   go run guessnumber.go
- *
- * This program is free software; you can redistribute it and\or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+// Guess my number game
+
+// --A Golang version of a silly game I made on my programmable
+//   calculator when I was bored in math class in 1987, with a couple of
+//   additions like input validation and computer guesses.
+
+// Copyright (c) 2007 Matthew Helmke for the old Python 2 version
+// Copyright (c) 2023 Matthew Helmke for the Golang version (this one)
+
+//  To run:
+//   go run guessnumber.go
+
+// This program is free software; you can redistribute it and\or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 package main
 
