@@ -6,7 +6,11 @@ Every implementation in this repository solves the same problem, follows the sam
 
 This repository is intentionally eclectic: modern and legacy languages, scripting and compiled, statically and dynamically typed, all side by side.
 
-I originally hand-wrote all of these myself. Starting in late 2025, I began using ChatGPT to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since this is just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of every language version where I have used ChatGPT, at least that has been my intent. My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
+I originally hand-wrote all of these myself.
+
+Starting in *late 2025*, I began working with various AI agents to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since this is just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of every language version where I have used AI to create that language variant, at least that has been my intent. 
+
+My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
 
 
 ## Game rules (behavioral contract)
@@ -56,6 +60,7 @@ The same game is currently implemented in the following languages:
 - Java                                                  (`guessnumber.java`)
 - JavaScript in an HTML context that runs in a browser  (`guessnumber.html`)
 - JavaScript for the command line using Node.js         (`guessnumber.js`)
+- Haskell                                               (`guessnumber.hs`)
 - Perl                                                  (`guessnumber.pl`)
 - PHP                                                   (`guessnumber.php`)
 - Python                                                (`guessnumber.py`)
