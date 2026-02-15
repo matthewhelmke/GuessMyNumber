@@ -38,11 +38,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 use strict;
-use IO::Prompt::Hooked;
 
 # set all our initial values
 my $totalguesses = 0;
-my $lowmax       = 0;
+my $lowmax       = 1;
 my $highmax      = 100;
 my $userguess;
 my $guessrange;
@@ -62,7 +61,7 @@ Here we go!
 ";
 
 # Get a random number
-my $secretnumber = 1 + int rand 99;
+my $secretnumber = int(rand(100)) + 1;
 
 # the main bit
 while ( $userguess != $secretnumber ) {
@@ -70,22 +69,19 @@ while ( $userguess != $secretnumber ) {
     # let the user input any number they want
     #$userguessunvalidated = <STDIN>;
 
-    my $userguessunvalidated = prompt(
-        message => "What is your guess? ",
-        error =>
-          "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n",
-        validate => sub {
-            my $userguessunvalidated = shift;
+    my $userguessunvalidated;
+    while (1) {
+        print "What is your guess? ";
+        chomp($userguessunvalidated = <STDIN> // "");
+        if (defined $userguessunvalidated && $userguessunvalidated =~ /^\d+$/) {
+            if ($userguessunvalidated >= 1 && $userguessunvalidated <= 100) {
+                last;
+            }
+        }
+        print "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n";
+    }
 
-            # make sure the guess is an integer
-            # make sure the guess is in the right range
-            return (  $userguessunvalidated =~ /^[1-9]\d?$/
-                  and $userguessunvalidated >= 1
-                  and $userguessunvalidated <= 100 );
-        },
-    );
-
-    my $userguess = $userguessunvalidated;
+    $userguess = $userguessunvalidated;
 
     ++$totalguesses;
 

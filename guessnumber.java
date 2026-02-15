@@ -66,11 +66,11 @@ public class guessnumber {
                 System.out.println("That guess was lower than a previous guess that was too low. Pay attention!\n");
             }
             if (userguess > highmax) {
-                System.out.println("TWake up! That guess was higher than an earlier guess that was too high.\n");
+                System.out.println("Wake up! That guess was higher than an earlier guess that was too high.\n");
             }
 
             // evaluate the guess
-            if (userguess < min || userguess > max) {
+            if (userguess < lowmax || userguess > highmax) {
                 System.out.println("Invalid! Please enter a whole number between 1 and 100: ");
             } else if (userguess < secretnumber) {
                 System.out.println("Your guess is too low.\n");

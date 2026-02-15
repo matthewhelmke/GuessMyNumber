@@ -1,0 +1,60 @@
+Welcome to Guess My Number!
+
+The computer will select a random whole number between 1 and 100.
+
+Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.
+
+Here we go!
+
+
+What is your guess? Your guess is too low.
+
+The computer guessed 50 and that was too low.
+
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+The computer guessed 75 and that was too high.
+
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+The computer guessed 62 and that was too low.
+
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+The computer guessed 68 and that was too high.
+
+
+
+This is a hard number, isn't it?
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+The computer guessed 65 and that was too high.
+
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+The computer guessed 63 and that was too low.
+
+
+
+Wow! You are really bad at this.
+
+What is your guess? That guess was lower than a previous guess that was too low. Pay attention!
+
+Invalid! Please enter a whole number between 1 and 100: 
+
+*********************************************
+   The computer's guess of 64 is correct!
+   It took 14  total guesses.
+*********************************************
+
+
