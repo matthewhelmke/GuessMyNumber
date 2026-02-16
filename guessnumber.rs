@@ -11,11 +11,36 @@
  *
  * This Rust version is a direct behavioral port of the Python, Bash, C,
  * Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
- * To build and run, use Cargo or `rustc` for a quick run.
+ * I used ChatGPT in the creation of this port, but then edited it further
+ * myself.
+ *
+ * Because Rust is newer and I had to learn, I'm including the following
+ * to make it easier for others in the same boat to try this out.
+ *
+ * To build and run, use Cargo.
+ *
+ * If you don't have Rust installed, use the official Rust installer:
+ *
+ * $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+ *
+ * You may need to run `source $HOME/.cargo.env` for the automated changes
+ * to your $PATH to take effect.
+ *
+ * Then, from the directory where this file is located, compile the source
+ * code with Cargo:
+ *
+ * $ cargo new guessnumber
+ *
+ * This created a new directory to house a new project called `guessnumber`.
+ * In the new directory, replace the contents of the `src/main.rs` file with
+ * the content of this file. Then, run:
+ *
+ * $ cargo run
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License.
  */
+
 use std::io::{self, Write};
 use std::process::exit;
 use std::time::{SystemTime, UNIX_EPOCH};
