@@ -7,7 +7,9 @@
 60 REM
 70 REM Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 80 REM Copyright (c) 2026 Matthew Helmke for the BASIC version (this one)
-90 REM
+85 REM I used GitHub Copilot, which at this moment used Grok Code Fast 1, in the
+90 REM creation of this port, but then edited it further myself.
+95 REM
 100 REM To run (with PC-BASIC):
 110 REM   pcbasic guessnumber.bas
 120 REM
