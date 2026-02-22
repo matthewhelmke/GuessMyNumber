@@ -93,7 +93,7 @@ Rust and R get notes not because they are special, but because they required *do
 
 ### COBOL
 
-I'm still learning about data types in GnuCOBOL and have been struggling with user input validation. I have fixed some of the issue by using a new data type for USERGUESS, but am still working on how to validate that user input is an integer.
+GnuCOBOL gave me fits with user input validation. I had to spend some time researching and trying out a bunch of things. It was also a bit of a bear about data types and wanting to display leadiing zeroes. Read the code to see how I made that work like all the other implementations.
 
 ### R
 
