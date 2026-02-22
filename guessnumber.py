@@ -48,7 +48,7 @@ secretnumber = random.randrange(100) + 1
 # set all our initial values
 userguess = 0
 totalguesses = 0
-lowmax = 0
+lowmax = 1
 highmax = 100
 
 # the main bit
@@ -56,6 +56,8 @@ while True:
 
     # let the user input any number they want
     userguessunvalidated = input("What is your guess? ")
+
+    totalguesses += 1
 
     # remove leading and trailing spaces
     userguessunvalidated = str.strip(userguessunvalidated)
@@ -78,8 +80,6 @@ while True:
             "That guess was lower than a previous guess that was too low. Pay attention!\n")
     if (userguess > highmax):
         print("Wake up! That guess was higher than an earlier guess that was too high.\n")
-
-    totalguesses += 1
 
     # evaluate the guess
     if (userguess > secretnumber):
@@ -137,7 +137,6 @@ while True:
         print("\nWow! You are really bad at this.\n")
 
     if (totalguesses >= 16):
-        print("\nYou're taking too long, I can't handle it any more.\n\n")
-        print("G A M E   O V E R\n")
+        print("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
         input("\n\nPress the enter key to exit.\n")
         break

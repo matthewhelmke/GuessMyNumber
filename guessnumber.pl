@@ -72,6 +72,7 @@ while ( $userguess != $secretnumber ) {
     my $userguessunvalidated;
     while (1) {
         print "What is your guess? ";
+        ++totalguesses;
         my $input = <STDIN>;
         # Handle EOF - exit gracefully
         if (!defined $input) {
@@ -89,8 +90,6 @@ while ( $userguess != $secretnumber ) {
     }
 
     $userguess = $userguessunvalidated;
-
-    ++$totalguesses;
 
     # some taunts for silly errors in user guesses
     if ( $userguess < $lowmax ) {
@@ -156,8 +155,7 @@ while ( $userguess != $secretnumber ) {
     }
 
     if ( $totalguesses >= 16 ) {
-        print "\nYou're taking too long, I can't handle it any more.\n\n";
-        print "G A M E   O V E R\n";
+        print "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
         exit;
     }
 

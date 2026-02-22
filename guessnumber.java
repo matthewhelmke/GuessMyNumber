@@ -46,12 +46,13 @@ public class guessnumber {
 
             // Print a description of the game, with rules, to the screen
 
-            System.out.println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n");
+            System.out.println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in as\nfew turns as possible.\n\nHere we go!\n\n");
 
             // let the user input any number they want, then check if an integer between 1-100
 
             while (!guessedcorrectly) {
                 System.out.print("What is your guess? ");
+                totalguesses++;
                 if (!scanner.hasNextInt()) {
                     System.out.println("Please enter a valid number.");
                     scanner.next(); // Discard invalid input
@@ -59,7 +60,6 @@ public class guessnumber {
                 }
 
                 userguess = scanner.nextInt();
-                totalguesses++;
 
                 // some taunts for silly errors in user guesses
                 if (userguess < lowmax) {
@@ -115,8 +115,7 @@ public class guessnumber {
                 }
 
                 if (totalguesses == 16) {
-                    System.out.println("\nYou're taking too long, I can't handle it any more.\n\n");
-                    System.out.println("G A M E   O V E R\n");
+                    System.out.println("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
                     return;
                 }
             }

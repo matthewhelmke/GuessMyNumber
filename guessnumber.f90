@@ -61,6 +61,8 @@ PROGRAM GuessMyNumber
     ! Player's turn
     PRINT *, "What is your guess? "
 
+    totalguesses = totalguesses + 1
+
     ! Verify the guess is an integer between 1 and 100
     DO
       READ(*, '(A)', iostat=iostat_val) input
@@ -87,8 +89,6 @@ PROGRAM GuessMyNumber
       PRINT *, "Wake up! That guess was higher than an earlier guess that was too high."
     END IF
 
-    totalguesses = totalguesses + 1
-
     ! Evaluate player guess against secretnumber
     IF (userguess < secretnumber) THEN
       PRINT *, "Too low!"
@@ -114,15 +114,14 @@ PROGRAM GuessMyNumber
 
     ! Computer's turn
     computerguess = (lowmax + highmax) / 2
-    PRINT *, "Computer guesses: ", computerguess
     totalguesses = totalguesses + 1
 
     ! Evaluate computer guess against secret
     IF (computerguess < secretnumber) THEN
-      PRINT *, "Computer: Too low!"
+      PRINT *, "The computer guessed", computerguess, "and that was too low."
       lowmax = computerguess + 1
     ELSE IF (computerguess > secretnumber) THEN
-      PRINT *, "Computer: Too high!"
+      PRINT *, "The computer guessed", computerguess, "and that was too high."
       highmax = computerguess - 1
     ELSE
       PRINT *, "*********************************************"
@@ -134,7 +133,7 @@ PROGRAM GuessMyNumber
 
     ! these taunts are for my amusement and to keep the game from being too long
     IF (totalguesses == 8) THEN
-      PRINT *, "Is this a hard number?"
+      PRINT *, "This is a hard number, isn't it?"
     ELSE IF (totalguesses == 12) THEN
       PRINT *, "Wow! You are really bad at this."
     ELSE IF (totalguesses >= 16) THEN

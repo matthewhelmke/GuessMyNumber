@@ -45,7 +45,7 @@ $secretnumber = rand(1, 100);
 $userguessunvalidated = 0;
 $userguess = 0;
 $totalguesses = 0;
-$lowmax = 0;
+$lowmax = 1;
 $highmax = 100;
 $won	 = false;
 $handle  = fopen('php://stdin', 'r');
@@ -60,6 +60,8 @@ function is_whole_number($var)
 // the main bit
 while (!$won) {
     echo 'What is your guess? ';
+
+    $totalguesses++;
 
     // let the user input any number they want
     $userguessunvalidated = trim(fgets($handle));
@@ -81,8 +83,6 @@ while (!$won) {
         }
 
         $userguess = $userguessunvalidated;
-
-        $totalguesses++;
 
         // some taunts for silly errors in user guesses
         if ($userguess < $lowmax) {
@@ -131,8 +131,7 @@ while (!$won) {
         }
 
         if ($totalguesses >= 16) {
-            echo "\nYou're taking too long, I can't handle it any more.\n\n";
-            echo "G A M E   O V E R\n";
+            echo "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
             exit;
         }
 
