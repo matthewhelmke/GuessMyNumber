@@ -47,8 +47,8 @@ Here we go!\n\n")
 (define (inquire-user secretnumber)
   (printf "What is your guess? ")
   (define userguess (string->number (read-line)))
-  ; Validate userguess against multiple criteria
   (set! totalguesses (add1 totalguesses))
+  ; Validate userguess against multiple criteria
   (cond [(not (integer? userguess)) (printf "Only whole numbers from 1 to 100 are allowed. Please try again. ") (inquire-user secretnumber)]
         [(< userguess 1) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
         [(> userguess 100) (printf "Only whole numbers from 1 to 100 are allowed.  Your guess is out of range. Please try again. ") (inquire-user secretnumber)]
@@ -67,7 +67,7 @@ Here we go!\n\n")
   ; Taunts based on taking a long time to guess correctly
   (cond [(= totalguesses 8) (printf "\nThis is a hard number, isn't it?\n")]
         [(= totalguesses 12) (printf "\nWow! You are really bad at this.\n")]
-        [(= totalguesses 16) (printf "\nYou're taking too long, I can't handle it any more.\nG A M E   O V E R\n") (exit)])
+        [(= totalguesses 16) (printf "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n") (exit)])
   
   (inquire-user secretnumber))
 

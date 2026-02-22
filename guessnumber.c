@@ -41,7 +41,7 @@ main()
         char characters;
         int userguess;
         int totalguesses = 0;
-        int lowmax = 0;
+        int lowmax = 1;
         int highmax = 100;
         int secretnumber;
         int guessrange;
@@ -64,6 +64,8 @@ main()
 
                 (void) fprintf(stdout, "What is your guess? ");
 
+                ++totalguesses;
+
                 // let the user input any number they want, then check if an integer between 1-100
                 int c;
                 for(;;) {
@@ -75,8 +77,6 @@ main()
                 }
 
                 (userguess=userguessunvalidated);
-
-                ++totalguesses;
 
                 // some taunts for silly errors in user guesses
                 if (userguess < lowmax)
@@ -136,8 +136,7 @@ main()
                         (void) fprintf(stdout, "\nWow! You are really bad at this.\n");
 
                 if (totalguesses == 16) {
-                        (void) fprintf(stdout, "\nYou're taking too long, I can't handle it any more.\n\n");
-                        (void) fprintf(stdout, "G A M E   O V E R\n");
+                        (void) fprintf(stdout, "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
                         exit(0);
                 }
 

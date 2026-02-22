@@ -64,7 +64,9 @@ highmax <- 100
 repeat {
 
   ## ----- User guess -----
-  guess_input <- read_input("Your guess: ")
+  guess_input <- read_input("What is your guess? ")
+
+  totalguesses <- totalguesses + 1
 
   if (is.na(guess_input)) {
     cat("\nNo input detected. Exiting.\n")
@@ -97,9 +99,7 @@ repeat {
     next
   }
 
-  totalguesses <- totalguesses + 1
-
-  ## taunts for guesses outside of established limits
+   ## taunts for guesses outside of established limits
   if (userguess < lowmax) {
     cat("That guess was lower than a previous guess that was too low. Pay attention!\n")
   }
@@ -136,16 +136,13 @@ repeat {
   }
 
   if (totalguesses >= 16) {
-    cat("\nYou're taking too long, I can't handle it any more.\n")
-    cat("G A M E   O V E R\n")
+    cat("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
     quit(save = "no")
   }
 
   ## ----- Computer guess -----
   computerguess <- as.integer((lowmax + highmax) / 2)
   totalguesses <- totalguesses + 1
-
-  cat(sprintf("The computer guesses %d.\n", computerguess))
 
   if (computerguess == secretnumber) {
     cat("\n*********************************************\n")
@@ -154,12 +151,12 @@ repeat {
     cat("*********************************************\n\n")
     break
   } else if (computerguess < secretnumber) {
-    cat("Too low.\n\n")
+    cat("The computer guessed", computerguess, "and that was too low.\n\n")
     if (computerguess >= lowmax) {
       lowmax <- computerguess + 1
     }
   } else {
-    cat("Too high.\n\n")
+    cat("The computer guessed", computerguess, "and that was too high.\n\n")
     if (computerguess <= highmax) {
       highmax <- computerguess - 1
     }

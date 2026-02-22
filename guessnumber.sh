@@ -44,7 +44,7 @@ declare -i secretnumber
 declare userguessunvalidated
 declare -i userguess
 declare -i totalguesses=0
-declare -i lowmax=0
+declare -i lowmax=1
 declare -i highmax=100
 declare -i guessrange
 declare -i computerguess
@@ -59,12 +59,12 @@ do
     while :; do
       # let the user input any number they want
       read -p "What is your guess? " userguessunvalidated
+      ((totalguesses=totalguesses+1))
       # verify the guess is an integer
       [[ $userguessunvalidated =~ ^[0-9]+$ ]] || { echo "Only whole numbers from 1 to 100 are allowed. Please try again."; continue; }
 
       # verify guess is between 1 and 100
       if ((userguessunvalidated >= 1 && userguessunvalidated <= 100)); then
-        ((totalguesses=totalguesses+1))
         break
       else
         echo "Only whole numbers from 1 to 100 are allowed. Your guess is out of range. Try again. "
@@ -146,7 +146,7 @@ do
 
       # these taunts are just for my amusement and to keep the game from being too terribly long
       if (( totalguesses == 8 )); then
-          echo -e "Is this a hard number?"
+          echo -e "This is a hard number, isn't it?"
         fi
 
       if (( totalguesses == 12 )); then
@@ -154,8 +154,7 @@ do
       fi
 
       if (( totalguesses >= 16 )); then
-          echo -e "This is taking too long."
-          echo -e "G A M E   O V E R"
+          echo -e "You're taking too long, I can't handle it any more.\n\nG A M E   O V E R"
         fi
 
 done

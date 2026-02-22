@@ -45,8 +45,7 @@ function getRandomComputerTaunt() {
 async function main() {
   // Print a description of the game, with rules, to the screen
   console.log("Welcome to Guess My Number!\n");
-  console.log("The computer will select a random whole number between 1 and 100.");
-  console.log("Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n");
+  console.log("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
   console.log("Here we go!\n");
 
   const secretnumber = Math.floor(Math.random() * 100) + 1;
@@ -60,6 +59,8 @@ async function main() {
   while (userguess !== secretnumber) {
     let input = await askQuestion("What is your guess? ");
 
+    totalguesses++;
+
     // Drop anything after a decimal point to make their guess an integer
     userguess = parseInt(input, 10);
 
@@ -70,8 +71,6 @@ async function main() {
     }
 
     console.log(`You guessed ${userguess}.`);
-
-    totalguesses++;
 
     // Evaluations and some taunts for silly errors in user guesses
     if (userguess < secretnumber) {
@@ -101,7 +100,7 @@ async function main() {
     } else if (totalguesses === 12) {
       console.log("Wow! You are really bad at this.");
     } else if (totalguesses === 16) {
-      console.log("You're taking too long, I can't handle it any more. G A M E   O V E R");
+      console.log("You're taking too long, I can't handle it any more.\n\nG A M E   O V E R");
       return process.exit(1);
     }
 

@@ -43,15 +43,14 @@
  DATA DIVISION.
  WORKING-STORAGE SECTION.
     *> Define variables
-    01 USERGUESS PIC 999 usage comp-6. *> unsigned (positive) packed decimal
-                                       *> defined by the number of 9s
-    01 COMPUTERGUESS PIC 999 usage comp-6.
-    01 SECRETNUMBER PIC 999 usage comp-6.
-    01 GUESSRANGE PIC 999 usage comp-6.
-    01 TOTALGUESSES PIC 99 usage comp-6.
-    01 LOWMAX PIC 99 usage comp-6.
-    01 HIGHMAX PIC 999 usage comp-6.
-    01 SEED PIC 999999999 usage comp-6.
+    01 USERGUESS PIC S9(3) usage comp-3. *> signed packed decimal allows for negative values, which we will use to detect non-numeric input, which is converted to 0 by comp-3, and then made negative by the signed part of the data type. This allows us to reject non-numeric input with a specific error message about non-numeric input, rather than just rejecting it as an out-of-range guess.
+    01 COMPUTERGUESS PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+    01 SECRETNUMBER PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+    01 GUESSRANGE PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+    01 TOTALGUESSES PIC 99 usage comp-6. *> unsigned (positive) packed decimal
+    01 LOWMAX PIC 99 usage comp-6. *> unsigned (positive) packed decimal
+    01 HIGHMAX PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+    01 SEED PIC 999999999 usage comp-6. *> unsigned (positive) packed decimal
     01 PSEUDO-RANDOM-NUMBER usage comp-1. *> float-short
 
 *> ***************************************************************
@@ -59,7 +58,7 @@
  PROCEDURE DIVISION.
     *> Assign values to some variables
     COMPUTE TOTALGUESSES = 0.
-    COMPUTE LOWMAX = 0.
+    COMPUTE LOWMAX = 1.
     COMPUTE HIGHMAX = 100.
     MOVE FUNCTION CURRENT-DATE(1:16) to SEED.
     *> FUNCTION RANDOM is pseudo-random, not true random, but good enough
@@ -76,8 +75,7 @@
     DISPLAY "Your goal is to guess that number. You will get a turn, then a computer".
     DISPLAY "player will get a turn. Each of you are aware of the other's guesses.".
     DISPLAY "The first one to guess the number correctly will win. Try to guess in".
-    DISPLAY "as few turns as possible. NOTE: Negative numbers are automatically".
-    DISPLAY "changed to positive before being evaluated."
+    DISPLAY "as few turns as possible.".
     DISPLAY " ".
     DISPLAY "Here we go!".
     DISPLAY " ".
@@ -90,8 +88,6 @@
 
     ADD 1 TO TOTALGUESSES.
 
-    DISPLAY "User guessed: " USERGUESS.
-
     *> ***********************************************************
     *> Input validation section
     *> ***********************************************************
@@ -103,10 +99,6 @@
       DISPLAY "Guesses must be integers between 1 and 100."
       GO To ENTERUSERGUESS
       END-IF.
-
-    *> Because of the data type used for USERGUESS, we don't need a check to
-    *> make sure the guess is positive...negative values are made positive
-    *> with comp-6.
 
     *> Missing a working check or checks to see if input is an integer
 
@@ -138,7 +130,9 @@
       END-IF.
 
     IF TOTALGUESSES = 16
-      DISPLAY "You're taking too long, I can't handle it any more. GAME OVER."
+      DISPLAY "You're taking too long, I can't handle it any more."
+      DISPLAY " "
+      DISPLAY "G A M E  O V E R"
       STOP RUN
       END-IF.
 
@@ -161,7 +155,7 @@
     *> ***********************************************************
 
     IF USERGUESS > SECRETNUMBER
-      DISPLAY "Your guess is too high! Guess again."
+      DISPLAY "Your guess is too high."
       IF USERGUESS <= HIGHMAX
         *> make highmax equal userguess minus one
         COMPUTE HIGHMAX = USERGUESS - 1
@@ -170,7 +164,7 @@
       END-IF.
 
     IF USERGUESS < SECRETNUMBER
-      DISPLAY "Your guess is too low! Guess again."
+      DISPLAY "Your guess is too low."
       *> make lowmax equal userguess plus one
       COMPUTE LOWMAX = USERGUESS + 1
       GO TO CALCULATECOMPUTERGUESS

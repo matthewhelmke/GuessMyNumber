@@ -48,7 +48,7 @@ userguessunvalidated = 0
 userguess = 1
 computerguess = 0
 totalguesses = 0
-lowmax = 0
+lowmax = 1
 highmax = 100
 gameover = 0
 
@@ -146,8 +146,7 @@ while gameover == 0
     end
     if totalguesses == 16
         puts " "
-        puts "You're taking too long, I can't handle it any more."
-        puts "G A M E   O V E R"
+        puts "You're taking too long, I can't handle it any more.\n\nG A M E   O V E R"
         gameover =1
     end
 

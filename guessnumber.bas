@@ -53,10 +53,10 @@
 440 REM Main game loop
 450 INPUT "What is your guess"; USERGUESS
 
+455 LET TOTALGUESSES = TOTALGUESSES + 1
+
 460 REM Validate input is numeric and in range
 470 IF USERGUESS < 1 OR USERGUESS > 100 THEN PRINT "Only whole numbers from 1 to 100 are allowed.": PRINT "Please try again.": GOTO 450
-
-530 LET TOTALGUESSES = TOTALGUESSES + 1
 
 540 REM Check for silly errors
 550 IF USERGUESS < LOWMAX THEN PRINT "That guess was lower than a previous guess that was too low. Pay attention!"
@@ -76,11 +76,9 @@
 770 LET COMPUTERGUESSES = INT((LOWMAX + HIGHMAX) / 2)
 780 LET TOTALGUESSES = TOTALGUESSES + 1
 
-790 PRINT "The computer guessed"; COMPUTERGUESSES
-
 800 REM Evaluate computer guess
-810 IF COMPUTERGUESSES < SECRETNUMBER THEN PRINT "The computer's guess is too low.": LET LOWMAX = COMPUTERGUESSES + 1: GOTO 950
-820 IF COMPUTERGUESSES > SECRETNUMBER THEN PRINT "The computer's guess is too high.": LET HIGHMAX = COMPUTERGUESSES - 1: GOTO 950
+810 IF COMPUTERGUESSES < SECRETNUMBER THEN PRINT "The computer guessed"; COMPUTERGUESSES; "and that was too low.": LET LOWMAX = COMPUTERGUESSES + 1: GOTO 950
+820 IF COMPUTERGUESSES > SECRETNUMBER THEN PRINT "The computer guessed"; COMPUTERGUESSES; "and that was too high.": LET HIGHMAX = COMPUTERGUESSES - 1: GOTO 950
 830 PRINT
 840 PRINT "*********************************************"
 850 PRINT "   The computer's guess of"; COMPUTERGUESSES; "is correct!"
@@ -89,7 +87,7 @@
 880 END
 
 950 REM Taunts
-960 IF TOTALGUESSES = 8 THEN PRINT : PRINT "Is this a hard number?"
+960 IF TOTALGUESSES = 8 THEN PRINT : PRINT "This is a hard number, isn't it?"
 970 IF TOTALGUESSES = 12 THEN PRINT : PRINT "Wow! You are really bad at this."
 980 IF TOTALGUESSES >= 16 THEN PRINT : PRINT "You're taking too long, I can't handle it any more.": PRINT : PRINT "G A M E   O V E R": END
 

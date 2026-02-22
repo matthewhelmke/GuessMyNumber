@@ -39,19 +39,19 @@ import System.Exit (exitSuccess)
 main :: IO ()
 main = do
   putStrLn "Welcome to Guess My Number!\n"
-  putStrLn "The computer will select a random whole number between 1 and 100."
-  putStrLn "Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n"
+  putStrLn "The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n"
   putStrLn "Here we go!\n"
 
   secretnumber <- randomRIO (1,100) :: IO Int
 
-  -- Start with shared bounds: lowmax=0 (no lower bound yet), highmax=100
-  gameLoop secretnumber 0 0 100
+  -- Start with shared bounds: lowmax=1 (no lower bound yet), highmax=100
+  gameLoop secretnumber 1 1 100
 
 gameLoop :: Int -> Int -> Int -> Int -> IO ()
 gameLoop secretnumber totalguesses lowmax highmax = do
   putStr "What is your guess? "
   userguessunvalidated <- getLine
+  let totalguesses' = totalguesses + 1
   case readMaybe userguessunvalidated :: Maybe Int of
     Nothing -> do
       putStrLn "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n"
@@ -67,8 +67,6 @@ gameLoop secretnumber totalguesses lowmax highmax = do
             putStrLn "That guess was lower than a previous guess that was too low. Pay attention!"
           when (userguess > highmax) $
             putStrLn "Wake up! That guess was higher than an earlier guess that was too high."
-
-          let totalguesses' = totalguesses + 1
 
           -- evaluate user's guess
           if userguess == secretnumber
@@ -136,8 +134,7 @@ gameLoop secretnumber totalguesses lowmax highmax = do
                   when (totalguesses'' == 8) $ putStrLn "\nThis is a hard number, isn't it?\n"
                   when (totalguesses'' == 12) $ putStrLn "\nWow! You are really bad at this.\n"
                   when (totalguesses'' >= 16) $ do
-                    putStrLn "\nYou're taking too long, I can't handle it any more.\n\n"
-                    putStrLn "G A M E   O V E R\n"
+                    putStrLn "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n"
                     putStrLn "Press Enter to exit."
                     _ <- getLine
                     exitSuccess

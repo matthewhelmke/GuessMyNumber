@@ -89,6 +89,10 @@ Each version lives as a self-contained program and can be run independently usin
 
 Rust and R get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
 
+### COBOL
+
+I'm still learning about data types in GnuCOBOL and have been struggling with user input validation. I have fixed some of the issue by using a new data type for USERGUESS, but am still working on how to validate that user input is an integer.
+
 ### R
 
 R is primarily known as a statistical and data-analysis language, not as a platform for interactive terminal programs. Nevertheless, it is fully capable of expressing this game.
