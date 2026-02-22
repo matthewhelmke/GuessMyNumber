@@ -58,11 +58,15 @@
 <h1>Guess My Number</h1>
 <div id="game">
   <!--Print a description of the game, with rules, to the screen-->
-  <p>Welcome to Guess My Number!</p>
-  <p>The computer has selected a random number between 1 and 100.</p>
-  <p>Take turns guessing. The first one to get it wins!</p>
-  <p>Non-integers will be converted to integers by truncating at the decimal.</p>
-  <p>What is your guess?</p>
+  <p>Welcome to Guess My Number!<br><br>
+  The computer has selected a random whole number between 1 and 100.<br>
+  TYour goal is to guess that number. You will get a turn, then a computer<br>
+  player will get a turn. Each of you are aware of the other's guesses.<br>
+  The first one to guess the number correctly will win. Try to guess in<br>
+  as few turns as possible.<br><br>Here we go!<br><br>
+  What is your guess?</p>
+
+  totalguesses++;
 
   <!--Only allow numbers to be input between 1 and 100 by steps of whole numbers -->
   <input id="userGuess" type="number" min="1" max="100" step="1" />
@@ -96,8 +100,6 @@
 
     taunt.textContent = `You guessed ${userguess}.`;
 
-    totalguesses++;
-
     // Responses and some taunts for silly errors in user guesses
     if (userguess < secretnumber) {
       userFeedback.textContent = "Your guess is too low.";
@@ -122,7 +124,7 @@
     } else if (totalguesses === 12) {
       taunt.textContent = "Wow! You are really bad at this.";
     } else if (totalguesses === 16) {
-      taunt.textContent = "You're taking too long. \n G A M E   O V E R.";
+      taunt.textContent = "You're taking too long.\n\n G A M E   O V E R";
       document.getElementById('game').classList.add('');
       return;
     }

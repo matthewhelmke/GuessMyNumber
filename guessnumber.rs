@@ -53,7 +53,7 @@ fn read_line() -> String {
 
 fn main() {
     println!("\nWelcome to Guess My Number!\n");
-    println!("The computer will select a random whole number between 1 and 100. Your goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n");
+    println!("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
     println!("Here we go!\n");
 
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
@@ -64,7 +64,8 @@ fn main() {
     let mut highmax: i32 = 100;
 
     loop {
-        print!("Your guess: ");
+        print!("What is your guess? ");
+        totalguesses += 1;
         io::stdout().flush().unwrap();
 
         let guess_input = read_line();
@@ -80,8 +81,6 @@ fn main() {
             println!("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
             continue;
         }
-
-        totalguesses += 1;
 
         if userguess < lowmax {
             println!("That guess was lower than a previous guess that was too low. Pay attention!");
@@ -115,14 +114,12 @@ fn main() {
             println!("\nWow! You are really bad at this.\n");
         }
         if totalguesses >= 16 {
-            println!("\nYou're taking too long, I can't handle it any more.\n");
-            println!("G A M E   O V E R");
+            println!("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R");
             exit(0);
         }
 
         let computerguess = (lowmax + highmax) / 2;
         totalguesses += 1;
-        println!("The computer guesses {}.", computerguess);
 
         if computerguess == secretnumber {
             println!("\n*********************************************");
@@ -131,12 +128,12 @@ fn main() {
             println!("*********************************************\n");
             break;
         } else if computerguess < secretnumber {
-            println!("Too low.\n");
+            println!("The computer guessed {} and that was too low.\n", computerguess);
             if computerguess >= lowmax {
                 lowmax = computerguess + 1;
             }
         } else {
-            println!("Too high.\n");
+            println!("The computer guessed {} and that was too high.\n", computerguess);
             if computerguess <= highmax {
                 highmax = computerguess - 1;
             }
