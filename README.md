@@ -24,6 +24,8 @@ In February 15, 2026, I used GitHub Copilot, which at this moment used `Claude H
 
 The test report was updated on February 21, 2026 at the same time as the addition of the BASIC implementation, written with the assistance of GitHub Copilot using `Grok Code Fast 1`.
 
+On February 22, 2025 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details.
+
 
 ## Game rules (behavioral contract)
 
@@ -91,7 +93,7 @@ Rust and R get notes not because they are special, but because they required *do
 
 ### COBOL
 
-I'm still learning about data types in GnuCOBOL and have been struggling with user input validation. I have fixed some of the issue by using a new data type for USERGUESS, but am still working on how to validate that user input is an integer.
+GnuCOBOL gave me fits with user input validation. I had to spend some time researching and trying out a bunch of things. It was also a bit of a bear about data types and wanting to display leadiing zeroes. Read the code to see how I made that work like all the other implementations.
 
 ### R
 

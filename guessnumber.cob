@@ -45,13 +45,17 @@
     *> Define variables
     01 USERGUESS PIC S9(3) usage comp-3. *> signed packed decimal allows for negative values, which we will use to detect non-numeric input, which is converted to 0 by comp-3, and then made negative by the signed part of the data type. This allows us to reject non-numeric input with a specific error message about non-numeric input, rather than just rejecting it as an out-of-range guess.
     01 COMPUTERGUESS PIC 999 usage comp-6. *> unsigned (positive) packed decimal
+    01 WS-COMPUTERGUESS-TRIMMED PIC ZZZ.
     01 SECRETNUMBER PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 GUESSRANGE PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 TOTALGUESSES PIC 99 usage comp-6. *> unsigned (positive) packed decimal
+    01 WS-TOTALGUESSES-TRIMMED PIC Z9.
     01 LOWMAX PIC 99 usage comp-6. *> unsigned (positive) packed decimal
     01 HIGHMAX PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 SEED PIC 999999999 usage comp-6. *> unsigned (positive) packed decimal
     01 PSEUDO-RANDOM-NUMBER usage comp-1. *> float-short
+    01 WS-USER-INPUT PIC X(10). *> raw line from the keyboard
+    01 WS-USER-GUESS PIC S9(3) COMP-3. *> guess converted to a number
 
 *> ***************************************************************
 
@@ -84,7 +88,7 @@
 
     DISPLAY "What is your guess?".
 
-    ACCEPT USERGUESS.
+    ACCEPT WS-USER-INPUT.
 
     ADD 1 TO TOTALGUESSES.
 
@@ -92,31 +96,25 @@
     *> Input validation section
     *> ***********************************************************
 
-    *> Non-numerics read as 0, so this checks for guesses like "F" or
-    *> "throw mamma from the train" and rejects them.
-    *> NO IDEA why "USERGUESS IS NOT NUMERIC" didn't work; glad this does.
-    IF USERGUESS = 0
-      DISPLAY "Guesses must be integers between 1 and 100."
-      GO To ENTERUSERGUESS
-      END-IF.
-
-    *> Missing a working check or checks to see if input is an integer
-
-    IF USERGUESS IS NEGATIVE
-      DISPLAY "Guesses must be integers between 1 and 100."
-      GO To ENTERUSERGUESS
-      END-IF.
-
-    IF USERGUESS > 100
-      DISPLAY "Guesses must be between 1 and 100."
+    IF FUNCTION TRIM (WS-USER-INPUT) IS NUMERIC *> I only got all this to work once I learned that this PIC X(10) added trailing spaces to the input, which caused the NUMERIC function to return false. TRIM removes those spaces and allows us to validate the input properly
+      MOVE FUNCTION NUMVAL (WS-USER-INPUT) TO WS-USER-GUESS
+    ELSE
+      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
       GO TO ENTERUSERGUESS
-      END-IF.
+    END-IF.
 
-    IF USERGUESS < 1
-      DISPLAY "Guesses must be between 1 and 100."
+    IF FUNCTION INTEGER (WS-USER-GUESS) NOT = WS-USER-GUESS
+      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
       GO TO ENTERUSERGUESS
-      END-IF.
+    END-IF.
 
+    IF WS-USER-GUESS < 1 OR WS-USER-GUESS >100
+      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
+      GO TO ENTERUSERGUESS
+    END-IF.
+
+    MOVE WS-USER-GUESS TO USERGUESS.
+  
     *> ***********************************************************
     *> Taunts for when it's taking too long
     *> ***********************************************************
@@ -171,20 +169,21 @@
       END-IF.
 
     IF USERGUESS = SECRETNUMBER
-      DISPLAY "Your guess is correct! Congratulations!!".
-      DISPLAY "Total guesses: " TOTALGUESSES.
+      MOVE TOTALGUESSES TO WS-TOTALGUESSES-TRIMMED
+      DISPLAY "*********************************************"
+      DISPLAY "Your guess is correct! Congratulations!!"
+      DISPLAY "It took " WS-TOTALGUESSES-TRIMMED " total guesses."
+      DISPLAY "********************************************"
       STOP RUN.
-
 
     CALCULATECOMPUTERGUESS.
       ADD 1 TO TOTALGUESSES.
       *> computer uses midpoint (binary search) within current reasonable values
       COMPUTE COMPUTERGUESS = (LOWMAX + HIGHMAX) / 2
-
-      DISPLAY "The computer guessed: " COMPUTERGUESS.
+      MOVE COMPUTERGUESS TO WS-COMPUTERGUESS-TRIMMED
 
       IF COMPUTERGUESS > SECRETNUMBER
-        DISPLAY "The computer's guess is too high."
+        DISPLAY "The computer's guessed " WS-COMPUTERGUESS-TRIMMED " and that was too high."
         DISPLAY " "
         IF COMPUTERGUESS <= HIGHMAX
           *> make highmax equal userguess minus one
@@ -195,7 +194,7 @@
         END-IF.
 
       IF COMPUTERGUESS < SECRETNUMBER
-        DISPLAY "The computer's guess is too low."
+        DISPLAY "The computer's guessed " WS-COMPUTERGUESS-TRIMMED " and that was too low."
         DISPLAY " "
         IF COMPUTERGUESS >= LOWMAX
           *> make lowmax equal userguess plus one
@@ -205,9 +204,11 @@
         GO TO ENTERUSERGUESS
         END-IF.
 
-      DISPLAY "The computer guessed correctly!".
-      DISPLAY " ".
-      DISPLAY "Total guesses: " TOTALGUESSES.
+      MOVE TOTALGUESSES TO WS-TOTALGUESSES-TRIMMED
+      DISPLAY "*********************************************"
+      DISPLAY "The computer's guess of " WS-COMPUTERGUESS-TRIMMED " is correct!"
+      DISPLAY "It took " WS-TOTALGUESSES-TRIMMED " total guesses."
+      DISPLAY "********************************************"
       STOP RUN.
 
     STOP RUN.
