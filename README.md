@@ -10,12 +10,14 @@ I originally hand-wrote all of these myself.
 
 Starting in *late 2025*, I began working with various AI agents to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since this is just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of every language version where I have used AI to create that language variant, at least that has been my intent. 
 
-AI assistants that have helped with any code in this repo include:
+AI platforms that have helped with any code in this repo include:
 
-- ChatGPT
-- GitHub Copilot using:
+- [ChatGPT](https://chatgpt.com/)
+- [GitHub Copilot](https://github.com/features/copilot) using:
   - `Claude Haiku 4.5`
   - `Grok Code Fast 1`
+- [LocalAI](https://localai.io/) using:
+  - `gpt-oss-120b`
 
 
 My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
@@ -24,7 +26,7 @@ In February 15, 2026, I used GitHub Copilot, which at this moment used `Claude H
 
 The test report was updated on February 21, 2026 at the same time as the addition of the BASIC implementation, written with the assistance of GitHub Copilot using `Grok Code Fast 1`.
 
-On February 22, 2025 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details.
+On February 22, 2025 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details. The agent only found issues. I fixed them myself.
 
 
 ## Game rules (behavioral contract)
