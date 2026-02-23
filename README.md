@@ -93,10 +93,6 @@ Each version lives as a self-contained program and can be run independently usin
 
 Rust and R get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
 
-### COBOL
-
-GnuCOBOL gave me fits with user input validation. I had to spend some time researching and trying out a bunch of things. It was also a bit of a bear about data types and wanting to display leadiing zeroes. Read the code to see how I made that work like all the other implementations.
-
 ### R
 
 R is primarily known as a statistical and data-analysis language, not as a platform for interactive terminal programs. Nevertheless, it is fully capable of expressing this game.
@@ -146,7 +142,7 @@ If you want to add a new version:
 
 - Fork the repo and then submit a PR
 - Keep the rules identical
-- Preserve the style and quantityof the comments, but more are okay
+- Preserve the style and quantity of the comments; adding more is okay, but don't reduce the number of comments
 - Preserve the taunts and termination behavior
 - Favor clarity over cleverness
 - Document any language-specific quirks you had to work around
@@ -164,5 +160,5 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 ### Future ideas/plans
 
-Dunno. Maybe Erlang? Forth? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
+Dunno. Maybe Kotlin? Erlang? Forth? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
 
