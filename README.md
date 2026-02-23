@@ -20,13 +20,13 @@ AI platforms that have helped with any code in this repo include:
   - `gpt-oss-120b`
 
 
-My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
-
 In February 15, 2026, I used GitHub Copilot, which at this moment used `Claude Haiku 4.5`, to do some long-deferred maintenance. I always intended to use the same variable names across all files and, at least as much as possible, the same game logic. But, I had let some inconsistencies creep in and it got worse over time as I didn't always use the same existing language version as my template while creating a new language implementation. I thought it would be a useful test of AI effectiveness while accomplishing something I wanted, so I collaborated with the AI agent to standardize and test every current implementation and generated a [Test Report here](./TEST_REPORT.md). I'm deeply impressed today!
 
 The test report was updated on February 21, 2026 at the same time as the addition of the BASIC implementation, written with the assistance of GitHub Copilot using `Grok Code Fast 1`.
 
-On February 22, 2025 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details. The agent only found issues. I fixed them myself.
+On February 22, 2026 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details. The agent only found issues. I fixed them myself.
+
+My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
 
 
 ## Game rules (behavioral contract)
