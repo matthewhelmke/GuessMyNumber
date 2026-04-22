@@ -18,6 +18,8 @@ AI platforms that have helped with any code in this repo include:
   - `Grok Code Fast 1`
 - [LocalAI](https://localai.io/) using:
   - `gpt-oss-120b`
+- [Claude Code](https://claude.ai/code) using:
+  - `Claude Sonnet 4.6`
 
 
 In February 15, 2026, I used GitHub Copilot, which at this moment used `Claude Haiku 4.5`, to do some long-deferred maintenance. I always intended to use the same variable names across all files and, at least as much as possible, the same game logic. But, I had let some inconsistencies creep in and it got worse over time as I didn't always use the same existing language version as my template while creating a new language implementation. I thought it would be a useful test of AI effectiveness while accomplishing something I wanted, so I collaborated with the AI agent to standardize and test every current implementation and generated a [Test Report here](./TEST_REPORT.md). I'm deeply impressed today!
@@ -72,6 +74,7 @@ The same game is currently implemented in the following languages:
 - BASIC                                                 (`guessnumber.bas`)
 - C                                                     (`guessnumber.c`)
 - COBOL                                                 (`guessnumber.cob`)
+- Forth using Gforth                                    (`guessnumber.fth`)
 - Fortran                                               (`guessnumber.f90`)
 - Go                                                    (`guessnumber.go`)
 - Java                                                  (`guessnumber.java`)
@@ -89,9 +92,27 @@ The same game is currently implemented in the following languages:
 Each version lives as a self-contained program and can be run independently using the tooling idiomatic to that language. See the comments at the start of each file for language-specific details.
 
 
+## Variable naming convention
+
+All implementations use the same variable names wherever the concept appears, to make side-by-side comparison easier, especially for students.
+
+| Variable | Purpose |
+|---|---|
+| `secretnumber` | the randomly chosen target number |
+| `userguess` | the user's validated guess |
+| `userguessunvalidated` | raw user input before validation |
+| `totalguesses` | shared counter, incremented for every guess (user or computer) |
+| `lowmax` | current lower bound (starts at 1) |
+| `highmax` | current upper bound (starts at 100) |
+| `guessrange` | `highmax - lowmax` (guards against a zero-range edge case) |
+| `computerguess` | the computer's midpoint calculation |
+
+Some languages express these differently — Forth, for example, uses named memory locations rather than typed variables — but the names are preserved regardless.
+
+
 ## Extra notes on a couple of languages
 
-Rust and R get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+Forth, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
 
 ### R
 
@@ -106,6 +127,16 @@ When running under Rscript, `readline()` does not reliably block for user input 
 `readLines("stdin", n = 1)`
 
 wrapped in a small helper function to ensure correct blocking behavior, EOF detection, and portability. This choice is deliberate and documented in the source to save future readers from rediscovering the issue.
+
+
+### Forth (Gforth)
+
+Standard ANS Forth has no built-in random number facility. The Forth version targets **Gforth** (GNU Forth) and uses two Gforth-specific features not present in all Forth systems:
+
+- `require random.fs` loads Gforth's bundled linear congruential RNG, which provides the `random` word (`n -- 0..n-1`) and a `seed` variable.
+- `utime` returns the system clock as microseconds (a double-cell integer), used to seed the RNG at startup.
+
+These are Gforth-specific and not portable to other Forth systems without modification. This is documented in the source and noted here so it is not mistaken for standard ANS Forth. On most Linux systems Gforth is available via the package manager (`apt install gforth` on Debian/Ubuntu derivatives).
 
 
 ### Rust
@@ -160,5 +191,5 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 ### Future ideas/plans
 
-Dunno. Maybe Kotlin? Erlang? Forth? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
+Dunno. Maybe Kotlin? Erlang? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
 
