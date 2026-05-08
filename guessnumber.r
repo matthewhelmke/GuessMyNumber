@@ -28,12 +28,17 @@
 # modify it under the terms of the GNU General Public License.
 #
 
+# Open stdin once and reuse the connection. readLines("stdin", ...) opens a
+# fresh connection each call, which under Rscript reads only the first line
+# and then sees EOF on every subsequent call.
+.stdin_conn <- file("stdin", open = "r")
+
 read_input <- function(prompt = "") {
   cat(prompt)
   flush.console()
 
   line <- tryCatch(
-    readLines("stdin", n = 1),
+    readLines(.stdin_conn, n = 1),
     error = function(e) character(0)
   )
 
