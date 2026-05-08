@@ -10,7 +10,7 @@ I originally hand-wrote all of these myself.
 
 Starting in *late 2025*, I began working with various AI agents to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since this is just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of every language version where I have used AI to create that language variant, at least that has been my intent. 
 
-February 15, 2026 was when I furst used any AI, specifically GitHub Copilot, which at that moment used `Claude Haiku 4.5`. Together we did some long-deferred maintenance. Since then, AI platforms and models that have helped with any code or content in this repo include:
+February 15, 2026 was when I first used any AI, specifically GitHub Copilot, which at that moment used `Claude Haiku 4.5`. Together we did some long-deferred maintenance. Since then, AI platforms and models that have helped with any code or content in this repo include:
 
 - [ChatGPT](https://chatgpt.com/)
 - [GitHub Copilot](https://github.com/features/copilot) using:
