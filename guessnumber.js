@@ -34,8 +34,16 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-function askQuestion(query) {
-  return new Promise(resolve => rl.question(query, ans => resolve(ans)));
+// Use readline's async iterator instead of rl.question. With piped stdin the
+// readline interface can emit `close` before the next rl.question is queued,
+// leaving the Promise unresolved and stalling the game mid-loop. The iterator
+// drains buffered lines reliably and signals EOF via { done: true }.
+const lineIter = rl[Symbol.asyncIterator]();
+
+async function askQuestion(query) {
+  process.stdout.write(query);
+  const { value, done } = await lineIter.next();
+  return done ? null : value;
 }
 
 function getRandomComputerTaunt() {
@@ -59,6 +67,11 @@ async function main() {
   while (userguess !== secretnumber) {
     let input = await askQuestion("What is your guess? ");
 
+    if (input === null) {
+      console.log("\nEnd of input. Game Over.");
+      return process.exit(0);
+    }
+
     totalguesses++;
 
     // Drop anything after a decimal point to make their guess an integer
@@ -78,20 +91,20 @@ async function main() {
       if (userguess <= lowmax) {
         console.log("That guess was lower than a previous guess that was too low. Pay attention!");
       }
-      if (userguess > lowmax) {
-        lowmax = userguess;
+      if (userguess >= lowmax) {
+        lowmax = userguess + 1;
       }
     } else if (userguess > secretnumber) {
       console.log("Your guess is too high.");
       if (userguess >= highmax) {
         console.log("Wake up! That guess was higher than an earlier guess that was too high.");
       }
-      if (userguess < highmax) {
-        highmax = userguess;
+      if (userguess <= highmax) {
+        highmax = userguess - 1;
       }
     } else {
       console.log(`Your guess is correct! Congratulations! It took ${totalguesses} total guesses.\n`);
-      return process.exit(1);
+      return process.exit(0);
     }
 
     // Time-based taunts
@@ -101,7 +114,7 @@ async function main() {
       console.log("Wow! You are really bad at this.");
     } else if (totalguesses === 16) {
       console.log("You're taking too long, I can't handle it any more.\n\nG A M E   O V E R");
-      return process.exit(1);
+      return process.exit(0);
     }
 
   // Now computer guesses
@@ -112,13 +125,13 @@ async function main() {
         return;
     } else if (computerguess < secretnumber) {
         console.log(`The computer guessed ${computerguess} and that was too low.`);
-        if (computerguess > lowmax) lowmax = computerguess + 1;
+        if (computerguess >= lowmax) lowmax = computerguess + 1;
     } else if (computerguess > secretnumber) {
         console.log(`The computer guessed ${computerguess} and that was too high.`);
-        if (computerguess < highmax) highmax = computerguess - 1;
+        if (computerguess <= highmax) highmax = computerguess - 1;
     } else {
         console.log(`The computer's guess of ${computerguess} is correct! It took ${totalguesses} total guesses!`);
-        return process.exit(1);
+        return process.exit(0);
     }
   }
 }

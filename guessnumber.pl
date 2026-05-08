@@ -72,7 +72,7 @@ while ( $userguess != $secretnumber ) {
     my $userguessunvalidated;
     while (1) {
         print "What is your guess? ";
-        ++totalguesses;
+        ++$totalguesses;
         my $input = <STDIN>;
         # Handle EOF - exit gracefully
         if (!defined $input) {
