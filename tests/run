@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+# Run the test harness for one or all language implementations.
+#
+# Usage:
+#   ./tests/run             — run every language in the manifest
+#   ./tests/run python      — run a single language
+#   ./tests/run python js   — run a subset
+#
+# A full run (no args) regenerates TEST_REPORT.md at the repo root. Partial
+# runs print results to stdout but leave TEST_REPORT.md alone.
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TESTS_DIR="${REPO_ROOT}/tests"
+RESULTS_DIR="${TESTS_DIR}/results"
+STDIN_FIXTURE="${TESTS_DIR}/fixtures/stdin.txt"
+REPORT_FILE="${REPO_ROOT}/TEST_REPORT.md"
+
+# shellcheck source=tests/manifest.sh
+source "${TESTS_DIR}/manifest.sh"
+
+# Match against the last 20 lines of combined output.
+WIN_REGEX='Your guess is correct|computer.*is correct|G A M E   O V E R'
+TIMEOUT_SEC=30
+
+declare -A STATUS DETAIL DURATION_MS LINES
+
+mkdir -p "${RESULTS_DIR}"
+rm -f "${RESULTS_DIR}"/*.log
+
+cd "${REPO_ROOT}"
+
+run_one() {
+    local lang="$1"
+    local file="${FILE[$lang]:-}"
+    local skip="${SKIP[$lang]:-}"
+
+    if [[ -n "$skip" ]]; then
+        STATUS[$lang]="SKIP"
+        DETAIL[$lang]="$skip"
+        return
+    fi
+
+    if [[ ! -f "$file" ]]; then
+        STATUS[$lang]="FAIL_BUILD"
+        DETAIL[$lang]="source file not found: $file"
+        return
+    fi
+
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+    local out_path="${tmpdir}/${lang}"
+
+    if [[ -n "${COMPILE[$lang]:-}" ]]; then
+        local compile_cmd="${COMPILE[$lang]//%OUT%/$out_path}"
+        compile_cmd="${compile_cmd//%TMPDIR%/$tmpdir}"
+        if ! eval "$compile_cmd" > "${RESULTS_DIR}/${lang}.compile.log" 2>&1; then
+            STATUS[$lang]="FAIL_BUILD"
+            DETAIL[$lang]="compile failed; see results/${lang}.compile.log"
+            rm -rf "$tmpdir"
+            return
+        fi
+    fi
+
+    local run_cmd="${RUN[$lang]:-}"
+    if [[ -z "$run_cmd" ]]; then
+        STATUS[$lang]="FAIL_BUILD"
+        DETAIL[$lang]="no RUN command in manifest"
+        rm -rf "$tmpdir"
+        return
+    fi
+    run_cmd="${run_cmd//%OUT%/$out_path}"
+    run_cmd="${run_cmd//%TMPDIR%/$tmpdir}"
+
+    local stdin_data
+    stdin_data="$(cat "$STDIN_FIXTURE")"
+    if [[ -n "${STDIN_SUFFIX[$lang]:-}" ]]; then
+        stdin_data="${stdin_data}${STDIN_SUFFIX[$lang]}"
+    fi
+
+    local result_log="${RESULTS_DIR}/${lang}.log"
+    local start_ms end_ms rc
+    start_ms=$(date +%s%3N)
+    printf '%s' "$stdin_data" | timeout --kill-after=5 "$TIMEOUT_SEC" \
+        bash -c "$run_cmd" > "$result_log" 2>&1
+    rc=$?
+    end_ms=$(date +%s%3N)
+    DURATION_MS[$lang]=$((end_ms - start_ms))
+    LINES[$lang]=$(wc -l < "$result_log" | tr -d ' ')
+
+    rm -rf "$tmpdir"
+
+    if [[ $rc -eq 124 || $rc -eq 137 ]]; then
+        STATUS[$lang]="TIMEOUT"
+        DETAIL[$lang]="exceeded ${TIMEOUT_SEC}s"
+        return
+    fi
+
+    local matched=0
+    if tail -20 "$result_log" | grep -qE "$WIN_REGEX"; then
+        matched=1
+    fi
+
+    if [[ $matched -eq 1 && $rc -eq 0 ]]; then
+        STATUS[$lang]="PASS"
+        DETAIL[$lang]=""
+    elif [[ $matched -eq 1 ]]; then
+        STATUS[$lang]="WARN"
+        DETAIL[$lang]="matched termination but rc=$rc (likely EOF handling)"
+    else
+        STATUS[$lang]="FAIL"
+        DETAIL[$lang]="no termination pattern (rc=$rc)"
+    fi
+}
+
+format_status() {
+    case "$1" in
+        PASS)       printf 'PASS' ;;
+        WARN)       printf 'WARN' ;;
+        FAIL)       printf 'FAIL' ;;
+        FAIL_BUILD) printf 'FAIL (build)' ;;
+        TIMEOUT)    printf 'TIMEOUT' ;;
+        SKIP)       printf 'SKIP' ;;
+        *)          printf '%s' "$1" ;;
+    esac
+}
+
+if [[ $# -gt 0 ]]; then
+    TARGETS=("$@")
+    PARTIAL=1
+else
+    mapfile -t TARGETS < <(printf '%s\n' "${!LANGS[@]}" | sort)
+    PARTIAL=0
+fi
+
+printf 'Testing %d language(s)...\n\n' "${#TARGETS[@]}"
+for k in "${TARGETS[@]}"; do
+    if [[ -z "${LANGS[$k]:-}" ]]; then
+        printf '  %-10s NOT IN MANIFEST\n' "$k"
+        continue
+    fi
+    printf '  %-10s ' "$k"
+    run_one "$k"
+    s="${STATUS[$k]}"
+    case "$s" in
+        PASS)
+            printf '%s  (%dms, %d lines)\n' "$(format_status "$s")" \
+                "${DURATION_MS[$k]}" "${LINES[$k]}"
+            ;;
+        WARN|FAIL)
+            printf '%s  %s\n' "$(format_status "$s")" "${DETAIL[$k]}"
+            ;;
+        TIMEOUT|FAIL_BUILD|SKIP)
+            printf '%s  %s\n' "$(format_status "$s")" "${DETAIL[$k]}"
+            ;;
+    esac
+done
+
+if [[ $PARTIAL -eq 1 ]]; then
+    printf '\nPartial run — TEST_REPORT.md not regenerated.\n'
+    exit 0
+fi
+
+# Full-run report
+mapfile -t ALL < <(printf '%s\n' "${!LANGS[@]}" | sort)
+
+declare -A COUNT
+COUNT[PASS]=0
+COUNT[WARN]=0
+COUNT[FAIL]=0
+COUNT[FAIL_BUILD]=0
+COUNT[TIMEOUT]=0
+COUNT[SKIP]=0
+for k in "${ALL[@]}"; do
+    s="${STATUS[$k]:-FAIL}"
+    COUNT[$s]=$((${COUNT[$s]:-0} + 1))
+done
+
+{
+    echo "# Guess My Number — Test Report"
+    echo
+    echo "Generated $(date -u +'%Y-%m-%d %H:%M:%S UTC') by \`./tests/run\`."
+    echo
+    echo "Per-language commands live in \`tests/manifest.sh\`. Stdin fixture is 20"
+    echo "lines of \"50\" (\`tests/fixtures/stdin.txt\`). A run **passes** when the"
+    echo "captured output ends with one of \"Your guess is correct\", \"computer …"
+    echo "is correct\", or \"G A M E   O V E R\" **and** the process exits zero."
+    echo "A **warn** is the same termination pattern with a non-zero exit — typically"
+    echo "an EOF-handling bug that the binary-search convergence masks before stdin"
+    echo "runs out."
+    echo
+    echo "## Summary"
+    echo
+    printf '%d pass · %d warn · %d fail · %d fail-build · %d timeout · %d skip · **%d total**\n' \
+        "${COUNT[PASS]}" "${COUNT[WARN]}" "${COUNT[FAIL]}" \
+        "${COUNT[FAIL_BUILD]}" "${COUNT[TIMEOUT]}" "${COUNT[SKIP]}" \
+        "${#ALL[@]}"
+    echo
+    echo "| Language | Status | Duration | Output lines | Notes |"
+    echo "|---|---|---:|---:|---|"
+    for k in "${ALL[@]}"; do
+        s="${STATUS[$k]:-—}"
+        d="${DETAIL[$k]:-}"
+        ms="${DURATION_MS[$k]:-—}"
+        [[ "$ms" != "—" ]] && ms="${ms} ms"
+        ln="${LINES[$k]:-—}"
+        [[ "$s" == "SKIP" || "$s" == "FAIL_BUILD" ]] && { ms="—"; ln="—"; }
+        printf '| %s | %s | %s | %s | %s |\n' \
+            "${LANGS[$k]}" "$(format_status "$s")" "$ms" "$ln" "$d"
+    done
+    echo
+    echo "## Methodology"
+    echo
+    echo '```bash'
+    echo "printf '%s' \"\$(cat tests/fixtures/stdin.txt)\" | timeout 30s <runner>"
+    echo '```'
+    echo
+    echo "Per-language stdout+stderr captures are in \`tests/results/<lang>.log\`"
+    echo "(gitignored)."
+} > "$REPORT_FILE"
+
+printf '\nReport written to %s\n' "${REPORT_FILE#$REPO_ROOT/}"
+
+exit_code=0
+[[ ${COUNT[FAIL]} -gt 0 || ${COUNT[FAIL_BUILD]} -gt 0 || ${COUNT[TIMEOUT]} -gt 0 ]] && exit_code=1
+exit $exit_code
