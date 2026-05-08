@@ -10,7 +10,7 @@ I originally hand-wrote all of these myself.
 
 Starting in *late 2025*, I began working with various AI agents to assist, mostly because I wanted to test its capabilities and this seemed to be a pretty solid way to do so since this is just a fun project and not something vital to anyone or anything. I believe I have noted in the initial comment section of every language version where I have used AI to create that language variant, at least that has been my intent. 
 
-AI platforms that have helped with any code in this repo include:
+February 15, 2026 was when I furst used any AI, specifically GitHub Copilot, which at that moment used `Claude Haiku 4.5`. Together we did some long-deferred maintenance. Since then, AI platforms and models that have helped with any code or content in this repo include:
 
 - [ChatGPT](https://chatgpt.com/)
 - [GitHub Copilot](https://github.com/features/copilot) using:
@@ -20,15 +20,7 @@ AI platforms that have helped with any code in this repo include:
   - `gpt-oss-120b`
 - [Claude Code](https://claude.ai/code) using:
   - `Claude Sonnet 4.6`
-
-
-In February 15, 2026, I used GitHub Copilot, which at this moment used `Claude Haiku 4.5`, to do some long-deferred maintenance. I always intended to use the same variable names across all files and, at least as much as possible, the same game logic. But, I had let some inconsistencies creep in and it got worse over time as I didn't always use the same existing language version as my template while creating a new language implementation. I thought it would be a useful test of AI effectiveness while accomplishing something I wanted, so I collaborated with the AI agent to standardize and test every current implementation and generated a [Test Report here](./TEST_REPORT.md). I'm deeply impressed today!
-
-The test report was updated on February 21, 2026 at the same time as the addition of the BASIC implementation, written with the assistance of GitHub Copilot using `Grok Code Fast 1`.
-
-On February 22, 2026 I ran [LocalAI]() on my workstation using the `gpt-oss-120b` model to look across all of the various implementations in this repo and find inconsistencies that might impact the end user experience (not counting that some versions, like HTML and BASIC must be run in specific environments). It showed me some and I found a few more. See [Pull request #26](https://github.com/matthewhelmke/GuessMyNumber/pull/26) for details. The agent only found issues. I fixed them myself.
-
-My 2026 expansion of this README is intentional to help AI assistants as well as humans by providing some clarity up front.
+  - `Claude Opus 4.7`
 
 
 ## Game rules (behavioral contract)
@@ -158,6 +150,21 @@ It is about:
 In short: I'm just playing with a small problem, solved many ways, on purpose.
 
 
+## Test harness
+
+`./tests/run` runs every implementation on a 20-line stdin fixture (`yes 50 | head -n 20`), classifies each as `PASS` / `WARN` / `FAIL` / `TIMEOUT` / `FAIL_BUILD` / `SKIP`, and writes `TEST_REPORT.md` at the repo root.
+
+`./tests/run <lang>` runs a single language without touching the report.
+
+Per-language commands live in `tests/manifest.sh`.
+
+`tests/fixtures/stdin.txt` lists a set of inputs to be used (it's just a list of the number 50 repeated multiple times at the moment).
+
+Locally, `tests/results/` holds log files containing the captured stdout+stderr per run and is gitignored for GitHub. 
+
+BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
+
+
 ## License
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
@@ -190,6 +197,8 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 
 ### Future ideas/plans
+
+Write a test harness. DONE.
 
 Dunno. Maybe Kotlin? Erlang? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
 
