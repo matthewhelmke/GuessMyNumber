@@ -44,7 +44,6 @@ main()
         int lowmax = 1;
         int highmax = 100;
         int secretnumber;
-        int guessrange;
         int computerguess;
         char buffer[256];
         char name[256];
@@ -101,11 +100,6 @@ main()
                         (void) fprintf(stdout, "\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalguesses);
                         exit(0);
                 }
-
-                // this is to prevent trying to generate a random number from a range of 0
-                (guessrange = highmax - lowmax);
-                if (guessrange <=0)
-                        (guessrange = 1);
 
                 // the computer's guess uses the midpoint of the shared bounds (binary search)
                 computerguess = (lowmax + highmax) / 2;

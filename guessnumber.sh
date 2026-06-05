@@ -46,7 +46,6 @@ declare -i userguess
 declare -i totalguesses=0
 declare -i lowmax=1
 declare -i highmax=100
-declare -i guessrange
 declare -i computerguess
 
 # Get a random number
@@ -106,12 +105,6 @@ do
         echo -e "It took $totalguesses tries."
         echo -e "*********************************************"
         break
-      fi
-
-      # Get a random number for the computer between lowmax and highmax, but prevent the computer from trying to generate a random number using a range of 0
-      guessrange=highmax-lowmax
-      if ((guessrange<=0)); then
-        guessrange=1
       fi
 
       # computer uses midpoint (binary search) within current reasonable values

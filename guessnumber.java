@@ -40,7 +40,6 @@ public class guessnumber {
             int secretnumber = random.nextInt(highmax - lowmax + 1) + lowmax; // Get a random number
             int userguess;
             int computerguess;
-            int guessrange;
             int totalguesses = 0;
             boolean guessedcorrectly = false;
 
@@ -82,12 +81,6 @@ public class guessnumber {
                     return;
                 }
             
-                // this is to prevent trying to generate a random number from a range of 0
-                guessrange = highmax - lowmax;
-                if (guessrange <= 0) {
-                    guessrange = 1;
-                }
-
                 // computer uses midpoint (binary search) within current reasonable values
                 computerguess = (lowmax + highmax) / 2;
                 totalguesses++;

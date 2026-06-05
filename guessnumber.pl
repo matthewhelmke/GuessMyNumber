@@ -44,7 +44,6 @@ my $totalguesses = 0;
 my $lowmax       = 1;
 my $highmax      = 100;
 my $userguess;
-my $guessrange;
 my $computerguess;
 
 # Print a description of the game, with rules, to the screen

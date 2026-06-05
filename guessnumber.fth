@@ -32,7 +32,6 @@ VARIABLE userguess
 VARIABLE totalguesses
 VARIABLE lowmax
 VARIABLE highmax
-VARIABLE guessrange
 VARIABLE computerguess
 
 \ raw input buffer before validation, corresponds to userguessunvalidated in other versions
@@ -137,10 +136,6 @@ require random.fs
 
 \ handle the computer's turn; returns true if the game ends
 : computer-turn ( -- done? )
-  \ this is to prevent trying to generate a random number from a range of 0
-  highmax @ lowmax @ - guessrange !
-  guessrange @ 1 < if 1 guessrange ! then
-
   \ the computer's guess uses a binary-search midpoint within current bounds
   lowmax @ highmax @ + 2 / computerguess !
   1 totalguesses +!

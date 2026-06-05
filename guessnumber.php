@@ -49,7 +49,6 @@ $lowmax = 1;
 $highmax = 100;
 $won	 = false;
 $handle  = fopen('php://stdin', 'r');
-$guessrange = 0;
 
 // is writing a function the easiset way to do this?? I don't know
 function is_whole_number($var)

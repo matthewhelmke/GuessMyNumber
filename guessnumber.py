@@ -102,11 +102,6 @@ while True:
         input("\n\nPress the enter key to exit.\n")
         break
 
-    # this is to prevent trying to generate a random number from a range of 0
-    guessrange = highmax - lowmax
-    if (guessrange <= 0):
-        guessrange = 1
-
     # the computer's guess uses a binary-search midpoint within current bounds
     computerguess = (lowmax + highmax) // 2
     totalguesses += 1
