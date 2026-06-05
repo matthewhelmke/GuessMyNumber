@@ -47,7 +47,6 @@
     01 COMPUTERGUESS PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 WS-COMPUTERGUESS-TRIMMED PIC ZZZ.
     01 SECRETNUMBER PIC 999 usage comp-6. *> unsigned (positive) packed decimal
-    01 GUESSRANGE PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 TOTALGUESSES PIC 99 usage comp-6. *> unsigned (positive) packed decimal
     01 WS-TOTALGUESSES-TRIMMED PIC Z9.
     01 LOWMAX PIC 99 usage comp-6. *> unsigned (positive) packed decimal
@@ -56,6 +55,8 @@
     01 PSEUDO-RANDOM-NUMBER usage comp-1. *> float-short
     01 WS-USER-INPUT PIC X(10). *> raw line from the keyboard
     01 WS-USER-GUESS PIC S9(3) COMP-3. *> guess converted to a number
+    01 WS-GMN-SECRET PIC X(10). *> raw GMN_SECRET env value, for parity testing
+    01 WS-GMN-SECRET-NUM PIC 9(9). *> GMN_SECRET parsed to a number
 
 *> ***************************************************************
 
@@ -69,8 +70,16 @@
     *> for this game. Using the date, formatted as a number, provides a
     *> constantly-changing seed value, which helps.
     ComputeSecretNumber.
-      MOVE FUNCTION RANDOM(SEED) TO PSEUDO-RANDOM-NUMBER
-      COMPUTE SECRETNUMBER = PSEUDO-RANDOM-NUMBER * 100 .
+      *> Use a fixed secret from GMN_SECRET when set, for parity testing
+      MOVE SPACES TO WS-GMN-SECRET
+      ACCEPT WS-GMN-SECRET FROM ENVIRONMENT "GMN_SECRET"
+      COMPUTE WS-GMN-SECRET-NUM = FUNCTION NUMVAL(WS-GMN-SECRET)
+      IF WS-GMN-SECRET-NUM >= 1 AND WS-GMN-SECRET-NUM <= 100
+        COMPUTE SECRETNUMBER = WS-GMN-SECRET-NUM
+      ELSE
+        MOVE FUNCTION RANDOM(SEED) TO PSEUDO-RANDOM-NUMBER
+        COMPUTE SECRETNUMBER = PSEUDO-RANDOM-NUMBER * 100
+      END-IF.
 
     *> Print a description of the game, with rules, to the screen
     DISPLAY "Welcome to Guess My Number!".

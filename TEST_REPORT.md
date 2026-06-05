@@ -1,6 +1,6 @@
 # Guess My Number — Test Report
 
-Generated 2026-06-05 23:01:08 UTC by `./tests/run`.
+Generated 2026-06-05 23:27:44 UTC by `./tests/run`.
 
 Per-language commands live in `tests/manifest.sh`. Stdin fixture is 20
 lines of "50" (`tests/fixtures/stdin.txt`). A run **passes** when the
@@ -16,25 +16,25 @@ runs out.
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
-| Bash | PASS | 4 ms | 29 |  |
+| Bash | PASS | 3 ms | 15 |  |
 | BASIC | SKIP | — | — | PC-BASIC INPUT statement does not read piped stdin |
-| C | PASS | 3 ms | 33 |  |
-| COBOL | PASS | 5 ms | 36 |  |
-| Erlang | PASS | 113 ms | 44 |  |
-| Forth | PASS | 6 ms | 52 |  |
+| C | PASS | 3 ms | 23 |  |
+| COBOL | PASS | 4 ms | 28 |  |
+| Erlang | PASS | 104 ms | 50 |  |
+| Forth | PASS | 7 ms | 52 |  |
 | Fortran | PASS | 4 ms | 45 |  |
-| Go | PASS | 34 ms | 42 |  |
-| Haskell | PASS | 163 ms | 54 |  |
+| Go | PASS | 29 ms | 27 |  |
+| Haskell | PASS | 157 ms | 24 |  |
 | HTML | SKIP | — | — | JavaScript-in-browser implementation; no command-line entry point |
-| Java | PASS | 40 ms | 53 |  |
-| JavaScript | PASS | 19 ms | 29 |  |
+| Java | PASS | 49 ms | 47 |  |
+| JavaScript | PASS | 20 ms | 29 |  |
 | Perl | PASS | 4 ms | 25 |  |
-| PHP | PASS | 12 ms | 27 |  |
-| Python | PASS | 15 ms | 59 |  |
-| R | PASS | 147 ms | 39 |  |
-| Racket | PASS | 226 ms | 18 |  |
-| Ruby | PASS | 37 ms | 71 |  |
-| Rust | PASS | 3 ms | 43 |  |
+| PHP | PASS | 12 ms | 22 |  |
+| Python | PASS | 13 ms | 59 |  |
+| R | PASS | 143 ms | 44 |  |
+| Racket | PASS | 227 ms | 28 |  |
+| Ruby | PASS | 37 ms | 27 |  |
+| Rust | PASS | 3 ms | 35 |  |
 
 ## Methodology
 

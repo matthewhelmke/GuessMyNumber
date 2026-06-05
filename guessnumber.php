@@ -38,8 +38,13 @@ win. Try to guess in as few turns as possible.
 
 Here we go!\n\n";
 
-// Get a random number
-$secretnumber = rand(1, 100);
+// Get a random number, or a fixed one from GMN_SECRET for parity testing
+$gmn_secret = getenv('GMN_SECRET');
+if ($gmn_secret !== false && ctype_digit($gmn_secret) && $gmn_secret >= 1 && $gmn_secret <= 100) {
+    $secretnumber = (int)$gmn_secret;
+} else {
+    $secretnumber = rand(1, 100);
+}
 
 // set all our initial values
 $userguessunvalidated = 0;

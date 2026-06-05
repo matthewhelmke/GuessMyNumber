@@ -32,15 +32,27 @@ PROGRAM GuessMyNumber
   CHARACTER(len=100) :: input
   INTEGER :: iostat_val
   REAL :: random_real
+  ! Variables for the GMN_SECRET parity-testing hook
+  CHARACTER(len=100) :: env_secret
+  INTEGER :: env_len, env_status, env_iostat, gmn_secret_val
 
   ! Initialize the random number generator (call once at program start)
   CALL RANDOM_SEED()
 
-  ! Generate a real random number between 0.0 and 1.0
-  CALL RANDOM_NUMBER(random_real)
-
-  ! Scale and convert to an integer between 1 and 100
-  secretnumber = INT(random_real * 100) + 1
+  ! Use a fixed secret from GMN_SECRET when set (for parity testing),
+  ! otherwise a random integer between 1 and 100
+  gmn_secret_val = 0
+  env_iostat = 1
+  CALL GET_ENVIRONMENT_VARIABLE("GMN_SECRET", env_secret, env_len, env_status)
+  IF (env_status == 0) THEN
+    READ(env_secret, *, IOSTAT=env_iostat) gmn_secret_val
+  END IF
+  IF (env_iostat == 0 .AND. gmn_secret_val >= 1 .AND. gmn_secret_val <= 100) THEN
+    secretnumber = gmn_secret_val
+  ELSE
+    CALL RANDOM_NUMBER(random_real)
+    secretnumber = INT(random_real * 100) + 1
+  END IF
   
   ! Initialize counters
   totalguesses = 0

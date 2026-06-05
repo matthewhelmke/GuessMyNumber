@@ -59,8 +59,12 @@ Here we go!
 
 ";
 
-# Get a random number
-my $secretnumber = int(rand(100)) + 1;
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+my $secretnumber =
+    (defined $ENV{GMN_SECRET} && $ENV{GMN_SECRET} =~ /^\d+$/
+        && $ENV{GMN_SECRET} >= 1 && $ENV{GMN_SECRET} <= 100)
+    ? $ENV{GMN_SECRET}
+    : int(rand(100)) + 1;
 
 # the main bit
 while ( $userguess != $secretnumber ) {

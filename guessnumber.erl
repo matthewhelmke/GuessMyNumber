@@ -29,11 +29,9 @@
 %%     atom 'eof' when the input stream closes (for example, when piped stdin
 %%     runs dry). read_guess/0 trims the newline and halts cleanly on eof.
 %%
-%%   * Most versions in this repo carry a `guessrange` variable that guards
-%%     against a zero-width range. The bounds always enclose the secret number,
-%%     so lowmax never passes highmax and that range cannot collapse. The guard
-%%     is unreachable, so this version omits it rather than keep dead code. The
-%%     computer's guess is simply the midpoint of the current bounds.
+%%   * The computer's guess is simply the midpoint of the current bounds. The
+%%     bounds always enclose the secret number, so the range never collapses and
+%%     needs no special-case guard.
 %%
 %%   * rand:uniform/1 auto-seeds the process from system entropy on first use,
 %%     so each run draws a fresh secret number with no explicit seeding.
@@ -64,8 +62,9 @@ main(_Args) ->
       "as few turns as possible.~n~n"
       "Here we go!~n~n"),
 
-    %% Draw the secret number (1..100 inclusive). rand auto-seeds the process.
-    Secretnumber = rand:uniform(100),
+    %% Draw the secret number: a fixed one from GMN_SECRET for parity testing,
+    %% otherwise a random 1..100 (rand auto-seeds the process).
+    Secretnumber = secret_from_env(),
 
     %% Start with shared bounds: lowmax = 1, highmax = 100, no guesses yet.
     game_loop(Secretnumber, 0, 1, 100).
@@ -148,6 +147,17 @@ after_round(Secretnumber, Totalguesses, Lowmax, Highmax) ->
     case time_taunt(Totalguesses) of
         game_over -> ok;
         continue  -> game_loop(Secretnumber, Totalguesses, Lowmax, Highmax)
+    end.
+
+%% Draw the secret number from the GMN_SECRET env hook, or a random 1..100.
+secret_from_env() ->
+    case os:getenv("GMN_SECRET") of
+        false -> rand:uniform(100);
+        Value ->
+            case string:to_integer(Value) of
+                {N, ""} when N >= 1, N =< 100 -> N;
+                _ -> rand:uniform(100)
+            end
     end.
 
 %% Read one guess from stdin. io:get_line/1 keeps the trailing newline and

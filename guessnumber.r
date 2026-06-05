@@ -60,7 +60,13 @@ cat(
 )
 cat("Here we go!\n\n")
 
-secretnumber <- sample(1:100, 1)
+# A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+gmn_secret <- Sys.getenv("GMN_SECRET")
+if (grepl("^[0-9]+$", gmn_secret) && as.integer(gmn_secret) >= 1 && as.integer(gmn_secret) <= 100) {
+  secretnumber <- as.integer(gmn_secret)
+} else {
+  secretnumber <- sample(1:100, 1)
+}
 
 totalguesses <- 0
 lowmax <- 1

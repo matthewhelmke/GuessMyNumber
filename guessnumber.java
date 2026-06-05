@@ -37,7 +37,13 @@ public class guessnumber {
             Random random = new Random();
             int lowmax = 1;
             int highmax = 100;
-            int secretnumber = random.nextInt(highmax - lowmax + 1) + lowmax; // Get a random number
+            // Get a random number, or a fixed one from GMN_SECRET for parity testing
+            int secretnumber = random.nextInt(highmax - lowmax + 1) + lowmax;
+            String gmnSecret = System.getenv("GMN_SECRET");
+            if (gmnSecret != null && gmnSecret.matches("\\d+")
+                    && Integer.parseInt(gmnSecret) >= 1 && Integer.parseInt(gmnSecret) <= 100) {
+                secretnumber = Integer.parseInt(gmnSecret);
+            }
             int userguess;
             int computerguess;
             int totalguesses = 0;

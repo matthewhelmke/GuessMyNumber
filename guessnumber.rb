@@ -40,7 +40,9 @@ puts "Here we go!"
 
 # Get a random number
 
-secretnumber = (rand(0-99) + 1)
+# A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+env_secret = ENV["GMN_SECRET"].to_i
+secretnumber = (env_secret >= 1 && env_secret <= 100) ? env_secret : (rand(0-99) + 1)
 
 # set all our initial values
 

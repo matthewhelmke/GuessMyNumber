@@ -35,6 +35,7 @@ import System.Random (randomRIO)
 import Text.Read (readMaybe)
 import Control.Monad (when)
 import System.Exit (exitSuccess)
+import System.Environment (lookupEnv)
 
 main :: IO ()
 main = do
@@ -42,10 +43,18 @@ main = do
   putStrLn "The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n"
   putStrLn "Here we go!\n"
 
-  secretnumber <- randomRIO (1,100) :: IO Int
+  -- A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+  secretnumber <- secretFromEnv
 
   -- Start with shared bounds: lowmax=1 (no lower bound yet), highmax=100
   gameLoop secretnumber 1 1 100
+
+secretFromEnv :: IO Int
+secretFromEnv = do
+  envValue <- lookupEnv "GMN_SECRET"
+  case envValue >>= readMaybe of
+    Just n | n >= 1 && n <= 100 -> return n
+    _ -> randomRIO (1, 100)
 
 gameLoop :: Int -> Int -> Int -> Int -> IO ()
 gameLoop secretnumber totalguesses lowmax highmax = do

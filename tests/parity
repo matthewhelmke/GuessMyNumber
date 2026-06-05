@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Parity check — confirm every CLI implementation produces identical
+# user-visible output for the same game.
+#
+# Each implementation runs under a fixed secret (GMN_SECRET) and a fixed input
+# fixture, so they all play the exact same game. The output is normalized and
+# diffed against Python, the canonical reference. A new language is "done" when
+# it matches here, so this doubles as the TDD gate for future implementations.
+#
+# Normalization policy: forgive only the differences a language's print
+# primitives force — trailing whitespace on a line, and runs of blank lines.
+# Normalization therefore strips trailing whitespace and collapses consecutive
+# blank lines (cat -s). Everything else must match the Python reference, or it
+# is a parity bug to fix.
+#
+# Usage:
+#   ./tests/parity              — check every implementation
+#   ./tests/parity rust forth   — check a subset
+#
+# Exit status is non-zero if any implementation diverges from Python. BASIC and
+# HTML are skipped (they cannot take piped stdin) and are verified by hand.
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TESTS_DIR="${REPO_ROOT}/tests"
+FIXTURE="${TESTS_DIR}/fixtures/parity_stdin.txt"
+export GMN_SECRET=42
+TIMEOUT_SEC=30
+DIFF_LINES=40   # cap each diff so the worklist stays readable
+
+# shellcheck source=tests/manifest.sh
+source "${TESTS_DIR}/manifest.sh"
+cd "${REPO_ROOT}"
+
+normalize() { sed -e 's/[[:space:]]*$//' | cat -s; }
+
+# Print one implementation's normalized output. Returns non-zero if it can't run.
+render() {
+    local lang="$1"
+    local file="${FILE[$lang]:-}"
+    [[ -n "${SKIP[$lang]:-}" ]] && return 1
+    [[ -f "$file" ]] || return 1
+
+    local tmpdir out_path compile_cmd run_cmd
+    tmpdir="$(mktemp -d)"
+    out_path="${tmpdir}/${lang}"
+
+    if [[ -n "${COMPILE[$lang]:-}" ]]; then
+        compile_cmd="${COMPILE[$lang]//%OUT%/$out_path}"
+        compile_cmd="${compile_cmd//%TMPDIR%/$tmpdir}"
+        if ! eval "$compile_cmd" >/dev/null 2>&1; then
+            rm -rf "$tmpdir"; return 1
+        fi
+    fi
+
+    run_cmd="${RUN[$lang]:-}"
+    run_cmd="${run_cmd//%OUT%/$out_path}"
+    run_cmd="${run_cmd//%TMPDIR%/$tmpdir}"
+
+    printf '%s' "$(cat "$FIXTURE")" | timeout --kill-after=5 "$TIMEOUT_SEC" \
+        bash -c "$run_cmd" 2>&1 | normalize
+    rm -rf "$tmpdir"
+}
+
+REF="$(render python)" || { echo "ERROR: could not run the Python reference" >&2; exit 2; }
+
+if [[ $# -gt 0 ]]; then
+    mapfile -t TARGETS < <(printf '%s\n' "$@")
+else
+    mapfile -t TARGETS < <(printf '%s\n' "${!LANGS[@]}" | sort)
+fi
+
+fails=0
+printf 'Parity check against Python (GMN_SECRET=%s)\n\n' "$GMN_SECRET"
+for lang in "${TARGETS[@]}"; do
+    if [[ -z "${LANGS[$lang]:-}" ]]; then
+        printf '  %-10s NOT IN MANIFEST\n' "$lang"; continue
+    fi
+    if [[ -n "${SKIP[$lang]:-}" ]]; then
+        printf '  %-10s SKIP  %s\n' "$lang" "${SKIP[$lang]}"; continue
+    fi
+    out="$(render "$lang")" || { printf '  %-10s ERROR (could not run)\n' "$lang"; fails=$((fails+1)); continue; }
+    if [[ "$out" == "$REF" ]]; then
+        printf '  %-10s MATCH\n' "$lang"
+    else
+        printf '  %-10s DIFF\n' "$lang"
+        diff <(printf '%s\n' "$REF") <(printf '%s\n' "$out") \
+            | head -n "$DIFF_LINES" | sed 's/^/        /'
+        fails=$((fails+1))
+    fi
+done
+
+printf '\n'
+if [[ $fails -gt 0 ]]; then
+    printf '%d implementation(s) diverge from Python.\n' "$fails"
+    exit 1
+fi
+printf 'All implementations match Python.\n'
+exit 0

@@ -29,6 +29,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 )
@@ -40,8 +41,11 @@ func main() {
 	// Create a local random generator with current time as seed
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Get a random number
+	// Get a random number, or a fixed one from GMN_SECRET for parity testing
 	secretnumber := rng.Intn(highmax-lowmax+1) + lowmax
+	if s, err := strconv.Atoi(os.Getenv("GMN_SECRET")); err == nil && s >= 1 && s <= 100 {
+		secretnumber = s
+	}
 
 	// Print a description of the game, with rules, to the screen
 	fmt.Println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n\nHere we go!\n\n")

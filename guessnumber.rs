@@ -57,7 +57,11 @@ fn main() {
     println!("Here we go!\n");
 
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let secretnumber = (now % 100) as i32 + 1;
+    // A fixed secret from GMN_SECRET for parity testing, otherwise a time-based one
+    let secretnumber = match std::env::var("GMN_SECRET").ok().and_then(|s| s.parse::<i32>().ok()) {
+        Some(n) if (1..=100).contains(&n) => n,
+        _ => (now % 100) as i32 + 1,
+    };
 
     let mut totalguesses: i32 = 0;
     let mut lowmax: i32 = 1;

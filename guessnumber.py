@@ -28,6 +28,8 @@
 
 # import random module so that we can generate pseudorandom numbers
 import random
+# import os so we can read the GMN_SECRET hook used for parity testing
+import os
 
 # Print a description of the game, with rules, to the screen
 print('''Welcome to Guess My Number!
@@ -42,8 +44,12 @@ Here we go!
 
 ''')
 
-# Get a random number
-secretnumber = random.randrange(100) + 1
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+_gmn_secret = os.environ.get("GMN_SECRET", "")
+if _gmn_secret.isdigit() and 1 <= int(_gmn_secret) <= 100:
+    secretnumber = int(_gmn_secret)
+else:
+    secretnumber = random.randrange(100) + 1
 
 # set all our initial values
 userguess = 0

@@ -71,5 +71,10 @@ Here we go!\n\n")
   
   (inquire-user secretnumber))
 
-; Call the function with "secretnumber" defined as a random number between 1 and 100
-(inquire-user (random 1 101))
+; Call the function with "secretnumber" set from GMN_SECRET (for parity
+; testing) or, failing that, a random number between 1 and 100
+(define gmn-secret (let ([e (getenv "GMN_SECRET")])
+                     (and e (string->number e))))
+(inquire-user (if (and (exact-integer? gmn-secret) (<= 1 gmn-secret 100))
+                  gmn-secret
+                  (random 1 101)))

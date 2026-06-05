@@ -45,7 +45,21 @@ require random.fs
 : init-game ( -- )
   utime drop seed !
   rnd drop                          \ advance once: the LCG's first step from a 64-bit timestamp is low-entropy
-  100 random 1 + secretnumber !
+  \ a fixed secret from GMN_SECRET for parity testing, otherwise a random 1..100
+  s" GMN_SECRET" getenv               \ ( c-addr u )
+  dup 0= if
+    2drop  100 random 1 +             \ unset: random 1..100
+  else
+    s>number? if                      \ ( d ) valid number
+      d>s                             \ ( n ) drop the high cell
+      dup 1 101 within 0= if          \ out of [1,100]?
+        drop 100 random 1 +
+      then
+    else
+      2drop  100 random 1 +           \ not a number
+    then
+  then
+  secretnumber !
   0 userguess !
   0 totalguesses !
   1 lowmax !

@@ -54,9 +54,14 @@ main()
         (void) fprintf(stdout,
                        "Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n");
 
-        // Get a random number
-        srand(time(0));
-        secretnumber = rand() % 100 + 1;
+        // Get a random number, or a fixed one from GMN_SECRET for parity testing
+        char *gmn_secret = getenv("GMN_SECRET");
+        if (gmn_secret != NULL && atoi(gmn_secret) >= 1 && atoi(gmn_secret) <= 100) {
+                secretnumber = atoi(gmn_secret);
+        } else {
+                srand(time(0));
+                secretnumber = rand() % 100 + 1;
+        }
 
         // the main bit
         for (;;) {

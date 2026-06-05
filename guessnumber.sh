@@ -48,8 +48,12 @@ declare -i lowmax=1
 declare -i highmax=100
 declare -i computerguess
 
-# Get a random number
-(( secretnumber = RANDOM % 100 + 1 ))
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+if [[ "$GMN_SECRET" =~ ^[0-9]+$ ]] && (( GMN_SECRET >= 1 && GMN_SECRET <= 100 )); then
+  secretnumber=$GMN_SECRET
+else
+  (( secretnumber = RANDOM % 100 + 1 ))
+fi
 
 # the main bit
 while ((userguess != secretnumber));

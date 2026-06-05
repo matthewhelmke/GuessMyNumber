@@ -120,8 +120,6 @@ Two things differ from the imperative versions out of necessity, not preference:
 
 - **Reading stdin.** `io:get_line/1` returns the line with its trailing newline, or the atom `eof` when input closes. A small `read_guess/0` helper trims the newline and exits cleanly on `eof`.
 
-This version also omits the `guessrange` guard the other implementations carry. Because the bounds always enclose the secret number, that range can never collapse, so the guard is unreachable—dead code. The computer simply guesses the midpoint of the current bounds.
-
 ### R
 
 R is primarily known as a statistical and data-analysis language, not as a platform for interactive terminal programs. Nevertheless, it is fully capable of expressing this game.

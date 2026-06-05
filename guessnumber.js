@@ -56,7 +56,9 @@ async function main() {
   console.log("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
   console.log("Here we go!\n");
 
-  const secretnumber = Math.floor(Math.random() * 100) + 1;
+  // A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+  const envSecret = parseInt(process.env.GMN_SECRET, 10);
+  const secretnumber = (envSecret >= 1 && envSecret <= 100) ? envSecret : Math.floor(Math.random() * 100) + 1;
   let userguess = 0;
   let computerguess = 0;
   let totalguesses = 0;
