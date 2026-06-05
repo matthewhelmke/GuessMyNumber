@@ -21,6 +21,7 @@ February 15, 2026 was when I first used any AI, specifically GitHub Copilot, whi
 - [Claude Code](https://claude.ai/code) using:
   - `Claude Sonnet 4.6`
   - `Claude Opus 4.7`
+  - `Claude Opus 4.8`
 
 
 ## Game rules (behavioral contract)
@@ -66,6 +67,7 @@ The same game is currently implemented in the following languages:
 - BASIC                                                 (`guessnumber.bas`)
 - C                                                     (`guessnumber.c`)
 - COBOL                                                 (`guessnumber.cob`)
+- Erlang using escript                                  (`guessnumber.erl`)
 - Forth using Gforth                                    (`guessnumber.fth`)
 - Fortran                                               (`guessnumber.f90`)
 - Go                                                    (`guessnumber.go`)
@@ -104,7 +106,21 @@ Some languages express these differently — Forth, for example, uses named memo
 
 ## Extra notes on a couple of languages
 
-Forth, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+Erlang, Forth, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+
+### Erlang
+
+Erlang is a functional language built for telecom systems—concurrent, fault-tolerant, and based on immutable data. WhatsApp, RabbitMQ, and CouchDB run on it. This version runs as an **escript**, Erlang's single-file scripting form, so it needs no separate compile step:
+
+`escript guessnumber.erl`
+
+Two things differ from the imperative versions out of necessity, not preference:
+
+- **No mutable variables.** Erlang values cannot be reassigned, so the shared state—the secret number, the guess count, and the bounds—is threaded through a tail-recursive loop. Each turn computes a new state and calls the next function with it. The Haskell version takes the same approach.
+
+- **Reading stdin.** `io:get_line/1` returns the line with its trailing newline, or the atom `eof` when input closes. A small `read_guess/0` helper trims the newline and exits cleanly on `eof`.
+
+This version also omits the `guessrange` guard the other implementations carry. Because the bounds always enclose the secret number, that range can never collapse, so the guard is unreachable—dead code. The computer simply guesses the midpoint of the current bounds.
 
 ### R
 
@@ -200,5 +216,5 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 Write a test harness. DONE.
 
-Dunno. Maybe Kotlin? Erlang? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
+Dunno. Maybe Kotlin? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
 
