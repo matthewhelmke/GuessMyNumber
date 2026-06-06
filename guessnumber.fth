@@ -32,7 +32,6 @@ VARIABLE userguess
 VARIABLE totalguesses
 VARIABLE lowmax
 VARIABLE highmax
-VARIABLE guessrange
 VARIABLE computerguess
 
 \ raw input buffer before validation, corresponds to userguessunvalidated in other versions
@@ -46,7 +45,21 @@ require random.fs
 : init-game ( -- )
   utime drop seed !
   rnd drop                          \ advance once: the LCG's first step from a 64-bit timestamp is low-entropy
-  100 random 1 + secretnumber !
+  \ a fixed secret from GMN_SECRET for parity testing, otherwise a random 1..100
+  s" GMN_SECRET" getenv               \ ( c-addr u )
+  dup 0= if
+    2drop  100 random 1 +             \ unset: random 1..100
+  else
+    s>number? if                      \ ( d ) valid number
+      d>s                             \ ( n ) drop the high cell
+      dup 1 101 within 0= if          \ out of [1,100]?
+        drop 100 random 1 +
+      then
+    else
+      2drop  100 random 1 +           \ not a number
+    then
+  then
+  secretnumber !
   0 userguess !
   0 totalguesses !
   1 lowmax !
@@ -54,9 +67,8 @@ require random.fs
 
 \ print a description of the game, with rules, to the screen
 : print-welcome ( -- )
-  cr
   ." Welcome to Guess My Number!" cr cr
-  ." The computer will select a random whole number between 1 and 100." cr cr
+  ." The computer will select a random whole number between 1 and 100." cr
   ." Your goal is to guess that number. You will get a turn, then a computer" cr
   ." player will get a turn. Each of you are aware of the other's guesses." cr
   ." The first one to guess the number correctly will win. Try to guess in" cr
@@ -81,7 +93,9 @@ require random.fs
 
 \ read a line into userguessunvalidated and try to parse it as an integer
 : read-user-input ( -- n flag )
-  userguessunvalidated buf-max accept
+  \ read-line (not accept) so piped input is not echoed back to stdout
+  userguessunvalidated buf-max stdin read-line throw
+  0= if bye then                    \ end of input
   uguess-len !
   userguessunvalidated uguess-len @ parse-integer ;
 
@@ -110,10 +124,10 @@ require random.fs
 
   \ some taunts for silly errors in user guesses
   userguess @ lowmax @ < if
-    ." That guess was lower than a previous guess that was too low. Pay attention!" cr
+    ." That guess was lower than a previous guess that was too low. Pay attention!" cr cr
   then
   userguess @ highmax @ > if
-    ." Wake up! That guess was higher than an earlier guess that was too high." cr
+    ." Wake up! That guess was higher than an earlier guess that was too high." cr cr
   then
 
   \ evaluate the user guess
@@ -137,10 +151,6 @@ require random.fs
 
 \ handle the computer's turn; returns true if the game ends
 : computer-turn ( -- done? )
-  \ this is to prevent trying to generate a random number from a range of 0
-  highmax @ lowmax @ - guessrange !
-  guessrange @ 1 < if 1 guessrange ! then
-
   \ the computer's guess uses a binary-search midpoint within current bounds
   lowmax @ highmax @ + 2 / computerguess !
   1 totalguesses +!

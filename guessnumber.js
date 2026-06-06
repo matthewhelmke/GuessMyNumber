@@ -46,92 +46,91 @@ async function askQuestion(query) {
   return done ? null : value;
 }
 
-function getRandomComputerTaunt() {
-  return computerTaunts[Math.floor(Math.random() * computerTaunts.length)];
-}
-
 async function main() {
   // Print a description of the game, with rules, to the screen
   console.log("Welcome to Guess My Number!\n");
   console.log("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
   console.log("Here we go!\n");
 
-  const secretnumber = Math.floor(Math.random() * 100) + 1;
+  // A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+  const envSecret = parseInt(process.env.GMN_SECRET, 10);
+  const secretnumber = (envSecret >= 1 && envSecret <= 100) ? envSecret : Math.floor(Math.random() * 100) + 1;
   let userguess = 0;
   let computerguess = 0;
   let totalguesses = 0;
   let lowmax = 1;
   let highmax = 100;
 
-  // Let the user input any number they want, then check if an integer between 1-100
-  while (userguess !== secretnumber) {
+  // the main bit
+  while (true) {
     let input = await askQuestion("What is your guess? ");
-
     if (input === null) {
-      console.log("\nEnd of input. Game Over.");
-      return process.exit(0);
+      break; // end of input
     }
 
-    totalguesses++;
-
-    // Drop anything after a decimal point to make their guess an integer
-    userguess = parseInt(input, 10);
-
-    // Check if between 1-100
-    if (isNaN(userguess) || userguess < 1 || userguess > 100) {
-      console.log("Please enter a valid number between 1 and 100.");
+    // verify the guess is a whole number
+    if (!/^\d+$/.test(input.trim())) {
+      console.log("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n");
       continue;
     }
 
-    console.log(`You guessed ${userguess}.`);
+    // verify the guess is in range
+    userguess = parseInt(input, 10);
+    if (userguess < 1 || userguess > 100) {
+      console.log("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
+      continue;
+    }
 
-    // Evaluations and some taunts for silly errors in user guesses
-    if (userguess < secretnumber) {
-      console.log("Your guess is too low.");
-      if (userguess <= lowmax) {
-        console.log("That guess was lower than a previous guess that was too low. Pay attention!");
-      }
-      if (userguess >= lowmax) {
-        lowmax = userguess + 1;
-      }
+    // this is a real guess, so count it
+    totalguesses++;
+
+    // some taunts for silly errors in user guesses
+    if (userguess < lowmax) {
+      console.log("That guess was lower than a previous guess that was too low. Pay attention!\n");
+    }
+    if (userguess > highmax) {
+      console.log("Wake up! That guess was higher than an earlier guess that was too high.\n");
+    }
+
+    // evaluate the guess
+    if (userguess === secretnumber) {
+      console.log(`\n*********************************************\n   Your guess is correct! Congratulations!\n   It took ${totalguesses} total guesses.\n*********************************************\n`);
+      break;
     } else if (userguess > secretnumber) {
-      console.log("Your guess is too high.");
-      if (userguess >= highmax) {
-        console.log("Wake up! That guess was higher than an earlier guess that was too high.");
-      }
+      console.log("Your guess is too high.\n");
       if (userguess <= highmax) {
         highmax = userguess - 1;
       }
     } else {
-      console.log(`Your guess is correct! Congratulations! It took ${totalguesses} total guesses.\n`);
-      return process.exit(0);
+      console.log("Your guess is too low.\n");
+      if (userguess >= lowmax) {
+        lowmax = userguess + 1;
+      }
     }
 
-    // Time-based taunts
-    if (totalguesses === 8) {
-      console.log("This is a hard number, isn't it?");
-    } else if (totalguesses === 12) {
-      console.log("Wow! You are really bad at this.");
-    } else if (totalguesses === 16) {
-      console.log("You're taking too long, I can't handle it any more.\n\nG A M E   O V E R");
-      return process.exit(0);
-    }
-
-  // Now computer guesses
+    // computer uses the midpoint (binary search) within current bounds
     computerguess = Math.floor((lowmax + highmax) / 2);
     totalguesses++;
 
-    if (userguess === secretnumber) {
-        return;
-    } else if (computerguess < secretnumber) {
-        console.log(`The computer guessed ${computerguess} and that was too low.`);
-        if (computerguess >= lowmax) lowmax = computerguess + 1;
+    if (computerguess === secretnumber) {
+      console.log(`**********************************************\n   The computer's guess of ${computerguess} is correct!\n   It took ${totalguesses} total guesses.\n**********************************************\n`);
+      break;
     } else if (computerguess > secretnumber) {
-        console.log(`The computer guessed ${computerguess} and that was too high.`);
-        if (computerguess <= highmax) highmax = computerguess - 1;
+      console.log(`The computer guessed ${computerguess} and that was too high.\nPlease try again.\n`);
+      highmax = computerguess - 1;
     } else {
-        console.log(`The computer's guess of ${computerguess} is correct! It took ${totalguesses} total guesses!`);
-        return process.exit(0);
+      console.log(`The computer guessed ${computerguess} and that was too low.\nPlease try again.\n`);
+      lowmax = computerguess + 1;
+    }
+
+    // more taunts and a forced guess limit
+    if (totalguesses === 8) {
+      console.log("\nThis is a hard number, isn't it?\n");
+    } else if (totalguesses === 12) {
+      console.log("\nWow! You are really bad at this.\n");
+    } else if (totalguesses >= 16) {
+      console.log("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
+      break;
     }
   }
 }

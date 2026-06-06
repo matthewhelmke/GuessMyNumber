@@ -31,15 +31,20 @@
 echo "Welcome to Guess My Number!
 
 The computer will select a random whole number between 1 and 100.
-Your goal is to guess that number. You will get a turn, then a
-computer player will get a turn. Each of you are\ aware of the
-other's guesses. The first one to guess the number correctly will
-win. Try to guess in as few turns as possible.
+Your goal is to guess that number. You will get a turn, then a computer
+player will get a turn. Each of you are aware of the other's guesses.
+The first one to guess the number correctly will win. Try to guess in
+as few turns as possible.
 
 Here we go!\n\n";
 
-// Get a random number
-$secretnumber = rand(1, 100);
+// Get a random number, or a fixed one from GMN_SECRET for parity testing
+$gmn_secret = getenv('GMN_SECRET');
+if ($gmn_secret !== false && ctype_digit($gmn_secret) && $gmn_secret >= 1 && $gmn_secret <= 100) {
+    $secretnumber = (int)$gmn_secret;
+} else {
+    $secretnumber = rand(1, 100);
+}
 
 // set all our initial values
 $userguessunvalidated = 0;
@@ -47,115 +52,87 @@ $userguess = 0;
 $totalguesses = 0;
 $lowmax = 1;
 $highmax = 100;
-$won	 = false;
 $handle  = fopen('php://stdin', 'r');
-$guessrange = 0;
-
-// is writing a function the easiset way to do this?? I don't know
-function is_whole_number($var)
-{
-    return (is_numeric($var)&&(intval($var)==floatval($var)));
-}
 
 // the main bit
-while (!$won) {
-    echo 'What is your guess? ';
-
-    $totalguesses++;
+while (true) {
+    echo "What is your guess? ";
 
     // let the user input any number they want
-    $userguessunvalidated = trim(fgets($handle));
+    $line = fgets($handle);
+    if ($line === false) {
+        break; // end of input
+    }
+    $userguessunvalidated = trim($line);
 
-    // if $userguess is a number, continue
-    if (preg_match('/\d/', $userguessunvalidated)) {
+    // verify the guess is a whole number
+    if (!ctype_digit($userguessunvalidated)) {
+        echo "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n";
+        continue;
+    }
 
-    // make sure the guess is an integer
-        //if (is_int($userguessunvalidated) == false)
-        if (is_whole_number($userguessunvalidated) == false) {
-            echo "Only whole numbers from 1 to 100 are allowed. Your guess is not a whole number.\nPlease try again.\n";
-            continue;
+    // verify the guess is in range
+    $userguess = (int)$userguessunvalidated;
+    if ($userguess < 1 || $userguess > 100) {
+        echo "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n";
+        continue;
+    }
+
+    // this is a real guess, so count it
+    $totalguesses++;
+
+    // some taunts for silly errors in user guesses
+    if ($userguess < $lowmax) {
+        echo "That guess was lower than a previous guess that was too low. Pay attention!\n\n";
+    }
+    if ($userguess > $highmax) {
+        echo "Wake up! That guess was higher than an earlier guess that was too high.\n\n";
+    }
+
+    // evaluate the guess
+    if ($userguess == $secretnumber) {
+        echo "\n*********************************************\n";
+        echo "   Your guess is correct! Congratulations!\n";
+        echo "   It took $totalguesses total guesses.\n";
+        echo "*********************************************\n\n";
+        exit;
+    } elseif ($userguess > $secretnumber) {
+        echo "Your guess is too high.\n\n";
+        if ($userguess <= $highmax) {
+            $highmax = ($userguess - 1);
         }
-
-        // make sure the guess is in the right range
-        if ($userguessunvalidated <=0 or $userguessunvalidated >=101) {
-            echo "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n";
-            continue;
+    } else {
+        echo "Your guess is too low.\n\n";
+        if ($userguess >= $lowmax) {
+            $lowmax = ($userguess + 1);
         }
+    }
 
-        $userguess = $userguessunvalidated;
+    // computer uses the midpoint (binary search) within current bounds
+    $computerguess = intval(($lowmax + $highmax) / 2);
+    $totalguesses++;
 
-        // some taunts for silly errors in user guesses
-        if ($userguess < $lowmax) {
-            echo "That guess was lower than a previous guess that was too low. Pay attention!\n";
-        }
+    if ($computerguess == $secretnumber) {
+        echo "**********************************************\n";
+        echo "   The computer's guess of $computerguess is correct!\n";
+        echo "   It took $totalguesses total guesses.\n";
+        echo "**********************************************\n\n";
+        exit;
+    } elseif ($computerguess > $secretnumber) {
+        echo "The computer guessed $computerguess and that was too high.\nPlease try again.\n\n";
+        $highmax = ($computerguess - 1);
+    } else {
+        echo "The computer guessed $computerguess and that was too low.\nPlease try again.\n\n";
+        $lowmax = ($computerguess + 1);
+    }
 
-        if ($userguess > $highmax) {
-            echo "Wake up! That guess was higher than an earlier guess that was too high.\n";
-        }
-
-        // evaluate userguess
-        if ($userguess > $secretnumber) {
-            echo "Your guess is too high.\n";
-            if ($userguess <= $highmax) {
-                $highmax = ($userguess - 1);
-            }
-        }
-
-        if ($userguess < $secretnumber) {
-            echo "Your guess is too low.\n";
-            if ($userguess >= $lowmax) {
-                $lowmax = ($userguess + 1);
-            }
-        }
-
-        if ($userguess == $secretnumber) {
-            echo "\n*********************************************\n";
-            echo "   Your guess is correct! Congratulations!\n";
-            printf('    It took %d ' . ngettext('guess', 'guesses', $totalguesses) . "!\n", $totalguesses);
-            echo "*********************************************\n";
-            exit;
-        }
-
-        // computer uses midpoint (binary search) within current reasonable values
-        $computerguess = intval(($lowmax + $highmax) / 2);
-
-        $totalguesses++;
-
-        // more taunts
-        if ($totalguesses == 8) {
-            echo "\nThis is a hard number, isn't it?\n";
-        }
-
-        if ($totalguesses == 12) {
-            echo "\nWow! You are really bad at this.\n";
-        }
-
-        if ($totalguesses >= 16) {
-            echo "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
-            exit;
-        }
-
-        // evaluate computerguess
-        if ($computerguess > $secretnumber) {
-            echo "The computer guessed ", $computerguess, " and that was too high.\n";
-            if ($computerguess <= $highmax) {
-                $highmax = ($computerguess - 1);
-            }
-        }
-
-        if ($computerguess < $secretnumber) {
-            echo "The computer guessed ", $computerguess, " and that was too low.\n";
-            if ($computerguess >= $lowmax) {
-                $lowmax = ($computerguess + 1);
-            }
-        }
-
-        if ($computerguess == $secretnumber) {
-            echo "\n*********************************************\n";
-            echo "   The computer's guess of $computerguess is correct!\n";
-            printf('    It took %d ' . ngettext('guess', 'guesses', $totalguesses) . "!\n", $totalguesses);
-            echo "*********************************************\n";
-            exit;
-        }
+    // more taunts and a forced guess limit
+    if ($totalguesses == 8) {
+        echo "\nThis is a hard number, isn't it?\n\n";
+    } elseif ($totalguesses == 12) {
+        echo "\nWow! You are really bad at this.\n\n";
+    } elseif ($totalguesses >= 16) {
+        echo "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
+        exit;
     }
 }

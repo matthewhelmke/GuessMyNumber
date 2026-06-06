@@ -46,115 +46,78 @@ declare -i userguess
 declare -i totalguesses=0
 declare -i lowmax=1
 declare -i highmax=100
-declare -i guessrange
 declare -i computerguess
 
-# Get a random number
-(( secretnumber = RANDOM % 100 + 1 ))
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+if [[ "$GMN_SECRET" =~ ^[0-9]+$ ]] && (( GMN_SECRET >= 1 && GMN_SECRET <= 100 )); then
+  secretnumber=$GMN_SECRET
+else
+  (( secretnumber = RANDOM % 100 + 1 ))
+fi
 
 # the main bit
-while ((userguess != secretnumber));
-do
+while :; do
+  printf "What is your guess? "
+  read userguessunvalidated || break   # end of input
 
-    while :; do
-      # let the user input any number they want
-      read -p "What is your guess? " userguessunvalidated
-      ((totalguesses=totalguesses+1))
-      # verify the guess is an integer
-      [[ $userguessunvalidated =~ ^[0-9]+$ ]] || { echo "Only whole numbers from 1 to 100 are allowed. Please try again."; continue; }
+  # verify the guess is a whole number
+  if [[ ! $userguessunvalidated =~ ^[0-9]+$ ]]; then
+    printf "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n"
+    continue
+  fi
 
-      # verify guess is between 1 and 100
-      if ((userguessunvalidated >= 1 && userguessunvalidated <= 100)); then
-        break
-      else
-        echo "Only whole numbers from 1 to 100 are allowed. Your guess is out of range. Try again. "
-      fi
-    done
+  # verify the guess is in range
+  userguess=$userguessunvalidated
+  if ((userguess < 1 || userguess > 100)); then
+    printf "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n"
+    continue
+  fi
 
-    # assign validated input value to userguess
-    userguess=userguessunvalidated
+  # this is a real guess, so count it
+  ((totalguesses += 1))
 
-    # some taunts for silly errors in user guesses
-    if ((userguess < lowmax)); then
-      echo "That guess was lower than a previous guess that was too low. Pay attention!"
-    elif ((userguess > highmax)); then
-      echo "Wake up! That guess was higher than an earlier guess that was too high."
-    fi
+  # some taunts for silly errors in user guesses
+  if ((userguess < lowmax)); then
+    printf "That guess was lower than a previous guess that was too low. Pay attention!\n\n"
+  fi
+  if ((userguess > highmax)); then
+    printf "Wake up! That guess was higher than an earlier guess that was too high.\n\n"
+  fi
 
-    # check for user guesses too high
-    if ((userguess > secretnumber)); then
-        echo -e "Your guess is too high."
-        if ((userguess <= highmax)); then
-          ((highmax = userguess-1))
-        fi
-      fi
-      # don't let the computer choose this number or anything higher than this as long as a reasonable user guess was made
+  # evaluate the guess
+  if ((userguess == secretnumber)); then
+    printf "\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n" "$totalguesses"
+    break
+  elif ((userguess > secretnumber)); then
+    printf "Your guess is too high.\n\n"
+    ((userguess <= highmax)) && ((highmax = userguess - 1))
+  else
+    printf "Your guess is too low.\n\n"
+    ((userguess >= lowmax)) && ((lowmax = userguess + 1))
+  fi
 
-    # check for user guesses too low
-    if ((userguess < secretnumber)); then
-        echo -e "Your guess is too low."
-        if ((userguess >= lowmax)); then
-          ((lowmax = userguess+1))
-        fi
-      fi
-      # don't let the computer choose this number or anything higher than this as long as a reasonable user guess was made
+  # computer uses the midpoint (binary search) within current bounds
+  ((computerguess = (lowmax + highmax) / 2))
+  ((totalguesses += 1))
 
-    # check for user guesses correct
-    if [ $userguess == $secretnumber ]; then
-        echo -e "*********************************************"
-        echo -e "Your guess is correct! Congratulations!"
-        echo -e "It took $totalguesses tries."
-        echo -e "*********************************************"
-        break
-      fi
+  if ((computerguess == secretnumber)); then
+    printf "**********************************************\n   The computer's guess of %d is correct!\n   It took %d total guesses.\n**********************************************\n\n" "$computerguess" "$totalguesses"
+    break
+  elif ((computerguess > secretnumber)); then
+    printf "The computer guessed %d and that was too high.\nPlease try again.\n\n" "$computerguess"
+    ((highmax = computerguess - 1))
+  else
+    printf "The computer guessed %d and that was too low.\nPlease try again.\n\n" "$computerguess"
+    ((lowmax = computerguess + 1))
+  fi
 
-      # Get a random number for the computer between lowmax and highmax, but prevent the computer from trying to generate a random number using a range of 0
-      guessrange=highmax-lowmax
-      if ((guessrange<=0)); then
-        guessrange=1
-      fi
-
-      # computer uses midpoint (binary search) within current reasonable values
-      ((computerguess = (lowmax + highmax) / 2 ))
-      ((totalguesses = totalguesses+1))
-
-
-      # check for computer guesses too high
-      if ((computerguess > secretnumber)); then
-          echo -e "The computer guessed $computerguess and that was too high."
-          if ((computerguess <= highmax)); then
-            ((highmax = computerguess-1))
-          fi
-        fi
-
-      # check for computer guesses too low
-      if ((computerguess < secretnumber)); then
-          echo -e "The computer guessed $computerguess and that was too low."
-          if ((computerguess >= lowmax)); then
-            ((lowmax = computerguess+1))
-          fi
-        fi
-
-      # check for computer guesses correct
-      if [ $computerguess == $secretnumber ]; then
-          echo -e "*********************************************"
-          echo -e "The computer's guess of $computerguess is correct!"
-          echo -e "It took $totalguesses tries."
-          echo -e "*********************************************"
-          break
-        fi
-
-      # these taunts are just for my amusement and to keep the game from being too terribly long
-      if (( totalguesses == 8 )); then
-          echo -e "This is a hard number, isn't it?"
-        fi
-
-      if (( totalguesses == 12 )); then
-        echo -e "Wow! You are really bad at this."
-      fi
-
-      if (( totalguesses >= 16 )); then
-          echo -e "You're taking too long, I can't handle it any more.\n\nG A M E   O V E R"
-        fi
-
+  # more taunts and a forced guess limit
+  if ((totalguesses == 8)); then
+    printf "\nThis is a hard number, isn't it?\n\n"
+  elif ((totalguesses == 12)); then
+    printf "\nWow! You are really bad at this.\n\n"
+  elif ((totalguesses >= 16)); then
+    printf "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n"
+    break
+  fi
 done

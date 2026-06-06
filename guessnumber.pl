@@ -44,7 +44,6 @@ my $totalguesses = 0;
 my $lowmax       = 1;
 my $highmax      = 100;
 my $userguess;
-my $guessrange;
 my $computerguess;
 
 # Print a description of the game, with rules, to the screen
@@ -60,103 +59,87 @@ Here we go!
 
 ";
 
-# Get a random number
-my $secretnumber = int(rand(100)) + 1;
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+my $secretnumber =
+    (defined $ENV{GMN_SECRET} && $ENV{GMN_SECRET} =~ /^\d+$/
+        && $ENV{GMN_SECRET} >= 1 && $ENV{GMN_SECRET} <= 100)
+    ? $ENV{GMN_SECRET}
+    : int(rand(100)) + 1;
 
 # the main bit
-while ( $userguess != $secretnumber ) {
+while (1) {
+    print "What is your guess? ";
 
     # let the user input any number they want
-    #$userguessunvalidated = <STDIN>;
+    my $input = <STDIN>;
+    last if !defined $input;   # end of input
+    chomp($input);
+    my $userguessunvalidated = $input;
 
-    my $userguessunvalidated;
-    while (1) {
-        print "What is your guess? ";
-        ++$totalguesses;
-        my $input = <STDIN>;
-        # Handle EOF - exit gracefully
-        if (!defined $input) {
-            print "\nEnd of input. Game Over.\n";
-            exit;
-        }
-        chomp($input);
-        $userguessunvalidated = $input;
-        if ($userguessunvalidated =~ /^\d+$/) {
-            if ($userguessunvalidated >= 1 && $userguessunvalidated <= 100) {
-                last;
-            }
-        }
-        print "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n";
+    # verify the guess is a whole number
+    if ($userguessunvalidated !~ /^\d+$/) {
+        print "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n";
+        next;
     }
 
+    # verify the guess is in range
     $userguess = $userguessunvalidated;
+    if ($userguess < 1 || $userguess > 100) {
+        print "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n";
+        next;
+    }
+
+    # this is a real guess, so count it
+    ++$totalguesses;
 
     # some taunts for silly errors in user guesses
-    if ( $userguess < $lowmax ) {
-        print
-"\nThat guess was lower than a previous guess that was too low. Pay attention!\n";
+    if ($userguess < $lowmax) {
+        print "That guess was lower than a previous guess that was too low. Pay attention!\n\n";
     }
-
-    if ( $userguess > $highmax ) {
-        print
-"\nWake up! That guess was higher than an earlier guess that was too high.\n";
+    if ($userguess > $highmax) {
+        print "Wake up! That guess was higher than an earlier guess that was too high.\n\n";
     }
 
     # evaluate the guess
-    if ( $userguess < $secretnumber ) {
-        print "\nYour guess is too low.\n\n";
-        $lowmax = ( $userguess + 1 );
-    }
-
-    if ( $userguess > $secretnumber ) {
-        print "\nYour guess is too high.\n\n";
-        $highmax = ( $userguess - 1 );
-    }
-
-    if ( $userguess == $secretnumber ) {
+    if ($userguess == $secretnumber) {
         print "\n*********************************************\n";
         print "   Your guess is correct! Congratulations!\n";
         print "   It took $totalguesses total guesses.\n";
-        print "*********************************************\n";
+        print "*********************************************\n\n";
         exit;
+    } elsif ($userguess > $secretnumber) {
+        print "Your guess is too high.\n\n";
+        $highmax = ($userguess - 1) if $userguess <= $highmax;
+    } else {
+        print "Your guess is too low.\n\n";
+        $lowmax = ($userguess + 1) if $userguess >= $lowmax;
     }
 
-    # computer guess routine
-
-    # computer uses midpoint (binary search) within current reasonable values
+    # computer uses the midpoint (binary search) within current bounds
     $computerguess = int(($lowmax + $highmax) / 2);
     ++$totalguesses;
 
-    if ( $computerguess < $secretnumber ) {
-        print "The computer guessed $computerguess and that was too low.\n\n";
-        $lowmax = ( $computerguess + 1 );
-    }
-
-    if ( $computerguess > $secretnumber ) {
-        print "The computer guessed $computerguess and that was too high.\n\n";
-        $highmax = ( $computerguess - 1 );
-    }
-
-    if ( $computerguess == $secretnumber ) {
-        print "\n*********************************************\n";
+    if ($computerguess == $secretnumber) {
+        print "**********************************************\n";
         print "   The computer's guess of $computerguess is correct!\n";
         print "   It took $totalguesses total guesses.\n";
-        print "*********************************************\n";
+        print "**********************************************\n\n";
         exit;
+    } elsif ($computerguess > $secretnumber) {
+        print "The computer guessed $computerguess and that was too high.\nPlease try again.\n\n";
+        $highmax = ($computerguess - 1);
+    } else {
+        print "The computer guessed $computerguess and that was too low.\nPlease try again.\n\n";
+        $lowmax = ($computerguess + 1);
     }
 
-# these taunts are just for my amusement and to keep the game from being too terribly long
-    if ( $totalguesses == 8 ) {
-        print "\nThis is a hard number, isn't it?\n";
-    }
-
-    if ( $totalguesses == 12 ) {
-        print "\nWow! You are really bad at this.\n";
-    }
-
-    if ( $totalguesses >= 16 ) {
+    # more taunts and a forced guess limit
+    if ($totalguesses == 8) {
+        print "\nThis is a hard number, isn't it?\n\n";
+    } elsif ($totalguesses == 12) {
+        print "\nWow! You are really bad at this.\n\n";
+    } elsif ($totalguesses >= 16) {
         print "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
         exit;
     }
-
 }

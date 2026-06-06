@@ -120,8 +120,6 @@ Two things differ from the imperative versions out of necessity, not preference:
 
 - **Reading stdin.** `io:get_line/1` returns the line with its trailing newline, or the atom `eof` when input closes. A small `read_guess/0` helper trims the newline and exits cleanly on `eof`.
 
-This version also omits the `guessrange` guard the other implementations carry. Because the bounds always enclose the secret number, that range can never collapse, so the guard is unreachable—dead code. The computer simply guesses the midpoint of the current bounds.
-
 ### R
 
 R is primarily known as a statistical and data-analysis language, not as a platform for interactive terminal programs. Nevertheless, it is fully capable of expressing this game.
@@ -179,6 +177,16 @@ Per-language commands live in `tests/manifest.sh`.
 Locally, `tests/results/` holds log files containing the captured stdout+stderr per run and is gitignored for GitHub. 
 
 BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
+
+### Parity check
+
+`./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it runs every command-line implementation under a fixed secret and a fixed input, then diffs the normalized output against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
+
+The fixed secret comes from an environment variable. Every command-line implementation reads `GMN_SECRET` (a number from 1 to 100) as the secret when it is set, and falls back to a random number when it is not. Nothing changes for an ordinary run; the hook exists so the parity check can drive all versions through the same game.
+
+Normalization forgives only the differences a language's print primitives force—trailing whitespace and runs of blank lines. Everything else must match.
+
+This makes `./tests/parity` the gate for a new implementation: add the file, give it the `GMN_SECRET` hook, and fix it until it matches Python. BASIC and HTML are excluded, since neither reads piped stdin; verify those by hand.
 
 
 ## License

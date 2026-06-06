@@ -28,6 +28,8 @@
 
 # import random module so that we can generate pseudorandom numbers
 import random
+# import os so we can read the GMN_SECRET hook used for parity testing
+import os
 
 # Print a description of the game, with rules, to the screen
 print('''Welcome to Guess My Number!
@@ -42,8 +44,12 @@ Here we go!
 
 ''')
 
-# Get a random number
-secretnumber = random.randrange(100) + 1
+# Get a random number, or a fixed one from GMN_SECRET for parity testing
+_gmn_secret = os.environ.get("GMN_SECRET", "")
+if _gmn_secret.isdigit() and 1 <= int(_gmn_secret) <= 100:
+    secretnumber = int(_gmn_secret)
+else:
+    secretnumber = random.randrange(100) + 1
 
 # set all our initial values
 userguess = 0
@@ -56,8 +62,6 @@ while True:
 
     # let the user input any number they want
     userguessunvalidated = input("What is your guess? ")
-
-    totalguesses += 1
 
     # remove leading and trailing spaces
     userguessunvalidated = str.strip(userguessunvalidated)
@@ -73,6 +77,9 @@ while True:
     if (userguess <= 0 or userguess >= 101):
         print('''Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n''')
         continue
+
+    # this is a real guess, so count it
+    totalguesses += 1
 
     # some taunts for silly errors in user guesses
     if (userguess < lowmax):
@@ -99,13 +106,7 @@ while True:
         print("   Your guess is correct! Congratulations!")
         print("   It took", totalguesses, "total guesses.")
         print("*********************************************\n")
-        input("\n\nPress the enter key to exit.\n")
         break
-
-    # this is to prevent trying to generate a random number from a range of 0
-    guessrange = highmax - lowmax
-    if (guessrange <= 0):
-        guessrange = 1
 
     # the computer's guess uses a binary-search midpoint within current bounds
     computerguess = (lowmax + highmax) // 2
@@ -126,7 +127,6 @@ while True:
         print("   The computer's guess of", computerguess, "is correct!")
         print("   It took", totalguesses, "total guesses.")
         print("**********************************************\n")
-        input("\n\nPress the enter key to exit.\n")
         break
 
     # these taunts are just for my amusement and to keep the game from being too terribly long
@@ -138,5 +138,4 @@ while True:
 
     if (totalguesses >= 16):
         print("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
-        input("\n\nPress the enter key to exit.\n")
         break

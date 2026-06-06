@@ -32,115 +32,137 @@ PROGRAM GuessMyNumber
   CHARACTER(len=100) :: input
   INTEGER :: iostat_val
   REAL :: random_real
+  ! Variables for the GMN_SECRET parity-testing hook
+  CHARACTER(len=100) :: env_secret
+  INTEGER :: env_len, env_status, env_iostat, gmn_secret_val
 
   ! Initialize the random number generator (call once at program start)
   CALL RANDOM_SEED()
 
-  ! Generate a real random number between 0.0 and 1.0
-  CALL RANDOM_NUMBER(random_real)
-
-  ! Scale and convert to an integer between 1 and 100
-  secretnumber = INT(random_real * 100) + 1
+  ! Use a fixed secret from GMN_SECRET when set (for parity testing),
+  ! otherwise a random integer between 1 and 100
+  gmn_secret_val = 0
+  env_iostat = 1
+  CALL GET_ENVIRONMENT_VARIABLE("GMN_SECRET", env_secret, env_len, env_status)
+  IF (env_status == 0) THEN
+    READ(env_secret, *, IOSTAT=env_iostat) gmn_secret_val
+  END IF
+  IF (env_iostat == 0 .AND. gmn_secret_val >= 1 .AND. gmn_secret_val <= 100) THEN
+    secretnumber = gmn_secret_val
+  ELSE
+    CALL RANDOM_NUMBER(random_real)
+    secretnumber = INT(random_real * 100) + 1
+  END IF
   
   ! Initialize counters
   totalguesses = 0
   lowmax = 1
   highmax = 100
 
-  PRINT *, "Welcome to Guess My Number!"
-  PRINT *
-  PRINT *, "The computer will select a random whole number between 1 and 100."
-  PRINT *, "Your goal is to guess that number. You will get a turn, then a computer"
-  PRINT *, "player will get a turn. Each of you are aware of the other's guesses."
-  PRINT *, "The first one to guess the number correctly will win. Try to guess in"
-  PRINT *, "as few turns as possible."
-  PRINT *
-  PRINT *, "Here we go!"
+  WRITE(*, '(A)') "Welcome to Guess My Number!"
+  WRITE(*, '(A)') ""
+  WRITE(*, '(A)') "The computer will select a random whole number between 1 and 100."
+  WRITE(*, '(A)') "Your goal is to guess that number. You will get a turn, then a computer"
+  WRITE(*, '(A)') "player will get a turn. Each of you are aware of the other's guesses."
+  WRITE(*, '(A)') "The first one to guess the number correctly will win. Try to guess in"
+  WRITE(*, '(A)') "as few turns as possible."
+  WRITE(*, '(A)') ""
+  WRITE(*, '(A)') "Here we go!"
+  WRITE(*, '(A)') ""
 
+  ! the main bit
   DO
-    ! Player's turn
-    PRINT *, "What is your guess? "
+    WRITE(*, '(A)', ADVANCE='NO') "What is your guess? "
+    READ(*, '(A)', iostat=iostat_val) input
+    IF (iostat_val /= 0) EXIT   ! end of input
 
+    ! verify the guess is a whole number
+    READ(input, *, iostat=iostat_val) userguess
+    IF (iostat_val /= 0) THEN
+      WRITE(*, '(A)') "Only whole numbers from 1 to 100 are allowed."
+      WRITE(*, '(A)') "Please try again."
+      WRITE(*, '(A)') ""
+      CYCLE
+    END IF
+
+    ! verify the guess is in range
+    IF (userguess < 1 .OR. userguess > 100) THEN
+      WRITE(*, '(A)') "Only whole numbers from 1 to 100 are allowed. Your guess is out of range."
+      WRITE(*, '(A)') "Please try again."
+      WRITE(*, '(A)') ""
+      CYCLE
+    END IF
+
+    ! this is a real guess, so count it
     totalguesses = totalguesses + 1
-
-    ! Verify the guess is an integer between 1 and 100
-    DO
-      READ(*, '(A)', iostat=iostat_val) input
-      IF (iostat_val /= 0) THEN
-        PRINT *, "End of input. Game Over."
-        STOP
-      END IF
-      READ(input, *, iostat=iostat_val) userguess
-      IF (iostat_val == 0) THEN  ! Check if read was successful
-        IF (userguess >= 1 .AND. userguess <= 100) THEN
-          EXIT  ! Exit the loop if input is valid
-        ELSE
-          PRINT *, "Only whole numbers from 1 to 100 are allowed. Please try again."
-        END IF
-      ELSE
-        PRINT *, "Only whole numbers from 1 to 100 are allowed. Please try again."
-      END IF
-    END DO
 
     ! some taunts for silly errors in user guesses
     IF (userguess < lowmax) THEN
-      PRINT *, "That guess was lower than a previous guess that was too low. Pay attention!"
-    ELSE IF (userguess > highmax) THEN
-      PRINT *, "Wake up! That guess was higher than an earlier guess that was too high."
+      WRITE(*, '(A)') "That guess was lower than a previous guess that was too low. Pay attention!"
+      WRITE(*, '(A)') ""
+    END IF
+    IF (userguess > highmax) THEN
+      WRITE(*, '(A)') "Wake up! That guess was higher than an earlier guess that was too high."
+      WRITE(*, '(A)') ""
     END IF
 
-    ! Evaluate player guess against secretnumber
-    IF (userguess < secretnumber) THEN
-      PRINT *, "Too low!"
-      lowmax = userguess + 1
-    ELSE IF (userguess > secretnumber) THEN
-      PRINT *, "Too high!"
-      highmax = userguess - 1
-    ELSE
-      PRINT *, "*********************************************"
-      PRINT *, "Your guess is correct! Congratulations!"
-      PRINT *, "It took", totalguesses, "total guesses."
-      PRINT *, "*********************************************"
+    ! evaluate the guess
+    IF (userguess == secretnumber) THEN
+      WRITE(*, '(A)') ""
+      WRITE(*, '(A)') "*********************************************"
+      WRITE(*, '(A)') "   Your guess is correct! Congratulations!"
+      WRITE(*, '(A, I0, A)') "   It took ", totalguesses, " total guesses."
+      WRITE(*, '(A)') "*********************************************"
+      WRITE(*, '(A)') ""
       EXIT
+    ELSE IF (userguess > secretnumber) THEN
+      WRITE(*, '(A)') "Your guess is too high."
+      WRITE(*, '(A)') ""
+      IF (userguess <= highmax) highmax = userguess - 1
+    ELSE
+      WRITE(*, '(A)') "Your guess is too low."
+      WRITE(*, '(A)') ""
+      IF (userguess >= lowmax) lowmax = userguess + 1
     END IF
 
-    ! Check for game over condition
-    IF (totalguesses >= 16) THEN
-      PRINT *, "You're taking too long, I can't handle it any more."
-      PRINT *, ""
-      PRINT *, "G A M E   O V E R"
-      STOP
-    END IF
-
-    ! Computer's turn
+    ! computer uses the midpoint (binary search) within current bounds
     computerguess = (lowmax + highmax) / 2
     totalguesses = totalguesses + 1
 
-    ! Evaluate computer guess against secret
-    IF (computerguess < secretnumber) THEN
-      PRINT *, "The computer guessed", computerguess, "and that was too low."
-      lowmax = computerguess + 1
+    IF (computerguess == secretnumber) THEN
+      WRITE(*, '(A)') "**********************************************"
+      WRITE(*, '(A, I0, A)') "   The computer's guess of ", computerguess, " is correct!"
+      WRITE(*, '(A, I0, A)') "   It took ", totalguesses, " total guesses."
+      WRITE(*, '(A)') "**********************************************"
+      WRITE(*, '(A)') ""
+      EXIT
     ELSE IF (computerguess > secretnumber) THEN
-      PRINT *, "The computer guessed", computerguess, "and that was too high."
+      WRITE(*, '(A, I0, A)') "The computer guessed ", computerguess, " and that was too high."
+      WRITE(*, '(A)') "Please try again."
+      WRITE(*, '(A)') ""
       highmax = computerguess - 1
     ELSE
-      PRINT *, "*********************************************"
-      PRINT *, "The computer's guess of", computerguess, "is correct!"
-      PRINT *, "It took", totalguesses, "total guesses."
-      PRINT *, "*********************************************"
-      EXIT
+      WRITE(*, '(A, I0, A)') "The computer guessed ", computerguess, " and that was too low."
+      WRITE(*, '(A)') "Please try again."
+      WRITE(*, '(A)') ""
+      lowmax = computerguess + 1
     END IF
 
-    ! these taunts are for my amusement and to keep the game from being too long
+    ! more taunts and a forced guess limit
     IF (totalguesses == 8) THEN
-      PRINT *, "This is a hard number, isn't it?"
+      WRITE(*, '(A)') ""
+      WRITE(*, '(A)') "This is a hard number, isn't it?"
+      WRITE(*, '(A)') ""
     ELSE IF (totalguesses == 12) THEN
-      PRINT *, "Wow! You are really bad at this."
+      WRITE(*, '(A)') ""
+      WRITE(*, '(A)') "Wow! You are really bad at this."
+      WRITE(*, '(A)') ""
     ELSE IF (totalguesses >= 16) THEN
-      PRINT *, "You're taking too long, I can't handle it any more."
-      PRINT *, ""
-      PRINT *, "G A M E   O V E R"
-      STOP
+      WRITE(*, '(A)') ""
+      WRITE(*, '(A)') "You're taking too long, I can't handle it any more."
+      WRITE(*, '(A)') ""
+      WRITE(*, '(A)') "G A M E   O V E R"
+      EXIT
     END IF
 
   END DO
