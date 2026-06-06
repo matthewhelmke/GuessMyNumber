@@ -178,6 +178,16 @@ Locally, `tests/results/` holds log files containing the captured stdout+stderr 
 
 BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
 
+### Parity check
+
+`./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it runs every command-line implementation under a fixed secret and a fixed input, then diffs the normalized output against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
+
+The fixed secret comes from an environment variable. Every command-line implementation reads `GMN_SECRET` (a number from 1 to 100) as the secret when it is set, and falls back to a random number when it is not. Nothing changes for an ordinary run; the hook exists so the parity check can drive all versions through the same game.
+
+Normalization forgives only the differences a language's print primitives force—trailing whitespace and runs of blank lines. Everything else must match.
+
+This makes `./tests/parity` the gate for a new implementation: add the file, give it the `GMN_SECRET` hook, and fix it until it matches Python. BASIC and HTML are excluded, since neither reads piped stdin; verify those by hand.
+
 
 ## License
 

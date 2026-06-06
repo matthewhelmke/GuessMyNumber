@@ -49,15 +49,12 @@ read_input <- function(prompt = "") {
   trimws(line)
 }
 
-cat("\nWelcome to Guess My Number!\n\n")
-cat(
-  "The computer will select a random whole number between 1 and 100. ",
-  "Your goal is to guess that number. You will get a turn, then a computer ",
-  "player will get a turn. Each of you are aware of the other's guesses. ",
-  "The first one to guess the number correctly will win. Try to guess in as ",
-  "few turns as possible.\n\n",
-  sep = ""
-)
+cat("Welcome to Guess My Number!\n\n")
+cat("The computer will select a random whole number between 1 and 100.\n")
+cat("Your goal is to guess that number. You will get a turn, then a computer\n")
+cat("player will get a turn. Each of you are aware of the other's guesses.\n")
+cat("The first one to guess the number correctly will win. Try to guess in\n")
+cat("as few turns as possible.\n\n")
 cat("Here we go!\n\n")
 
 # A fixed secret from GMN_SECRET for parity testing, otherwise a random one
@@ -73,119 +70,79 @@ lowmax <- 1
 highmax <- 100
 
 repeat {
-
-  ## ----- User guess -----
   guess_input <- read_input("What is your guess? ")
+  if (is.na(guess_input)) {
+    break
+  }
 
+  # verify the guess is a whole number
+  if (!grepl("^[0-9]+$", guess_input)) {
+    cat("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n")
+    next
+  }
+
+  # verify the guess is in range
+  userguess <- as.integer(guess_input)
+  if (userguess < 1 || userguess > 100) {
+    cat("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n")
+    next
+  }
+
+  # this is a real guess, so count it
   totalguesses <- totalguesses + 1
 
-  if (is.na(guess_input)) {
-    cat("\nNo input detected. Exiting.\n")
-    quit(save = "no")
-  }
-
-
-  if (!nzchar(guess_input)) {
-    cat("\nNo input detected. Exiting.\n")
-    quit(save = "no")
-  }
-
-  userguess <- suppressWarnings(as.integer(guess_input))
-
-  if (is.na(userguess)) {
-    cat(
-      "Only whole numbers from 1 to 100 are allowed. ",
-      "Your guess is not a whole number.\nPlease try again.\n\n",
-      sep = ""
-    )
-    next
-  }
-
-  if (userguess < 1 || userguess > 100) {
-    cat(
-      "Only whole numbers from 1 to 100 are allowed. ",
-      "Your guess is out of range.\nPlease try again.\n\n",
-      sep = ""
-    )
-    next
-  }
-
-   ## taunts for guesses outside of established limits
+  # some taunts for silly errors in user guesses
   if (userguess < lowmax) {
-    cat("That guess was lower than a previous guess that was too low. Pay attention!\n")
+    cat("That guess was lower than a previous guess that was too low. Pay attention!\n\n")
   }
-
   if (userguess > highmax) {
-    cat("Wake up! That guess was higher than an earlier guess that was too high.\n")
+    cat("Wake up! That guess was higher than an earlier guess that was too high.\n\n")
   }
 
+  # evaluate the guess
   if (userguess == secretnumber) {
     cat("\n*********************************************\n")
-    cat(sprintf("   Your guess of %d is correct!\n", userguess))
-    cat(sprintf("    It took %d guesses!\n", totalguesses))
+    cat("   Your guess is correct! Congratulations!\n")
+    cat(sprintf("   It took %d total guesses.\n", totalguesses))
     cat("*********************************************\n\n")
     break
-  } else if (userguess < secretnumber) {
-    cat("Too low.\n\n")
-    if (userguess >= lowmax) {
-      lowmax <- userguess + 1
-    }
-  } else {
-    cat("Too high.\n\n")
+  } else if (userguess > secretnumber) {
+    cat("Your guess is too high.\n\n")
     if (userguess <= highmax) {
       highmax <- userguess - 1
     }
+  } else {
+    cat("Your guess is too low.\n\n")
+    if (userguess >= lowmax) {
+      lowmax <- userguess + 1
+    }
   }
 
-  ## PHP-aligned taunt thresholds
-  if (totalguesses == 8) {
-    cat("\nThis is a hard number, isn't it?\n\n")
-  }
-
-  if (totalguesses == 12) {
-    cat("\nWow! You are really bad at this.\n\n")
-  }
-
-  if (totalguesses >= 16) {
-    cat("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
-    quit(save = "no")
-  }
-
-  ## ----- Computer guess -----
+  # computer uses the midpoint (binary search) within current bounds
   computerguess <- as.integer((lowmax + highmax) / 2)
   totalguesses <- totalguesses + 1
 
   if (computerguess == secretnumber) {
-    cat("\n*********************************************\n")
+    cat("**********************************************\n")
     cat(sprintf("   The computer's guess of %d is correct!\n", computerguess))
-    cat(sprintf("    It took %d guesses!\n", totalguesses))
-    cat("*********************************************\n\n")
+    cat(sprintf("   It took %d total guesses.\n", totalguesses))
+    cat("**********************************************\n\n")
     break
-  } else if (computerguess < secretnumber) {
-    cat("The computer guessed", computerguess, "and that was too low.\n\n")
-    if (computerguess >= lowmax) {
-      lowmax <- computerguess + 1
-    }
+  } else if (computerguess > secretnumber) {
+    cat(sprintf("The computer guessed %d and that was too high.\nPlease try again.\n\n", computerguess))
+    highmax <- computerguess - 1
   } else {
-    cat("The computer guessed", computerguess, "and that was too high.\n\n")
-    if (computerguess <= highmax) {
-      highmax <- computerguess - 1
-    }
+    cat(sprintf("The computer guessed %d and that was too low.\nPlease try again.\n\n", computerguess))
+    lowmax <- computerguess + 1
   }
 
+  # more taunts and a forced guess limit
   if (totalguesses == 8) {
     cat("\nThis is a hard number, isn't it?\n\n")
-  }
-
-  if (totalguesses == 12) {
+  } else if (totalguesses == 12) {
     cat("\nWow! You are really bad at this.\n\n")
-  }
-
-  if (totalguesses >= 16) {
-    cat("\nYou're taking too long, I can't handle it any more.\n")
-    cat("G A M E   O V E R\n")
-    quit(save = "no")
+  } else if (totalguesses >= 16) {
+    cat("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
+    break
   }
 }
-
-read_input("Press Enter to exit.")

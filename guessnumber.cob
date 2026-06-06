@@ -95,129 +95,137 @@
 
     ENTERUSERGUESS. *> Start the guessing loop, which continues to the file end
 
-    DISPLAY "What is your guess?".
+    DISPLAY "What is your guess? " WITH NO ADVANCING.
 
     ACCEPT WS-USER-INPUT.
-
-    ADD 1 TO TOTALGUESSES.
 
     *> ***********************************************************
     *> Input validation section
     *> ***********************************************************
 
-    IF FUNCTION TRIM (WS-USER-INPUT) IS NUMERIC *> I only got all this to work once I learned that this PIC X(10) added trailing spaces to the input, which caused the NUMERIC function to return false. TRIM removes those spaces and allows us to validate the input properly
+    *> verify the guess is a whole number (TRIM removes the trailing spaces
+    *> the PIC X(10) field adds, which would otherwise fail NUMERIC)
+    IF FUNCTION TRIM (WS-USER-INPUT) IS NUMERIC
       MOVE FUNCTION NUMVAL (WS-USER-INPUT) TO WS-USER-GUESS
     ELSE
-      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
+      DISPLAY "Only whole numbers from 1 to 100 are allowed."
+      DISPLAY "Please try again."
+      DISPLAY " "
       GO TO ENTERUSERGUESS
     END-IF.
 
     IF FUNCTION INTEGER (WS-USER-GUESS) NOT = WS-USER-GUESS
-      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
+      DISPLAY "Only whole numbers from 1 to 100 are allowed."
+      DISPLAY "Please try again."
+      DISPLAY " "
       GO TO ENTERUSERGUESS
     END-IF.
 
-    IF WS-USER-GUESS < 1 OR WS-USER-GUESS >100
-      DISPLAY "Only whole numbers from 1 to 100 are allowed. Please try again."
+    *> verify the guess is in range
+    IF WS-USER-GUESS < 1 OR WS-USER-GUESS > 100
+      DISPLAY "Only whole numbers from 1 to 100 are allowed. "
+        "Your guess is out of range."
+      DISPLAY "Please try again."
+      DISPLAY " "
       GO TO ENTERUSERGUESS
     END-IF.
 
     MOVE WS-USER-GUESS TO USERGUESS.
-  
-    *> ***********************************************************
-    *> Taunts for when it's taking too long
-    *> ***********************************************************
 
-    IF TOTALGUESSES = 8
-      DISPLAY "This is a hard number, isn't it?"
-      END-IF.
+    *> this is a real guess, so count it
+    ADD 1 TO TOTALGUESSES.
 
-    IF TOTALGUESSES = 12
-      DISPLAY "Wow! You are really bad at this."
-      END-IF.
-
-    IF TOTALGUESSES = 16
-      DISPLAY "You're taking too long, I can't handle it any more."
-      DISPLAY " "
-      DISPLAY "G A M E  O V E R"
-      STOP RUN
-      END-IF.
-
-   *> ***********************************************************
-   *> Taunts for carelessness - they lose their turn
-   *> ***********************************************************
-
+    *> some taunts for silly errors in user guesses
     IF USERGUESS < LOWMAX
-      DISPLAY "That guess was lower than a previous guess that was too low. Pay attention!"
-      GO TO CALCULATECOMPUTERGUESS
-      END-IF.
+      DISPLAY "That guess was lower than a previous guess that was too low. "
+        "Pay attention!"
+      DISPLAY " "
+    END-IF.
 
     IF USERGUESS > HIGHMAX
-      DISPLAY "Wake up! That guess was higher than an earlier guess that was too high."
-      GO TO CALCULATECOMPUTERGUESS
-      END-IF.
+      DISPLAY "Wake up! That guess was higher than an earlier guess that "
+        "was too high."
+      DISPLAY " "
+    END-IF.
 
     *> ***********************************************************
     *> Evaluate guess against answer
     *> ***********************************************************
 
-    IF USERGUESS > SECRETNUMBER
-      DISPLAY "Your guess is too high."
-      IF USERGUESS <= HIGHMAX
-        *> make highmax equal userguess minus one
-        COMPUTE HIGHMAX = USERGUESS - 1
-        END-IF
-      GO TO CALCULATECOMPUTERGUESS
-      END-IF.
-
-    IF USERGUESS < SECRETNUMBER
-      DISPLAY "Your guess is too low."
-      *> make lowmax equal userguess plus one
-      COMPUTE LOWMAX = USERGUESS + 1
-      GO TO CALCULATECOMPUTERGUESS
-      END-IF.
-
     IF USERGUESS = SECRETNUMBER
       MOVE TOTALGUESSES TO WS-TOTALGUESSES-TRIMMED
+      DISPLAY " "
       DISPLAY "*********************************************"
-      DISPLAY "Your guess is correct! Congratulations!!"
-      DISPLAY "It took " WS-TOTALGUESSES-TRIMMED " total guesses."
-      DISPLAY "********************************************"
-      STOP RUN.
+      DISPLAY "   Your guess is correct! Congratulations!"
+      DISPLAY "   It took " FUNCTION TRIM (WS-TOTALGUESSES-TRIMMED)
+        " total guesses."
+      DISPLAY "*********************************************"
+      DISPLAY " "
+      STOP RUN
+    END-IF.
+
+    IF USERGUESS > SECRETNUMBER
+      DISPLAY "Your guess is too high."
+      DISPLAY " "
+      IF USERGUESS <= HIGHMAX
+        COMPUTE HIGHMAX = USERGUESS - 1
+      END-IF
+    ELSE
+      DISPLAY "Your guess is too low."
+      DISPLAY " "
+      IF USERGUESS >= LOWMAX
+        COMPUTE LOWMAX = USERGUESS + 1
+      END-IF
+    END-IF.
 
     CALCULATECOMPUTERGUESS.
-      ADD 1 TO TOTALGUESSES.
-      *> computer uses midpoint (binary search) within current reasonable values
+      *> computer uses the midpoint (binary search) within current bounds
       COMPUTE COMPUTERGUESS = (LOWMAX + HIGHMAX) / 2
+      ADD 1 TO TOTALGUESSES
       MOVE COMPUTERGUESS TO WS-COMPUTERGUESS-TRIMMED
 
+      IF COMPUTERGUESS = SECRETNUMBER
+        MOVE TOTALGUESSES TO WS-TOTALGUESSES-TRIMMED
+        DISPLAY "**********************************************"
+        DISPLAY "   The computer's guess of "
+          FUNCTION TRIM (WS-COMPUTERGUESS-TRIMMED) " is correct!"
+        DISPLAY "   It took " FUNCTION TRIM (WS-TOTALGUESSES-TRIMMED)
+          " total guesses."
+        DISPLAY "**********************************************"
+        DISPLAY " "
+        STOP RUN
+      END-IF.
+
       IF COMPUTERGUESS > SECRETNUMBER
-        DISPLAY "The computer's guessed " WS-COMPUTERGUESS-TRIMMED " and that was too high."
+        DISPLAY "The computer guessed "
+          FUNCTION TRIM (WS-COMPUTERGUESS-TRIMMED) " and that was too high."
+        DISPLAY "Please try again."
         DISPLAY " "
-        IF COMPUTERGUESS <= HIGHMAX
-          *> make highmax equal userguess minus one
-          COMPUTE HIGHMAX = COMPUTERGUESS - 1
-          GO TO ENTERUSERGUESS
-          END-IF
-        GO TO ENTERUSERGUESS
-        END-IF.
-
-      IF COMPUTERGUESS < SECRETNUMBER
-        DISPLAY "The computer's guessed " WS-COMPUTERGUESS-TRIMMED " and that was too low."
+        COMPUTE HIGHMAX = COMPUTERGUESS - 1
+      ELSE
+        DISPLAY "The computer guessed "
+          FUNCTION TRIM (WS-COMPUTERGUESS-TRIMMED) " and that was too low."
+        DISPLAY "Please try again."
         DISPLAY " "
-        IF COMPUTERGUESS >= LOWMAX
-          *> make lowmax equal userguess plus one
-          COMPUTE LOWMAX = COMPUTERGUESS + 1
-          GO TO ENTERUSERGUESS
-          END-IF
-        GO TO ENTERUSERGUESS
-        END-IF.
+        COMPUTE LOWMAX = COMPUTERGUESS + 1
+      END-IF.
 
-      MOVE TOTALGUESSES TO WS-TOTALGUESSES-TRIMMED
-      DISPLAY "*********************************************"
-      DISPLAY "The computer's guess of " WS-COMPUTERGUESS-TRIMMED " is correct!"
-      DISPLAY "It took " WS-TOTALGUESSES-TRIMMED " total guesses."
-      DISPLAY "********************************************"
-      STOP RUN.
+      *> more taunts and a forced guess limit
+      EVALUATE TRUE
+        WHEN TOTALGUESSES = 8
+          DISPLAY " "
+          DISPLAY "This is a hard number, isn't it?"
+          DISPLAY " "
+        WHEN TOTALGUESSES = 12
+          DISPLAY " "
+          DISPLAY "Wow! You are really bad at this."
+          DISPLAY " "
+        WHEN TOTALGUESSES >= 16
+          DISPLAY " "
+          DISPLAY "You're taking too long, I can't handle it any more."
+          DISPLAY " "
+          DISPLAY "G A M E   O V E R"
+          STOP RUN
+      END-EVALUATE.
 
-    STOP RUN.
+      GO TO ENTERUSERGUESS.

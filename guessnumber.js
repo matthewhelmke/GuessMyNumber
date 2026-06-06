@@ -46,10 +46,6 @@ async function askQuestion(query) {
   return done ? null : value;
 }
 
-function getRandomComputerTaunt() {
-  return computerTaunts[Math.floor(Math.random() * computerTaunts.length)];
-}
-
 async function main() {
   // Print a description of the game, with rules, to the screen
   console.log("Welcome to Guess My Number!\n");
