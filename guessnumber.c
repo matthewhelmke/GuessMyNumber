@@ -37,22 +37,17 @@
 int
 main()
 {
-        char userguessunvalidated;
-        char characters;
+        char userguessunvalidated[256];
         int userguess;
         int totalguesses = 0;
         int lowmax = 1;
         int highmax = 100;
         int secretnumber;
         int computerguess;
-        char buffer[256];
-        char name[256];
-        FILE *outfile;
-        FILE *infile;
 
         // Print a description of the game, with rules, to the screen
         (void) fprintf(stdout,
-                       "Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\n\nYour goal is to guess that number. You will get a turn, then a computer player will get a turn. Each of you are aware of the other's guesses. The first one to guess the number correctly will win. Try to guess in as few turns as possible.\n\nHere we go!\n\n");
+                       "Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n\nHere we go!\n\n");
 
         // Get a random number, or a fixed one from GMN_SECRET for parity testing
         char *gmn_secret = getenv("GMN_SECRET");
@@ -68,73 +63,82 @@ main()
 
                 (void) fprintf(stdout, "What is your guess? ");
 
-                ++totalguesses;
+                // let the user input any number they want
+                if (scanf("%255s", userguessunvalidated) != 1)
+                        exit(0); // end of input
 
-                // let the user input any number they want, then check if an integer between 1-100
-                int c;
-                for(;;) {
-                        if(((c = scanf("%hhd", &userguessunvalidated)) == 1 || c == EOF) && userguessunvalidated > 0 && userguessunvalidated <101 && ((c = getchar()) == EOF || c == '\n'))
-                                break;
-
-                        printf("Invalid! Please enter a whole number between 1 and 100: ");
-                        while((c = getchar()) != EOF && c != '\n');
+                // verify the guess is a whole number (all digits)
+                int alldigits = userguessunvalidated[0] != '\0';
+                for (int i = 0; userguessunvalidated[i] != '\0'; i++)
+                        if (userguessunvalidated[i] < '0' || userguessunvalidated[i] > '9')
+                                alldigits = 0;
+                if (!alldigits) {
+                        (void) fprintf(stdout, "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n");
+                        continue;
                 }
 
-                (userguess=userguessunvalidated);
+                // verify the guess is in range
+                userguess = atoi(userguessunvalidated);
+                if (userguess < 1 || userguess > 100) {
+                        (void) fprintf(stdout, "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n");
+                        continue;
+                }
+
+                // this is a real guess, so count it
+                ++totalguesses;
 
                 // some taunts for silly errors in user guesses
                 if (userguess < lowmax)
-                        (void) fprintf(stdout, "That guess was lower than a previous guess that was too low. Pay attention!\n");
+                        (void) fprintf(stdout, "That guess was lower than a previous guess that was too low. Pay attention!\n\n");
                 if (userguess > highmax)
-                        (void) fprintf(stdout, "Wake up! That guess was higher than an earlier guess that was too high.\n");
+                        (void) fprintf(stdout, "Wake up! That guess was higher than an earlier guess that was too high.\n\n");
 
                 // evaluate the guess
-                if (userguess < secretnumber) {
-                        (void) fprintf(stdout, "Your guess is too low.\n");
-                        if (userguess >= lowmax)
-                                (lowmax = userguess + 1);
-                }
-
-                if (userguess > secretnumber) {
-                        (void) fprintf(stdout, "Your guess is too high.\n");
-                        if (userguess <= highmax)
-                                (highmax = userguess - 1);
-                }
-
                 if (userguess == secretnumber) {
                         (void) fprintf(stdout, "\n*********************************************\n   Your guess is correct! Congratulations!\n   It took %d total guesses.\n*********************************************\n\n", totalguesses);
                         exit(0);
+                }
+
+                if (userguess < secretnumber) {
+                        (void) fprintf(stdout, "Your guess is too low.\n\n");
+                        if (userguess >= lowmax)
+                                lowmax = userguess + 1;
+                }
+
+                if (userguess > secretnumber) {
+                        (void) fprintf(stdout, "Your guess is too high.\n\n");
+                        if (userguess <= highmax)
+                                highmax = userguess - 1;
                 }
 
                 // the computer's guess uses the midpoint of the shared bounds (binary search)
                 computerguess = (lowmax + highmax) / 2;
                 ++totalguesses;
 
-                if (computerguess < secretnumber) {
-                        (void) fprintf(stdout, "The computer guessed %d and that was too low.\n\n", computerguess);
-                        if (computerguess >= lowmax)
-                                (lowmax = computerguess + 1);
-                }
-
-                if (computerguess > secretnumber) {
-                        (void) fprintf(stdout, "The computer guessed %d and that was too high.\n\n", computerguess);
-                        if (computerguess <= highmax)
-                                (highmax = computerguess - 1);
-                }
-
                 if (computerguess == secretnumber) {
-                        (void) fprintf(stdout, "\n*********************************************\n   The computer's guess of %d is correct!\n", computerguess);
-                        (void) fprintf(stdout, "   It took %d total guesses.\n*********************************************\n\n", totalguesses);
+                        (void) fprintf(stdout, "**********************************************\n   The computer's guess of %d is correct!\n   It took %d total guesses.\n**********************************************\n\n", computerguess, totalguesses);
                         exit(0);
                 }
 
+                if (computerguess < secretnumber) {
+                        (void) fprintf(stdout, "The computer guessed %d and that was too low.\nPlease try again.\n\n", computerguess);
+                        if (computerguess >= lowmax)
+                                lowmax = computerguess + 1;
+                }
+
+                if (computerguess > secretnumber) {
+                        (void) fprintf(stdout, "The computer guessed %d and that was too high.\nPlease try again.\n\n", computerguess);
+                        if (computerguess <= highmax)
+                                highmax = computerguess - 1;
+                }
+
                 if (totalguesses == 8)
-                        (void) fprintf(stdout, "\nThis is a hard number, isn't it?\n");
+                        (void) fprintf(stdout, "\nThis is a hard number, isn't it?\n\n");
 
                 if (totalguesses == 12)
-                        (void) fprintf(stdout, "\nWow! You are really bad at this.\n");
+                        (void) fprintf(stdout, "\nWow! You are really bad at this.\n\n");
 
-                if (totalguesses == 16) {
+                if (totalguesses >= 16) {
                         (void) fprintf(stdout, "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
                         exit(0);
                 }

@@ -37,6 +37,7 @@ The first one to guess the number correctly will win. Try to guess in
 as few turns as possible."
 puts " "
 puts "Here we go!"
+puts ""
 
 # Get a random number
 
@@ -52,104 +53,101 @@ computerguess = 0
 totalguesses = 0
 lowmax = 1
 highmax = 100
-gameover = 0
 
 # the main bit
 
-while gameover == 0
+while true
+    print "What is your guess? "
 
     # let the user input any number they want
+    line = gets
+    break if line.nil?   # end of input
+    userguessunvalidated = line.chomp
 
-    puts " "
-    print "What is your guess? "
-    userguessunvalidated = gets.chomp.to_i
-    totalguesses += 1;
-
-    # perform validation, if passes then pass value to final variable
-
-    if ((userguessunvalidated > 0) && (userguessunvalidated < 101))
-            userguess = userguessunvalidated
-        else
-            puts "Invalid! Please enter a whole number between 1 and 100."
-            puts "We will use your previous guess or one if this is your first guess."
+    # verify the guess is a whole number
+    if userguessunvalidated !~ /\A\d+\z/
+        puts "Only whole numbers from 1 to 100 are allowed."
+        puts "Please try again."
+        puts ""
+        next
     end
+
+    # verify the guess is in range
+    userguess = userguessunvalidated.to_i
+    if userguess < 1 || userguess > 100
+        puts "Only whole numbers from 1 to 100 are allowed. Your guess is out of range."
+        puts "Please try again."
+        puts ""
+        next
+    end
+
+    # this is a real guess, so count it
+    totalguesses += 1
 
     # some taunts for silly errors in user guesses
-
-    if userguess > highmax
-        puts " "
-        puts "Wake up! That guess was higher than an earlier guess that was too high."
-    end
     if userguess < lowmax
-        puts " "
         puts "That guess was lower than a previous guess that was too low. Pay attention!"
+        puts ""
+    end
+    if userguess > highmax
+        puts "Wake up! That guess was higher than an earlier guess that was too high."
+        puts ""
     end
 
-    # evaluate the user guess
-
+    # evaluate the guess
     if userguess == secretnumber
-        puts " "
+        puts ""
         puts "*********************************************"
         puts "   Your guess is correct! Congratulations!"
-        print "   It took ", totalguesses, " total guesses."
-        puts " "
+        puts "   It took #{totalguesses} total guesses."
         puts "*********************************************"
-        gameover = 1
-    end
-
-    if userguess > secretnumber
-        puts " "
+        puts ""
+        break
+    elsif userguess > secretnumber
         puts "Your guess is too high."
-        highmax = userguess
-    end
-    if userguess < secretnumber
-        puts " "
+        puts ""
+        highmax = userguess - 1 if userguess <= highmax
+    else
         puts "Your guess is too low."
-        lowmax = userguess
+        puts ""
+        lowmax = userguess + 1 if userguess >= lowmax
     end
 
-    # computer uses midpoint (binary search) within current reasonable values
+    # computer uses the midpoint (binary search) within current bounds
     computerguess = (lowmax + highmax) / 2
     totalguesses += 1
 
-    # evaluate computer guess
-
     if computerguess == secretnumber
-        puts " "
         puts "**********************************************"
-        print "   The computer's guess of ", computerguess, " is correct!"
-        puts " "
-        print "   It took ", totalguesses, " total guesses."
-        puts " "
+        puts "   The computer's guess of #{computerguess} is correct!"
+        puts "   It took #{totalguesses} total guesses."
         puts "**********************************************"
-        gameover = 1
-    end
-    if computerguess > secretnumber
-        puts " "
-        print "The computer guessed ", computerguess, " and that was too high. "
+        puts ""
+        break
+    elsif computerguess > secretnumber
+        puts "The computer guessed #{computerguess} and that was too high."
         puts "Please try again."
-        highmax = computerguess
-    end
-    if computerguess < secretnumber
-        puts " "
-        print "The computer guessed ", computerguess, " and that was too low. "
+        puts ""
+        highmax = computerguess - 1
+    else
+        puts "The computer guessed #{computerguess} and that was too low."
         puts "Please try again."
-        lowmax = computerguess
+        puts ""
+        lowmax = computerguess + 1
     end
 
-    # long game taunts
+    # more taunts and a forced guess limit
     if totalguesses == 8
-        puts " "
+        puts ""
         puts "This is a hard number, isn't it?"
-    end
-    if totalguesses == 12
-        puts " "
+        puts ""
+    elsif totalguesses == 12
+        puts ""
         puts "Wow! You are really bad at this."
-    end
-    if totalguesses == 16
-        puts " "
+        puts ""
+    elsif totalguesses >= 16
+        puts ""
         puts "You're taking too long, I can't handle it any more.\n\nG A M E   O V E R"
-        gameover =1
+        break
     end
-
 end

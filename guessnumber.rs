@@ -52,7 +52,7 @@ fn read_line() -> String {
 }
 
 fn main() {
-    println!("\nWelcome to Guess My Number!\n");
+    println!("Welcome to Guess My Number!\n");
     println!("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
     println!("Here we go!\n");
 
@@ -69,93 +69,79 @@ fn main() {
 
     loop {
         print!("What is your guess? ");
-        totalguesses += 1;
         io::stdout().flush().unwrap();
 
         let guess_input = read_line();
-        let userguess: i32 = match guess_input.parse() {
-            Ok(n) => n,
-            Err(_) => {
-                println!("Only whole numbers from 1 to 100 are allowed. Your guess is not a whole number.\nPlease try again.\n");
-                continue;
-            }
-        };
 
+        // verify the guess is a whole number
+        if guess_input.is_empty() || !guess_input.chars().all(|c| c.is_ascii_digit()) {
+            println!("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n");
+            continue;
+        }
+
+        // verify the guess is in range
+        let userguess: i32 = guess_input.parse().unwrap();
         if userguess < 1 || userguess > 100 {
             println!("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
             continue;
         }
 
+        // this is a real guess, so count it
+        totalguesses += 1;
+
+        // some taunts for silly errors in user guesses
         if userguess < lowmax {
-            println!("That guess was lower than a previous guess that was too low. Pay attention!");
+            println!("That guess was lower than a previous guess that was too low. Pay attention!\n");
         }
         if userguess > highmax {
-            println!("Wake up! That guess was higher than an earlier guess that was too high.");
+            println!("Wake up! That guess was higher than an earlier guess that was too high.\n");
         }
 
+        // evaluate the guess
         if userguess == secretnumber {
             println!("\n*********************************************");
-            println!("   Your guess of {} is correct!", userguess);
-            println!("    It took {} guesses!", totalguesses);
+            println!("   Your guess is correct! Congratulations!");
+            println!("   It took {} total guesses.", totalguesses);
             println!("*********************************************\n");
             break;
-        } else if userguess < secretnumber {
-            println!("Too low.\n");
-            if userguess >= lowmax {
-                lowmax = userguess + 1;
-            }
-        } else {
-            println!("Too high.\n");
+        } else if userguess > secretnumber {
+            println!("Your guess is too high.\n");
             if userguess <= highmax {
                 highmax = userguess - 1;
             }
+        } else {
+            println!("Your guess is too low.\n");
+            if userguess >= lowmax {
+                lowmax = userguess + 1;
+            }
         }
 
-        if totalguesses == 8 {
-            println!("\nThis is a hard number, isn't it?\n");
-        }
-        if totalguesses == 12 {
-            println!("\nWow! You are really bad at this.\n");
-        }
-        if totalguesses >= 16 {
-            println!("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R");
-            exit(0);
-        }
-
+        // computer uses the midpoint (binary search) within current bounds
         let computerguess = (lowmax + highmax) / 2;
         totalguesses += 1;
 
         if computerguess == secretnumber {
-            println!("\n*********************************************");
+            println!("**********************************************");
             println!("   The computer's guess of {} is correct!", computerguess);
-            println!("    It took {} guesses!", totalguesses);
-            println!("*********************************************\n");
+            println!("   It took {} total guesses.", totalguesses);
+            println!("**********************************************\n");
             break;
-        } else if computerguess < secretnumber {
-            println!("The computer guessed {} and that was too low.\n", computerguess);
-            if computerguess >= lowmax {
-                lowmax = computerguess + 1;
-            }
+        } else if computerguess > secretnumber {
+            println!("The computer guessed {} and that was too high.\nPlease try again.\n", computerguess);
+            highmax = computerguess - 1;
         } else {
-            println!("The computer guessed {} and that was too high.\n", computerguess);
-            if computerguess <= highmax {
-                highmax = computerguess - 1;
-            }
+            println!("The computer guessed {} and that was too low.\nPlease try again.\n", computerguess);
+            lowmax = computerguess + 1;
         }
 
+        // more taunts and a forced guess limit
         if totalguesses == 8 {
             println!("\nThis is a hard number, isn't it?\n");
-        }
-        if totalguesses == 12 {
+        } else if totalguesses == 12 {
             println!("\nWow! You are really bad at this.\n");
-        }
-        if totalguesses >= 16 {
-            println!("\nYou're taking too long, I can't handle it any more.\n");
-            println!("G A M E   O V E R");
+        } else if totalguesses >= 16 {
+            println!("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
             exit(0);
         }
     }
-
-    println!("Press Enter to exit.");
-    let _ = read_line();
 }

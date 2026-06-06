@@ -193,14 +193,14 @@ is_all_digits(Str) ->
 %% Taunt for a guess below a bound already known to be too low.
 maybe_careless_low(Userguess, Lowmax) when Userguess < Lowmax ->
     io:format("That guess was lower than a previous guess that was too low. "
-              "Pay attention!~n");
+              "Pay attention!~n~n");
 maybe_careless_low(_Userguess, _Lowmax) ->
     ok.
 
 %% Taunt for a guess above a bound already known to be too high.
 maybe_careless_high(Userguess, Highmax) when Userguess > Highmax ->
     io:format("Wake up! That guess was higher than an earlier guess that was "
-              "too high.~n");
+              "too high.~n~n");
 maybe_careless_high(_Userguess, _Highmax) ->
     ok.
 

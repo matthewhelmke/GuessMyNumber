@@ -47,24 +47,36 @@ public class guessnumber {
             int userguess;
             int computerguess;
             int totalguesses = 0;
-            boolean guessedcorrectly = false;
 
             // Print a description of the game, with rules, to the screen
 
-            System.out.println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in as\nfew turns as possible.\n\nHere we go!\n\n");
+            System.out.println("Welcome to Guess My Number!\n\nThe computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n\nHere we go!\n\n");
 
-            // let the user input any number they want, then check if an integer between 1-100
-
-            while (!guessedcorrectly) {
+            // the main bit
+            while (true) {
                 System.out.print("What is your guess? ");
-                totalguesses++;
-                if (!scanner.hasNextInt()) {
-                    System.out.println("Please enter a valid number.");
-                    scanner.next(); // Discard invalid input
+
+                // let the user input any number they want
+                if (!scanner.hasNext()) {
+                    break; // end of input
+                }
+                String userguessunvalidated = scanner.next();
+
+                // verify the guess is a whole number
+                if (!userguessunvalidated.matches("\\d+")) {
+                    System.out.println("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n");
                     continue;
                 }
 
-                userguess = scanner.nextInt();
+                // verify the guess is in range
+                userguess = Integer.parseInt(userguessunvalidated);
+                if (userguess < 1 || userguess > 100) {
+                    System.out.println("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
+                    continue;
+                }
+
+                // this is a real guess, so count it
+                totalguesses++;
 
                 // some taunts for silly errors in user guesses
                 if (userguess < lowmax) {
@@ -75,45 +87,42 @@ public class guessnumber {
                 }
 
                 // evaluate the guess
-                if (userguess < lowmax || userguess > highmax) {
-                    System.out.println("Invalid! Please enter a whole number between 1 and 100: ");
-                } else if (userguess < secretnumber) {
-                    System.out.println("Your guess is too low.\n");
+                if (userguess == secretnumber) {
+                    System.out.println("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took " + totalguesses + " total guesses.\n*********************************************\n");
+                    return;
                 } else if (userguess > secretnumber) {
                     System.out.println("Your guess is too high.\n");
+                    if (userguess <= highmax) {
+                        highmax = userguess - 1;
+                    }
                 } else {
-                    guessedcorrectly = true;
-                    System.out.println("\n*********************************************\n   Your guess is correct! Congratulations!\n   It took " + totalguesses + "  total guesses.\n*********************************************\n\n");
-                    return;
+                    System.out.println("Your guess is too low.\n");
+                    if (userguess >= lowmax) {
+                        lowmax = userguess + 1;
+                    }
                 }
-            
-                // computer uses midpoint (binary search) within current reasonable values
+
+                // computer uses the midpoint (binary search) within current bounds
                 computerguess = (lowmax + highmax) / 2;
                 totalguesses++;
 
-                // evaluate the computer guess
-                if (computerguess < secretnumber) {
-                    System.out.println("The computer guessed " + computerguess + " and that was too low.\n\n");
-                    lowmax = computerguess + 1;
+                if (computerguess == secretnumber) {
+                    System.out.println("**********************************************\n   The computer's guess of " + computerguess + " is correct!\n   It took " + totalguesses + " total guesses.\n**********************************************\n");
+                    return;
                 } else if (computerguess > secretnumber) {
-                    System.out.println("The computer guessed " + computerguess + " and that was too high.\n\n");
+                    System.out.println("The computer guessed " + computerguess + " and that was too high.\nPlease try again.\n");
                     highmax = computerguess - 1;
                 } else {
-                    guessedcorrectly = true;
-                    System.out.println("\n*********************************************\n   The computer's guess of " + computerguess + " is correct!\n   It took " + totalguesses + "  total guesses.\n*********************************************\n\n");
-                    return;
-                } 
-            
+                    System.out.println("The computer guessed " + computerguess + " and that was too low.\nPlease try again.\n");
+                    lowmax = computerguess + 1;
+                }
 
+                // more taunts and a forced guess limit
                 if (totalguesses == 8) {
                     System.out.println("\nThis is a hard number, isn't it?\n");
-                }
-
-                if (totalguesses == 12) {
+                } else if (totalguesses == 12) {
                     System.out.println("\nWow! You are really bad at this.\n");
-                }
-
-                if (totalguesses == 16) {
+                } else if (totalguesses >= 16) {
                     System.out.println("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
                     return;
                 }

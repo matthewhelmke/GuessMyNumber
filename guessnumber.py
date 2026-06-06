@@ -63,8 +63,6 @@ while True:
     # let the user input any number they want
     userguessunvalidated = input("What is your guess? ")
 
-    totalguesses += 1
-
     # remove leading and trailing spaces
     userguessunvalidated = str.strip(userguessunvalidated)
 
@@ -79,6 +77,9 @@ while True:
     if (userguess <= 0 or userguess >= 101):
         print('''Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n''')
         continue
+
+    # this is a real guess, so count it
+    totalguesses += 1
 
     # some taunts for silly errors in user guesses
     if (userguess < lowmax):
@@ -105,7 +106,6 @@ while True:
         print("   Your guess is correct! Congratulations!")
         print("   It took", totalguesses, "total guesses.")
         print("*********************************************\n")
-        input("\n\nPress the enter key to exit.\n")
         break
 
     # the computer's guess uses a binary-search midpoint within current bounds
@@ -127,7 +127,6 @@ while True:
         print("   The computer's guess of", computerguess, "is correct!")
         print("   It took", totalguesses, "total guesses.")
         print("**********************************************\n")
-        input("\n\nPress the enter key to exit.\n")
         break
 
     # these taunts are just for my amusement and to keep the game from being too terribly long
@@ -139,5 +138,4 @@ while True:
 
     if (totalguesses >= 16):
         print("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
-        input("\n\nPress the enter key to exit.\n")
         break
