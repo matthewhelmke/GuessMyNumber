@@ -75,6 +75,7 @@ The same game is currently implemented in the following languages:
 - JavaScript in an HTML context that runs in a browser  (`guessnumber.html`)
 - JavaScript for the command line using Node.js         (`guessnumber.js`)
 - Haskell                                               (`guessnumber.hs`)
+- Pascal                                                (`guessnumber.pas`)
 - Perl                                                  (`guessnumber.pl`)
 - PHP                                                   (`guessnumber.php`)
 - Python                                                (`guessnumber.py`)
@@ -106,7 +107,7 @@ Some languages express these differently — Forth, for example, uses named memo
 
 ## Extra notes on a couple of languages
 
-Erlang, Forth, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+Erlang, Forth, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
 
 ### Erlang
 
@@ -119,6 +120,25 @@ Two things differ from the imperative versions out of necessity, not preference:
 - **No mutable variables.** Erlang values cannot be reassigned, so the shared state—the secret number, the guess count, and the bounds—is threaded through a tail-recursive loop. Each turn computes a new state and calls the next function with it. The Haskell version takes the same approach.
 
 - **Reading stdin.** `io:get_line/1` returns the line with its trailing newline, or the atom `eof` when input closes. A small `read_guess/0` helper trims the newline and exits cleanly on `eof`.
+
+### Forth (Gforth)
+
+Standard ANS Forth has no built-in random number facility. The Forth version targets **Gforth** (GNU Forth) and uses two Gforth-specific features not present in all Forth systems:
+
+- `require random.fs` loads Gforth's bundled linear congruential RNG, which provides the `random` word (`n -- 0..n-1`) and a `seed` variable.
+- `utime` returns the system clock as microseconds (a double-cell integer), used to seed the RNG at startup.
+
+These are Gforth-specific and not portable to other Forth systems without modification. This is documented in the source and noted here so it is not mistaken for standard ANS Forth. On most Linux systems Gforth is available via the package manager (`apt install gforth` on Debian/Ubuntu derivatives).
+
+
+### Pascal
+
+The Pascal version targets **Free Pascal** (`fpc`) and reads input one line at a time. Two details are deliberate:
+
+- **Parsing reports failure through a code, not an exception.** `Val` converts the trimmed string to an integer and sets a result code. The guess is checked to be all digits first, then `Val` parses it; a non-zero code means the digits overflowed an integer, which the range check then rejects. This matches how Python accepts the value with `int()` and rejects it on range.
+
+- **The loop checks `EOF` before `ReadLn`.** A closed stdin ends the game cleanly instead of looping on empty reads. The prompt prints first, so a piped run that reaches the secret never hits the `EOF` branch.
+
 
 ### R
 
@@ -133,16 +153,6 @@ When running under Rscript, `readline()` does not reliably block for user input 
 `readLines("stdin", n = 1)`
 
 wrapped in a small helper function to ensure correct blocking behavior, EOF detection, and portability. This choice is deliberate and documented in the source to save future readers from rediscovering the issue.
-
-
-### Forth (Gforth)
-
-Standard ANS Forth has no built-in random number facility. The Forth version targets **Gforth** (GNU Forth) and uses two Gforth-specific features not present in all Forth systems:
-
-- `require random.fs` loads Gforth's bundled linear congruential RNG, which provides the `random` word (`n -- 0..n-1`) and a `seed` variable.
-- `utime` returns the system clock as microseconds (a double-cell integer), used to seed the RNG at startup.
-
-These are Gforth-specific and not portable to other Forth systems without modification. This is documented in the source and noted here so it is not mistaken for standard ANS Forth. On most Linux systems Gforth is available via the package manager (`apt install gforth` on Debian/Ubuntu derivatives).
 
 
 ### Rust
@@ -222,7 +232,14 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 ### Future ideas/plans
 
-Write a test harness. DONE.
+Perhaps something like one of these?
 
-Dunno. Maybe Kotlin? Perhaps something like Algol or even Pascal? Something else?? Ideas are also welcome, just file an issue.
+- Ada
+- Algol
+- Common Lisp
+- Kotlin
+- Prolog
+- Zig
+
+Something else?? Ideas are also welcome, just file an issue.
 
