@@ -12,7 +12,7 @@ runs out.
 
 ## Summary
 
-17 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **19 total**
+18 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **19 total**
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
@@ -28,6 +28,7 @@ runs out.
 | HTML | SKIP | — | — | JavaScript-in-browser implementation; no command-line entry point |
 | Java | PASS | 52 ms | 32 |  |
 | JavaScript | PASS | 21 ms | 55 |  |
+| Pascal | PASS | 28 ms | 55 |  | 
 | Perl | PASS | 4 ms | 38 |  |
 | PHP | PASS | 11 ms | 55 |  |
 | Python | PASS | 13 ms | 25 |  |
