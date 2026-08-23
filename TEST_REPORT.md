@@ -1,7 +1,5 @@
 # Guess My Number — Test Report
 
-Generated 2026-06-06 02:55:44 UTC by `./tests/run`.
-
 Per-language commands live in `tests/manifest.sh`. Stdin fixture is 20
 lines of "50" (`tests/fixtures/stdin.txt`). A run **passes** when the
 captured output ends with one of "Your guess is correct", "computer …
@@ -12,7 +10,7 @@ runs out.
 
 ## Summary
 
-18 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **19 total**
+19 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **21 total**
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
@@ -28,6 +26,7 @@ runs out.
 | HTML | SKIP | — | — | JavaScript-in-browser implementation; no command-line entry point |
 | Java | PASS | 52 ms | 32 |  |
 | JavaScript | PASS | 21 ms | 55 |  |
+| Lua | PASS | 3 ms | 39 |  |
 | Pascal | PASS | 28 ms | 55 |  | 
 | Perl | PASS | 4 ms | 38 |  |
 | PHP | PASS | 11 ms | 55 |  |

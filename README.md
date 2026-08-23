@@ -17,6 +17,7 @@ February 15, 2026 was when I first used any AI, specifically GitHub Copilot, whi
   - `Claude Haiku 4.5`
   - `Grok Code Fast 1`
 - [LocalAI](https://localai.io/) using:
+  - `gpt-oss-20b`
   - `gpt-oss-120b`
 - [Claude Code](https://claude.ai/code) using:
   - `Claude Sonnet 4.6`
@@ -71,10 +72,11 @@ The same game is currently implemented in the following languages:
 - Forth using Gforth                                    (`guessnumber.fth`)
 - Fortran                                               (`guessnumber.f90`)
 - Go                                                    (`guessnumber.go`)
+- Haskell                                               (`guessnumber.hs`)
 - Java                                                  (`guessnumber.java`)
 - JavaScript in an HTML context that runs in a browser  (`guessnumber.html`)
 - JavaScript for the command line using Node.js         (`guessnumber.js`)
-- Haskell                                               (`guessnumber.hs`)
+- Lua                                                   (`guessnumber.lua`)
 - Pascal                                                (`guessnumber.pas`)
 - Perl                                                  (`guessnumber.pl`)
 - PHP                                                   (`guessnumber.php`)
@@ -107,7 +109,7 @@ Some languages express these differently — Forth, for example, uses named memo
 
 ## Extra notes on a couple of languages
 
-Erlang, Forth, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+Erlang, Forth, Lua, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
 
 ### Erlang
 
@@ -129,6 +131,17 @@ Standard ANS Forth has no built-in random number facility. The Forth version tar
 - `utime` returns the system clock as microseconds (a double-cell integer), used to seed the RNG at startup.
 
 These are Gforth-specific and not portable to other Forth systems without modification. This is documented in the source and noted here so it is not mistaken for standard ANS Forth. On most Linux systems Gforth is available via the package manager (`apt install gforth` on Debian/Ubuntu derivatives).
+
+
+### Lua
+
+The Lua version runs under the standard interpreter (`lua guessnumber.lua`; on Debian/Ubuntu derivatives, `apt install lua5.4`). Two details are deliberate:
+
+- **Output uses `io.write`, not `print`.** Lua's `print` separates its arguments with tab characters and appends a newline, which would not match Python's spaces. `io.write` emits exactly the bytes given, so each message is assembled with explicit concatenation and newlines.
+
+- **`goto continue` ends a turn early.** Lua has no `continue` statement, so invalid input jumps to a `::continue::` label at the foot of the loop — the same effect Python gets from `continue`, spelled the way Lua allows.
+
+The `GMN_SECRET` parity hook reads the environment variable with `os.getenv`, matching the other versions.
 
 
 ### Pascal

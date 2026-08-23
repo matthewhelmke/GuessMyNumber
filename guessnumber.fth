@@ -4,7 +4,6 @@
 \    calculator when I was bored in math class in 1987, with a couple of
 \    additions like input validation and computer guesses.
 \
-\ Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 \ Copyright (c) 2026 Matthew Helmke for the Gforth version (this one)
 \    with assistance from Claude Code (claude.ai/code)
 \    using the claude-sonnet-4-6 model
