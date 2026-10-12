@@ -8,7 +8,7 @@
 ;
 ; Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 ; Copyright (c) 2021 Matthew Helmke for the Racket version (this one)
-; GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
+; GMN_SECRET hook and input trimming revised 2026-10-12 with assistance from Claude Code
 ;    (claude.ai/code) using the claude-opus-5-5 model
 ;
 ; To run:
@@ -51,12 +51,13 @@ Here we go!\n\n")
   (define line (read-line))
   (cond
     [(eof-object? line) (void)]   ; end of input
-    [(not (regexp-match? #rx"^[0-9]+$" (string-trim line)))
+    ; string-trim is given spaces and tabs; by default it trims all whitespace
+    [(not (regexp-match? #rx"^[0-9]+$" (string-trim line #px"[ \t]+")))
      ; not a whole number
      (printf "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n")
      (inquire-user secretnumber)]
     [else
-     (define userguess (string->number (string-trim line)))
+     (define userguess (string->number (string-trim line #px"[ \t]+")))
      (cond
        [(or (< userguess 1) (> userguess 100))
         ; out of range

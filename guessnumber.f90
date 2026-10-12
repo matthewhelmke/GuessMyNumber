@@ -29,10 +29,14 @@
 ! Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 PROGRAM GuessMyNumber
+  USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY: OUTPUT_UNIT
   IMPLICIT none
   INTEGER :: secretnumber, userguess, computerguess, totalguesses, lowmax, highmax
   CHARACTER(len=100) :: input
   INTEGER :: iostat_val, i
+  ! Variables for reading standard input a byte at a time
+  INTEGER :: stdin_unit, input_len
+  CHARACTER(len=1) :: one_char
   REAL :: random_real
   ! Variables for the GMN_SECRET parity-testing hook
   CHARACTER(len=100) :: env_secret
@@ -78,11 +82,34 @@ PROGRAM GuessMyNumber
   WRITE(*, '(A)') "Here we go!"
   WRITE(*, '(A)') ""
 
+  ! Standard input is read as raw bytes, through /dev/stdin, because a
+  ! formatted READ ends a line at a carriage return as well as a line feed,
+  ! so "3", a carriage return, and "0" would read as two guesses. /dev/stdin
+  ! is a Linux path; the preconnected unit 5 cannot be switched to stream access.
+  OPEN(NEWUNIT=stdin_unit, FILE='/dev/stdin', ACCESS='STREAM', FORM='UNFORMATTED', ACTION='READ')
+
   ! the main bit
   DO
     WRITE(*, '(A)', ADVANCE='NO') "What is your guess? "
-    READ(*, '(A)', iostat=iostat_val) input
-    IF (iostat_val /= 0) EXIT   ! end of input
+    ! show the prompt now; reading another unit does not flush standard output
+    FLUSH(OUTPUT_UNIT)
+
+    ! let the user input any number they want: read up to a line feed, which
+    ! is dropped. Characters past the length of input are dropped too.
+    input = ""
+    input_len = 0
+    DO
+      READ(stdin_unit, IOSTAT=iostat_val) one_char
+      IF (iostat_val /= 0) EXIT              ! end of input
+      IF (one_char == CHAR(10)) EXIT         ! the line is complete
+      IF (input_len < LEN(input)) THEN
+        input_len = input_len + 1
+        input(input_len:input_len) = one_char
+      END IF
+    END DO
+    ! end of input with nothing read ends the game; a last line with no line
+    ! feed is still a guess
+    IF (iostat_val /= 0 .AND. input_len == 0) EXIT
 
     ! remove leading and trailing spaces and tabs: tabs become spaces, ADJUSTL
     ! moves leading spaces to the end, and LEN_TRIM stops before trailing ones

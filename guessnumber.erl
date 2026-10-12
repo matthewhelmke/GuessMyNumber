@@ -12,7 +12,7 @@
 %% This Erlang version is a direct behavioral port of the Python and Haskell
 %% versions. I built it with Claude Code using Claude Opus 4.8, then reviewed
 %% it myself.
-%% GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
+%% GMN_SECRET hook and input reading revised 2026-10-12 with assistance from Claude Code
 %%    (claude.ai/code) using the claude-opus-5-5 model
 %%
 %% To run:
@@ -27,9 +27,12 @@
 %%     there are no reassigned variables; each turn computes a new state and
 %%     calls the next function with it.
 %%
-%%   * io:get_line/1 returns the input line WITH its trailing newline, or the
-%%     atom 'eof' when the input stream closes (for example, when piped stdin
-%%     runs dry). read_guess/0 trims the newline and halts cleanly on eof.
+%%   * A guess is read one character at a time, up to the line feed, rather
+%%     than with io:get_line/1. io:get_line/1 turns a carriage return and line
+%%     feed into a plain line feed, so "30" with a Windows line ending would
+%%     read as a valid guess, where the contract says it is not a whole number.
+%%     io:get_chars/2 returns the atom 'eof' when the input stream closes (for
+%%     example, when piped stdin runs dry), and read_guess/0 halts cleanly.
 %%
 %%   * The computer's guess is simply the midpoint of the current bounds. The
 %%     bounds always enclose the secret number, so the range never collapses and
@@ -164,13 +167,26 @@ secret_from_env() ->
             end
     end.
 
-%% Read one guess from stdin. io:get_line/1 keeps the trailing newline and
-%% returns 'eof' when the stream closes; trim the newline and exit cleanly on
-%% eof so a closed pipe does not loop forever.
+%% Read one guess from stdin, and exit cleanly at end of input so a closed
+%% pipe does not loop forever.
 read_guess() ->
-    case io:get_line("What is your guess? ") of
+    io:format("What is your guess? "),
+    case read_line([]) of
         eof  -> halt(0);
-        Line -> string:trim(Line)
+        %% trim only spaces and tabs; string:trim/1 would also remove other
+        %% whitespace, such as a form feed or a carriage return
+        Line -> string:trim(Line, both, [$\s, $\t])
+    end.
+
+%% Collect characters up to a line feed, which is dropped; anything else,
+%% including a carriage return, stays in the line. A last line with no line
+%% feed is returned when the input ends; 'eof' means nothing was left to read.
+read_line(Reversed) ->
+    case io:get_chars("", 1) of
+        eof when Reversed =:= [] -> eof;
+        eof  -> lists:reverse(Reversed);
+        "\n" -> lists:reverse(Reversed);
+        [Char] -> read_line([Char | Reversed])
     end.
 
 %% Classify a raw guess. Matches the Python lineage: a non-numeric entry and an

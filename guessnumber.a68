@@ -37,6 +37,11 @@ COMMENT
       the same second therefore pick the same number. Every run also writes
       the generator's state to a .Random.seed file in the current directory.
 
+    * A form feed is the end of a page to a68g, not a character, so reading
+      a line stops at one and the guess never contains it. The procedure
+      handed to on page end sets a flag instead, and a line that set it is
+      not a whole number.
+
     * The language has no trim and no string-to-integer conversion, so this
       file defines small procedures for both.
 
@@ -64,15 +69,18 @@ COMMENT
 COMMENT
 
 BEGIN
-   # Remove leading and trailing spaces, tabs, and other control characters.
+   # True for the two characters a guess may be padded with: space and tab #
+   PROC is blank = (CHAR c) BOOL: c = " " OR c = REPR 9;
+
+   # Remove leading and trailing spaces and tabs, and nothing else.
      AND evaluates both of its operands, so each loop condition is an
      IF that looks at a character only while one is left to look at. #
    PROC trim = (STRING s) STRING:
       BEGIN
          INT first := LWB s, last := UPB s;
-         WHILE IF first <= last THEN ABS s[first] <= ABS " " ELSE FALSE FI
+         WHILE IF first <= last THEN is blank (s[first]) ELSE FALSE FI
          DO first +:= 1 OD;
-         WHILE IF last >= first THEN ABS s[last] <= ABS " " ELSE FALSE FI
+         WHILE IF last >= first THEN is blank (s[last]) ELSE FALSE FI
          DO last -:= 1 OD;
          s[first:last]
       END;
@@ -135,6 +143,13 @@ BEGIN
    BOOL endofinput := FALSE;
    on logical file end (stand in, (REF FILE f) BOOL: (endofinput := TRUE; TRUE));
 
+   # set by the event procedure when a read meets a form feed. a68g treats a
+     form feed as the end of a page, not as a character, so the guess never
+     contains one; this flag is how the loop learns that the line held one.
+     Returning FALSE lets a68g go on to the next page and read the rest. #
+   BOOL formfeed := FALSE;
+   on page end (stand in, (REF FILE f) BOOL: (formfeed := TRUE; FALSE));
+
    # the main bit #
    WHILE NOT gameover DO
       print ("What is your guess? ");
@@ -142,6 +157,7 @@ BEGIN
       # let the user input any number they want #
       BOOL validguess := FALSE;
       endofinput := FALSE;
+      formfeed := FALSE;
       read (userguessunvalidated);
 
       IF endofinput THEN
@@ -150,11 +166,12 @@ BEGIN
       ELSE
          read (newline);
 
-         # remove leading and trailing spaces #
+         # remove leading and trailing spaces and tabs #
          userguessunvalidated := trim (userguessunvalidated);
 
-         # verify the guess is a whole number #
-         IF NOT is all digits (userguessunvalidated) THEN
+         # verify the guess is a whole number; a form feed anywhere in the
+           line means it is not #
+         IF formfeed OR NOT is all digits (userguessunvalidated) THEN
             print (("Only whole numbers from 1 to 100 are allowed.", newline,
                     "Please try again.", newline,
                     newline))

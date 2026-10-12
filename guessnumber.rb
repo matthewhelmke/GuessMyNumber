@@ -69,7 +69,8 @@ while true
     # let the user input any number they want
     line = gets
     break if line.nil?   # end of input
-    userguessunvalidated = line.chomp
+    # drop the line feed only; chomp would also drop a carriage return before it
+    userguessunvalidated = line.delete_suffix("\n")
 
     # remove leading and trailing spaces and tabs
     userguessunvalidated = userguessunvalidated.sub(/\A[ \t]+/, "").sub(/[ \t]+\z/, "")

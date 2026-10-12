@@ -21,6 +21,17 @@ declare -A SECRET=(
     [bound-at-100]=100
     [trim-spaces]=30
     [trim-tabs]=30
+    [carriage-return]=30
+    [vertical-tab]=30
+    [form-feed]=30
+    [no-break-space]=30
+    [ideographic-space]=30
+    [next-line]=30
+    [cr-inside]=30
+    [form-feed-inside]=30
+    [next-line-inside]=30
+    [line-separator]=30
+    [paragraph-separator]=30
     [empty-line]=30
     [letters]=30
     [sign-minus]=30
@@ -52,6 +63,22 @@ declare -A EXPECT=(
     [bound-at-100]="The computer's guess of 100 is correct!"
     [trim-spaces]="$FIRSTGUESSWIN"
     [trim-tabs]="$FIRSTGUESSWIN"
+    # Only spaces and tabs are trimmed. These are whitespace to many trim
+    # functions, so each one tests that a language's trim removes no more.
+    [carriage-return]="$NONNUMERIC"     # 30 then CR, as a Windows line ending leaves it
+    [vertical-tab]="$NONNUMERIC"
+    [form-feed]="$NONNUMERIC"
+    [no-break-space]="$NONNUMERIC"      # U+00A0
+    [ideographic-space]="$NONNUMERIC"   # U+3000
+    [next-line]="$NONNUMERIC"           # U+0085
+    # The same kind of character inside a number. A reader that ends a line at
+    # one would see two short guesses, such as 3 and 0, instead of one bad one;
+    # at the end of a line that same reader passes by luck, reading an empty line.
+    [cr-inside]="$NONNUMERIC"
+    [form-feed-inside]="$NONNUMERIC"
+    [next-line-inside]="$NONNUMERIC"    # U+0085
+    [line-separator]="$NONNUMERIC"      # U+2028
+    [paragraph-separator]="$NONNUMERIC" # U+2029
     [empty-line]="$NONNUMERIC"
     [letters]="$NONNUMERIC"
     [sign-minus]="$NONNUMERIC"
