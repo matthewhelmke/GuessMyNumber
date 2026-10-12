@@ -4,9 +4,10 @@
 #
 # Each scenario in tests/scenarios.sh is one game: a fixed secret (GMN_SECRET)
 # and a fixed input from tests/fixtures/parity/<name>.txt. Every implementation
-# plays every scenario, and its normalized output is diffed against Python, the
-# canonical reference. A new language is "done" when it matches here, so this
-# doubles as the TDD gate for future implementations.
+# plays every scenario, and its normalized output and exit status are diffed
+# against Python, the canonical reference, which must exit 0 in every game. A
+# new language is "done" when it matches here, so this doubles as the TDD gate
+# for future implementations.
 #
 # Before comparing anything, the script checks that the Python reference still
 # reaches the path each scenario is named for (the EXPECT patterns). A scenario
@@ -74,14 +75,21 @@ prepare() {
     RUN_CMD="${RUN_CMD//%TMPDIR%/$tmpdir}"
 }
 
-# Play one scenario with the prepared language and print its normalized output.
+# Play one scenario with the prepared language and print its normalized output,
+# then a last line holding its exit status, so the comparison covers both.
 # Output is cut off at MAX_OUTPUT bytes: a program that loops at end of input
 # would otherwise print for the whole timeout, and closing the pipe stops it.
 play() {
-    local scenario="$1"
-    GMN_SECRET="${SECRET[$scenario]}" timeout --kill-after=5 "$TIMEOUT_SEC" \
+    local scenario="$1" output status
+    # PIPESTATUS[0] is the program's own status; the pipeline's, under
+    # pipefail, could come from head or normalize instead
+    output="$(GMN_SECRET="${SECRET[$scenario]}" timeout --kill-after=5 "$TIMEOUT_SEC" \
         bash -c "$RUN_CMD" < "${FIXTURE_DIR}/${scenario}.txt" 2>&1 \
-        | head -c "$MAX_OUTPUT" | normalize
+        | head -c "$MAX_OUTPUT" | normalize; exit "${PIPESTATUS[0]}")"
+    status=$?
+    # The command substitution drops trailing newlines, so the status line
+    # follows the output the same way whether or not the output ended in one
+    printf '%s\nexit status %s\n' "$output" "$status"
 }
 
 # Run one hook case with the prepared language, and print its verdict. Each
@@ -118,6 +126,11 @@ for scenario in "${SCENARIOS[@]}"; do
         broken=1; continue
     fi
     REF[$scenario]="$(play "$scenario")"
+    if [[ "${REF[$scenario]}" != *$'\n'"exit status 0" ]]; then
+        echo "ERROR: scenario '$scenario' does not end with exit status 0 in the" \
+             "Python reference: ${REF[$scenario]##*$'\n'}" >&2
+        broken=1
+    fi
     while IFS= read -r pattern; do
         if ! grep -Eq -- "$pattern" <<<"${REF[$scenario]}"; then
             echo "ERROR: scenario '$scenario' no longer reaches its path;" \
