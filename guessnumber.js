@@ -126,9 +126,9 @@ async function main() {
     // more taunts and a forced guess limit
     if (totalguesses === 8) {
       console.log("\nThis is a hard number, isn't it?\n");
-    } else if (totalguesses === 12) {
+    } else if (totalguesses === 10) {
       console.log("\nWow! You are really bad at this.\n");
-    } else if (totalguesses >= 16) {
+    } else if (totalguesses >= 12) {
       console.log("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
       break;
     }

@@ -204,15 +204,15 @@ maybe_careless_high(Userguess, Highmax) when Userguess > Highmax ->
 maybe_careless_high(_Userguess, _Highmax) ->
     ok.
 
-%% Taunts at 8 and 12 total guesses; a forced game over at 16. Returns whether
+%% Taunts at 8 and 10 total guesses; a forced game over at 12. Returns whether
 %% the game should continue.
 time_taunt(Totalguesses) when Totalguesses =:= 8 ->
     io:format("~nThis is a hard number, isn't it?~n~n"),
     continue;
-time_taunt(Totalguesses) when Totalguesses =:= 12 ->
+time_taunt(Totalguesses) when Totalguesses =:= 10 ->
     io:format("~nWow! You are really bad at this.~n~n"),
     continue;
-time_taunt(Totalguesses) when Totalguesses >= 16 ->
+time_taunt(Totalguesses) when Totalguesses >= 12 ->
     io:format("~nYou're taking too long, I can't handle it any more.~n~n"
               "G A M E   O V E R~n~n"),
     game_over;

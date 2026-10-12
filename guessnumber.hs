@@ -121,8 +121,8 @@ gameLoop secretnumber totalguesses lowmax highmax = do
 
                   -- more taunts and a forced guess limit
                   when (totalguesses'' == 8) $ putStrLn "\nThis is a hard number, isn't it?\n"
-                  when (totalguesses'' == 12) $ putStrLn "\nWow! You are really bad at this.\n"
-                  when (totalguesses'' >= 16) $ do
+                  when (totalguesses'' == 10) $ putStrLn "\nWow! You are really bad at this.\n"
+                  when (totalguesses'' >= 12) $ do
                     putStrLn "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n"
                     exitSuccess
 

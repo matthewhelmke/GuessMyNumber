@@ -207,13 +207,13 @@ begin
       WriteLn('This is a hard number, isn''t it?');
       WriteLn;
     end
-    else if totalguesses = 12 then
+    else if totalguesses = 10 then
     begin
       WriteLn;
       WriteLn('Wow! You are really bad at this.');
       WriteLn;
     end
-    else if totalguesses >= 16 then
+    else if totalguesses >= 12 then
     begin
       WriteLn;
       WriteLn('You''re taking too long, I can''t handle it any more.');

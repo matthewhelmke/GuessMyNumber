@@ -41,6 +41,7 @@ FIXTURE_DIR="${TESTS_DIR}/fixtures/parity"
 KNOWN_FILE="${TESTS_DIR}/parity_known.txt"
 TIMEOUT_SEC=30
 DIFF_LINES=40   # cap each diff so the worklist stays readable
+MAX_OUTPUT=200000   # bytes; a whole game prints about 3 KB, so more means a runaway loop
 
 # shellcheck source=tests/manifest.sh
 source "${TESTS_DIR}/manifest.sh"
@@ -69,10 +70,13 @@ prepare() {
 }
 
 # Play one scenario with the prepared language and print its normalized output.
+# Output is cut off at MAX_OUTPUT bytes: a program that loops at end of input
+# would otherwise print for the whole timeout, and closing the pipe stops it.
 play() {
     local scenario="$1"
     GMN_SECRET="${SECRET[$scenario]}" timeout --kill-after=5 "$TIMEOUT_SEC" \
-        bash -c "$RUN_CMD" < "${FIXTURE_DIR}/${scenario}.txt" 2>&1 | normalize
+        bash -c "$RUN_CMD" < "${FIXTURE_DIR}/${scenario}.txt" 2>&1 \
+        | head -c "$MAX_OUTPUT" | normalize
 }
 
 mapfile -t SCENARIOS < <(printf '%s\n' "${!SECRET[@]}" | sort)

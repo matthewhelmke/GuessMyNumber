@@ -50,9 +50,9 @@ All implementations are expected to conform to the following rules. These are th
 
 1. Taunts are printed at specific guess counts:
     - After 8 total guesses
-    - After 12 total guesses
+    - After 10 total guesses
 
-1. The game terminates forcibly after 16 total guesses with a GAME OVER message.
+1. The game terminates forcibly after 12 total guesses with a GAME OVER message. The computer's binary search always finds the number by its seventh guess, at 14 total guesses, so a limit any later could never be reached; at 12, it ends about a third of the slowest games.
 
 1. Additional taunts are triggered when the user:
     - Guesses lower than a previous guess that was already too low
@@ -225,7 +225,7 @@ BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
 
 `./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it plays every command-line implementation through a set of scenarios, then diffs the normalized output of each against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
 
-Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, the 8- and 12-guess taunts, both careless-guess taunts, and each kind of invalid input. No scenario reaches the forced game over at 16 guesses yet. Each scenario also names text the Python output must contain, such as the 12-guess taunt. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
+Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, a bound of 100, the 8- and 10-guess taunts, the forced game over at 12, both careless-guess taunts, and each kind of invalid input. Each scenario also names text the Python output must contain, such as the GAME OVER message. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
 
 Some implementations do not match every scenario yet. `tests/parity_known.txt` lists those pairs, with the cause of each; they report `KNOWN` and do not fail the check. The list only shrinks: a listed pair that starts matching reports `STALE` and fails the check until its line is deleted. `./tests/parity <language>` shows the diffs for a language's known divergences.
 

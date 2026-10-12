@@ -240,11 +240,11 @@ BEGIN
             print ((newline,
                     "This is a hard number, isn't it?", newline,
                     newline))
-         ELIF totalguesses = 12 THEN
+         ELIF totalguesses = 10 THEN
             print ((newline,
                     "Wow! You are really bad at this.", newline,
                     newline))
-         ELIF totalguesses >= 16 THEN
+         ELIF totalguesses >= 12 THEN
             print ((newline,
                     "You're taking too long, I can't handle it any more.", newline,
                     newline,

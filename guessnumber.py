@@ -134,9 +134,9 @@ while True:
     if (totalguesses == 8):
         print("\nThis is a hard number, isn't it?\n")
 
-    if (totalguesses == 12):
+    if (totalguesses == 10):
         print("\nWow! You are really bad at this.\n")
 
-    if (totalguesses >= 16):
+    if (totalguesses >= 12):
         print("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
         break

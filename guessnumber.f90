@@ -153,11 +153,11 @@ PROGRAM GuessMyNumber
       WRITE(*, '(A)') ""
       WRITE(*, '(A)') "This is a hard number, isn't it?"
       WRITE(*, '(A)') ""
-    ELSE IF (totalguesses == 12) THEN
+    ELSE IF (totalguesses == 10) THEN
       WRITE(*, '(A)') ""
       WRITE(*, '(A)') "Wow! You are really bad at this."
       WRITE(*, '(A)') ""
-    ELSE IF (totalguesses >= 16) THEN
+    ELSE IF (totalguesses >= 12) THEN
       WRITE(*, '(A)') ""
       WRITE(*, '(A)') "You're taking too long, I can't handle it any more."
       WRITE(*, '(A)') ""

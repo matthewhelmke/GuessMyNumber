@@ -135,10 +135,10 @@ main()
                 if (totalguesses == 8)
                         (void) fprintf(stdout, "\nThis is a hard number, isn't it?\n\n");
 
-                if (totalguesses == 12)
+                if (totalguesses == 10)
                         (void) fprintf(stdout, "\nWow! You are really bad at this.\n\n");
 
-                if (totalguesses >= 16) {
+                if (totalguesses >= 12) {
                         (void) fprintf(stdout, "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
                         exit(0);
                 }

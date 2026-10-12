@@ -141,11 +141,11 @@ while true
         puts ""
         puts "This is a hard number, isn't it?"
         puts ""
-    elsif totalguesses == 12
+    elsif totalguesses == 10
         puts ""
         puts "Wow! You are really bad at this."
         puts ""
-    elsif totalguesses >= 16
+    elsif totalguesses >= 12
         puts ""
         puts "You're taking too long, I can't handle it any more.\n\nG A M E   O V E R"
         break

@@ -88,7 +88,7 @@
 
 950 REM Taunts
 960 IF TOTALGUESSES = 8 THEN PRINT : PRINT "This is a hard number, isn't it?"
-970 IF TOTALGUESSES = 12 THEN PRINT : PRINT "Wow! You are really bad at this."
-980 IF TOTALGUESSES >= 16 THEN PRINT : PRINT "You're taking too long, I can't handle it any more.": PRINT : PRINT "G A M E   O V E R": END
+970 IF TOTALGUESSES = 10 THEN PRINT : PRINT "Wow! You are really bad at this."
+980 IF TOTALGUESSES >= 12 THEN PRINT : PRINT "You're taking too long, I can't handle it any more.": PRINT : PRINT "G A M E   O V E R": END
 
 1110 GOTO 450
