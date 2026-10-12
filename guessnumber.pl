@@ -8,6 +8,8 @@
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 # Copyright (c) 2020 Matthew Helmke for the Perl version (this one)
+# Input handling revised 2026-10-12 with assistance from Claude Code
+#    (claude.ai/code) using the claude-opus-5-5 model
 #
 # Prerequisites:
 #   You must have CPAN installed. On most Linux distros, you can install with:
@@ -75,6 +77,9 @@ while (1) {
     last if !defined $input;   # end of input
     chomp($input);
     my $userguessunvalidated = $input;
+
+    # remove leading and trailing spaces and tabs
+    $userguessunvalidated =~ s/^[ \t]+|[ \t]+$//g;
 
     # verify the guess is a whole number
     if ($userguessunvalidated !~ /^\d+$/) {

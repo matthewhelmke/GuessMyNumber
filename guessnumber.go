@@ -6,6 +6,8 @@
 
 // Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 // Copyright (c) 2023 Matthew Helmke for the Golang version (this one)
+// Input handling revised 2026-10-12 with assistance from Claude Code
+//    (claude.ai/code) using the claude-opus-5-5 model
 
 //  To run:
 //   go run guessnumber.go
@@ -27,12 +29,27 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
+
+// isAllDigits reports whether s is a non-empty run of the ASCII digits 0 to 9.
+func isAllDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return true
+}
 
 func main() {
 	lowmax := 1
@@ -52,6 +69,9 @@ func main() {
 
 	var userguessunvalidated string
 
+	// read whole lines; fmt.Scanf("%s") reads one word and skips empty lines
+	input := bufio.NewScanner(os.Stdin)
+
 	totalguesses := 0
 
 	// the main bit
@@ -59,19 +79,24 @@ func main() {
 		fmt.Print("What is your guess? ")
 
 		// let the user input any number they want
-		if _, err := fmt.Scanf("%s", &userguessunvalidated); err != nil {
+		if !input.Scan() {
 			break // end of input
 		}
+		userguessunvalidated = input.Text()
 
-		// verify the guess is a whole number
-		userguess, err := strconv.Atoi(userguessunvalidated)
-		if err != nil {
+		// remove leading and trailing spaces and tabs
+		userguessunvalidated = strings.Trim(userguessunvalidated, " \t")
+
+		// verify the guess is a whole number; strconv.Atoi alone would accept a sign
+		if !isAllDigits(userguessunvalidated) {
 			fmt.Println("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n")
 			continue
 		}
 
-		// verify the guess is in range
-		if userguess < 1 || userguess > 100 {
+		// verify the guess is in range; the input is all digits, so Atoi can fail
+		// only when the number is too large for an int, which is out of range
+		userguess, err := strconv.Atoi(userguessunvalidated)
+		if err != nil || userguess < 1 || userguess > 100 {
 			fmt.Println("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n")
 			continue
 		}

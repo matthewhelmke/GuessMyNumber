@@ -6,6 +6,8 @@
  *
  * Copyright (c) 2007 Matthew Helmke for the old Python 2 version
  * Copyright (c) 2020 Matthew Helmke for the C version (this one)
+ * Input handling revised 2026-10-12 with assistance from Claude Code
+ *    (claude.ai/code) using the claude-opus-5-5 model
  *
  * To compile (Linux):
  *   gcc -o guessnumber guessnumber.c
@@ -63,9 +65,21 @@ main()
 
                 (void) fprintf(stdout, "What is your guess? ");
 
-                // let the user input any number they want
-                if (scanf("%255s", userguessunvalidated) != 1)
+                // let the user input any number they want; fgets reads the whole line,
+                // where scanf("%s") would read one word and skip empty lines
+                if (fgets(userguessunvalidated, sizeof userguessunvalidated, stdin) == NULL)
                         exit(0); // end of input
+
+                // remove the newline, then leading and trailing spaces and tabs
+                userguessunvalidated[strcspn(userguessunvalidated, "\n")] = '\0';
+                char *start = userguessunvalidated;
+                while (*start == ' ' || *start == '\t')
+                        start++;
+                size_t length = strlen(start);
+                while (length > 0 && (start[length - 1] == ' ' || start[length - 1] == '\t'))
+                        length--;
+                memmove(userguessunvalidated, start, length);
+                userguessunvalidated[length] = '\0';
 
                 // verify the guess is a whole number (all digits)
                 int alldigits = userguessunvalidated[0] != '\0';
@@ -77,12 +91,15 @@ main()
                         continue;
                 }
 
-                // verify the guess is in range
-                userguess = atoi(userguessunvalidated);
-                if (userguess < 1 || userguess > 100) {
+                // verify the guess is in range. strtol, unlike atoi, is defined for a
+                // number too large to hold: it returns LONG_MAX, which is out of range.
+                long value = strtol(userguessunvalidated, NULL, 10);
+                if (value < 1 || value > 100) {
                         (void) fprintf(stdout, "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n");
                         continue;
                 }
+
+                userguess = (int) value;
 
                 // this is a real guess, so count it
                 ++totalguesses;

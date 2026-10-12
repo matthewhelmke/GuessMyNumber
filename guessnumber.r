@@ -10,6 +10,8 @@
 # Original versions:
 #   Copyright (c) 2007 Matthew Helmke
 #   Copyright (c) 2025 Matthew Helmke
+#   Input handling revised 2026-10-12 with assistance from Claude Code
+#      (claude.ai/code) using the claude-opus-5-5 model
 #
 # This R version is a direct behavioral port of the Rust version,
 # which itself was derived from the Python, Bash, C, Perl, PHP,
@@ -83,8 +85,9 @@ repeat {
     next
   }
 
-  # verify the guess is in range
-  userguess <- as.integer(guess_input)
+  # verify the guess is in range; as.numeric rather than as.integer, which
+  # turns a number too large for an integer into NA, and NA cannot be compared
+  userguess <- as.numeric(guess_input)
   if (userguess < 1 || userguess > 100) {
     cat("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n")
     next

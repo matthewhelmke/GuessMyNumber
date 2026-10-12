@@ -8,6 +8,8 @@
  * Original versions:
  *   Copyright (c) 2007 Matthew Helmke
  *   Copyright (c) 2025 Matthew Helmke
+ *   Input handling revised 2026-10-12 with assistance from Claude Code
+ *      (claude.ai/code) using the claude-opus-5-5 model
  *
  * This Rust version is a direct behavioral port of the Python, Bash, C,
  * Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
@@ -79,8 +81,9 @@ fn main() {
             continue;
         }
 
-        // verify the guess is in range
-        let userguess: i32 = guess_input.parse().unwrap();
+        // verify the guess is in range; the input is all digits, so parse can
+        // fail only when the number is too large for an i32, which is out of range
+        let userguess: i32 = guess_input.parse().unwrap_or(i32::MAX);
         if userguess < 1 || userguess > 100 {
             println!("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
             continue;

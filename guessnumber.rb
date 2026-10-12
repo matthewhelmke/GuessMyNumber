@@ -8,6 +8,8 @@
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 # Copyright (c) 2024 Matthew Helmke for the Ruby version (this one)
+# Input handling revised 2026-10-12 with assistance from Claude Code
+#    (claude.ai/code) using the claude-opus-5-5 model
 #
 # To run:
 #   ruby guessnumber.rb
@@ -63,6 +65,9 @@ while true
     line = gets
     break if line.nil?   # end of input
     userguessunvalidated = line.chomp
+
+    # remove leading and trailing spaces and tabs
+    userguessunvalidated = userguessunvalidated.sub(/\A[ \t]+/, "").sub(/[ \t]+\z/, "")
 
     # verify the guess is a whole number
     if userguessunvalidated !~ /\A\d+\z/
