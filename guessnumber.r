@@ -38,7 +38,9 @@ read_input <- function(prompt = "") {
   flush.console()
 
   line <- tryCatch(
-    readLines(.stdin_conn, n = 1),
+    # warn = FALSE: a last line with no newline is still a guess, so the
+    # "incomplete final line" warning would only add noise to the output
+    readLines(.stdin_conn, n = 1, warn = FALSE),
     error = function(e) character(0)
   )
 

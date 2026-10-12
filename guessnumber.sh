@@ -58,7 +58,9 @@ fi
 # the main bit
 while :; do
   printf "What is your guess? "
-  read userguessunvalidated || break   # end of input
+  # read fails at end of input, and also on a last line that has no newline,
+  # so stop only when it fails without having read anything
+  read userguessunvalidated || [[ -n "$userguessunvalidated" ]] || break
 
   # verify the guess is a whole number
   if [[ ! $userguessunvalidated =~ ^[0-9]+$ ]]; then
