@@ -8,6 +8,8 @@
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 # Copyright (c) 2020 Matthew Helmke for the Python 3 version (this one)
+# End of input handling added 2026-10-12 with assistance from Claude Code
+#    (claude.ai/code) using the claude-opus-5-5 model
 #
 # To run:
 #   python guessnumber.py
@@ -60,8 +62,12 @@ highmax = 100
 # the main bit
 while True:
 
-    # let the user input any number they want
-    userguessunvalidated = input("What is your guess? ")
+    # let the user input any number they want; the game ends quietly when
+    # input runs out
+    try:
+        userguessunvalidated = input("What is your guess? ")
+    except EOFError:
+        break
 
     # remove leading and trailing spaces and tabs
     userguessunvalidated = str.strip(userguessunvalidated, " \t")
