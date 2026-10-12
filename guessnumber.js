@@ -6,8 +6,8 @@
 
  Copyright (c) 2007 Matthew Helmke for the old Python 2 version
  Copyright (c) 2025 Matthew Helmke for the JavaScript + Node.js version (this one)
- GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
-    (claude.ai/code) using the claude-opus-5-5 model
+ GMN_SECRET hook and input reading revised 2026-10-12 with assistance from
+    Claude Code (claude.ai/code) using the claude-opus-5-5 model
 
  To run:
    You must have Node.js installed
@@ -29,23 +29,41 @@
 */
 
 
-const readline = require("readline");
+// Input is split into lines here, at line feeds only. The readline module is
+// not used because it also ends a line at a carriage return, U+2028, and
+// U+2029, so "3", a carriage return, and "0" would read as two guesses. It also
+// kept the program waiting for more input after the game ended at a terminal.
+const pendingLines = [];   // complete lines not yet asked for
+let partialLine = "";      // text after the last line feed
+let inputEnded = false;
+let wakeAskQuestion = null;
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", (chunk) => {
+  partialLine += chunk;
+  let lineFeed = partialLine.indexOf("\n");
+  while (lineFeed !== -1) {
+    pendingLines.push(partialLine.slice(0, lineFeed));
+    partialLine = partialLine.slice(lineFeed + 1);
+    lineFeed = partialLine.indexOf("\n");
+  }
+  if (wakeAskQuestion) wakeAskQuestion();
+});
+process.stdin.on("end", () => {
+  // a last line with no line feed still counts as a line
+  if (partialLine !== "") pendingLines.push(partialLine);
+  inputEnded = true;
+  if (wakeAskQuestion) wakeAskQuestion();
 });
 
-// Use readline's async iterator instead of rl.question. With piped stdin the
-// readline interface can emit `close` before the next rl.question is queued,
-// leaving the Promise unresolved and stalling the game mid-loop. The iterator
-// drains buffered lines reliably and signals EOF via { done: true }.
-const lineIter = rl[Symbol.asyncIterator]();
-
+// Print the prompt and wait for the next line; null means the input has ended
 async function askQuestion(query) {
   process.stdout.write(query);
-  const { value, done } = await lineIter.next();
-  return done ? null : value;
+  while (pendingLines.length === 0 && !inputEnded) {
+    await new Promise((resolve) => { wakeAskQuestion = resolve; });
+    wakeAskQuestion = null;
+  }
+  return pendingLines.length > 0 ? pendingLines.shift() : null;
 }
 
 async function main() {
@@ -73,7 +91,11 @@ async function main() {
     }
 
     // verify the guess is a whole number
-    if (!/^\d+$/.test(input.trim())) {
+    // remove leading and trailing spaces and tabs; trim() would also remove
+    // other whitespace, such as a form feed or a no-break space
+    input = input.replace(/^[ \t]+|[ \t]+$/g, "");
+
+    if (!/^\d+$/.test(input)) {
       console.log("Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n");
       continue;
     }
@@ -139,4 +161,5 @@ async function main() {
   }
 }
 
-main();
+// stop reading once the game is over, so the program can exit at a terminal
+main().then(() => process.stdin.destroy());

@@ -10,7 +10,7 @@
   This Pascal version is a direct behavioral port of the canonical Python
   version. I built it with Claude Code using Claude Opus 4.8, then reviewed
   it myself.
-  Number parsing revised 2026-10-12 with assistance from Claude Code
+  Number parsing and input reading revised 2026-10-12 with assistance from Claude Code
      (claude.ai/code) using the claude-opus-5-5 model
 
   To compile (Free Pascal):
@@ -29,8 +29,10 @@
     * GetEnvironmentVariable (from SysUtils) reads the GMN_SECRET parity hook.
       An empty string means the variable is unset, so the secret stays random.
 
-    * The input loop checks EOF before ReadLn so a closed stdin ends the game
-      cleanly instead of looping on empty reads. The prompt is printed first,
+    * The input loop checks EOF before reading so a closed stdin ends the game
+      cleanly instead of looping on empty reads. A guess is read a character
+      at a time up to the line feed, because ReadLn also ends a line at a
+      carriage return. The prompt is printed first,
       mirroring the other versions, so a piped run that converges never reaches
       the EOF branch.
 
@@ -69,6 +71,42 @@ begin
       IsAllDigits := False;
       Exit;
     end;
+end;
+
+{ Read one line, up to a line feed, which is dropped. ReadLn is not used
+  because it also ends a line at a carriage return, so "3", a carriage return,
+  and "0" would read as two guesses. A last line with no line feed is still
+  returned when the input ends. }
+function ReadLineLF: string;
+var
+  c: Char;
+  line: string;
+begin
+  line := '';
+  while not EOF do
+  begin
+    Read(c);
+    if c = #10 then
+      Break;
+    line := line + c;
+  end;
+  ReadLineLF := line;
+end;
+
+{ The string without its leading and trailing spaces and tabs. SysUtils' Trim
+  is not used because it removes every character up to a space, including a
+  carriage return, a vertical tab, and a form feed. }
+function TrimBlanks(const s: string): string;
+var
+  first, last: Integer;
+begin
+  first := 1;
+  last := Length(s);
+  while (first <= last) and (s[first] in [' ', #9]) do
+    first := first + 1;
+  while (last >= first) and (s[last] in [' ', #9]) do
+    last := last - 1;
+  TrimBlanks := Copy(s, first, last - first + 1);
 end;
 
 { The value of a string of digits, or 101 when it has more than three digits
@@ -125,10 +163,10 @@ begin
 
     { let the user input any number they want }
     if EOF then Break;   { end of input }
-    ReadLn(userguessunvalidated);
+    userguessunvalidated := ReadLineLF;
 
-    { remove leading and trailing spaces }
-    userguessunvalidated := Trim(userguessunvalidated);
+    { remove leading and trailing spaces and tabs }
+    userguessunvalidated := TrimBlanks(userguessunvalidated);
 
     { verify the guess is a whole number }
     if not IsAllDigits(userguessunvalidated) then

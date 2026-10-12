@@ -56,7 +56,10 @@ use std::process::exit;
 fn read_line() -> String {
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
-    input.trim().to_string()
+    // drop the newline, then leading and trailing spaces and tabs; trim() would
+    // also remove other whitespace, such as a form feed or a no-break space
+    let line = input.strip_suffix('\n').unwrap_or(&input);
+    line.trim_matches(|c| c == ' ' || c == '\t').to_string()
 }
 
 // A random number from 1 to 100. Rust's standard library has no random number

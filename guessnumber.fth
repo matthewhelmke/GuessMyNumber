@@ -53,18 +53,22 @@ require random.fs
   ." as few turns as possible." cr cr
   ." Here we go!" cr cr ;
 
-\ skip leading whitespace in a string
+\ true for the two characters a guess may be padded with: space and tab
+: blank? ( c -- flag )
+  dup bl =  swap 9 =  or ;
+
+\ skip leading spaces and tabs in a string
 : skip-spaces ( c-addr u -- c-addr' u' )
   begin
-    dup 0 > if over c@ bl <= else false then
+    dup 0 > if over c@ blank? else false then
   while
     1 /string
   repeat ;
 
-\ drop trailing whitespace from a string; the standard -trailing drops only spaces, not tabs
+\ drop trailing spaces and tabs from a string; the standard -trailing drops only spaces
 : skip-trailing-spaces ( c-addr u -- c-addr u' )
   begin
-    dup 0 > if 2dup + 1- c@ bl <= else false then
+    dup 0 > if 2dup + 1- c@ blank? else false then
   while
     1-
   repeat ;
@@ -115,12 +119,29 @@ require random.fs
   1 lowmax !
   100 highmax ! ;
 
+create onechar 1 allot                \ one byte of input at a time
+
+\ read one line into userguessunvalidated, up to a line feed, which is dropped.
+\ read-line is not used: it also ends a line at a carriage return, so "3", a
+\ carriage return, and "0" would read as two guesses. Neither is accept, which
+\ echoes piped input back to stdout. Bytes past buf-max are dropped. Returns
+\ false at end of input when nothing was read; a last line with no line feed
+\ still counts.
+: read-guess-line ( -- flag )
+  0 uguess-len !
+  begin
+    onechar 1 stdin read-file throw  ( u )
+    0= if  uguess-len @ 0<> exit  then       \ end of input
+    onechar c@ 10 = if  true exit  then       \ line feed: the line is complete
+    uguess-len @ buf-max < if
+      onechar c@  userguessunvalidated uguess-len @ +  c!
+      1 uguess-len +!
+    then
+  again ;
+
 \ read a line into userguessunvalidated and try to parse it as an integer
 : read-user-input ( -- n flag )
-  \ read-line (not accept) so piped input is not echoed back to stdout
-  userguessunvalidated buf-max stdin read-line throw
-  0= if bye then                    \ end of input
-  uguess-len !
+  read-guess-line 0= if bye then    \ end of input
   userguessunvalidated uguess-len @ parse-integer ;
 
 \ keep prompting until the user enters a valid whole number between 1 and 100

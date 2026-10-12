@@ -29,13 +29,34 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 public class guessnumber {
 
-    public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
+    // Read one line, ending at a line feed, which is dropped. Returns null at
+    // end of input when nothing is left; a last line with no line feed is still
+    // returned. Scanner.nextLine and BufferedReader.readLine are not used: both
+    // also end a line at a carriage return, and Scanner at U+0085, U+2028, and
+    // U+2029 too, so "3", a carriage return, and "0" would read as two guesses.
+    static String readLine(BufferedReader input) throws IOException {
+        int c = input.read();
+        if (c == -1) {
+            return null;
+        }
+        StringBuilder line = new StringBuilder();
+        while (c != -1 && c != '\n') {
+            line.append((char) c);
+            c = input.read();
+        }
+        return line.toString();
+    }
+
+    public static void main(String[] args) throws IOException {
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             Random random = new Random();
             int lowmax = 1;
             int highmax = 100;
@@ -69,10 +90,10 @@ public class guessnumber {
 
                 // let the user input any number they want
                 // read the whole line; scanner.next() would read one word and skip empty lines
-                if (!scanner.hasNextLine()) {
+                String userguessunvalidated = readLine(input);
+                if (userguessunvalidated == null) {
                     break; // end of input
                 }
-                String userguessunvalidated = scanner.nextLine();
 
                 // remove leading and trailing spaces and tabs
                 userguessunvalidated = userguessunvalidated.replaceAll("^[ \\t]+|[ \\t]+$", "");

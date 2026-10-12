@@ -8,6 +8,8 @@
 
  Copyright (c) 2007 Matthew Helmke for the old Python 2 version
  Copyright (c) 2020 Matthew Helmke for the PHP version (this one)
+ Input trimming revised 2026-10-12 with assistance from Claude Code
+    (claude.ai/code) using the claude-opus-5-5 model
 
  To run:
    php -f guessnumber.php
@@ -63,7 +65,9 @@ while (true) {
     if ($line === false) {
         break; // end of input
     }
-    $userguessunvalidated = trim($line);
+    // drop the newline, then leading and trailing spaces and tabs; trim()'s
+    // default list would also remove a carriage return and a vertical tab
+    $userguessunvalidated = trim(rtrim($line, "\n"), " \t");
 
     // verify the guess is a whole number
     if (!ctype_digit($userguessunvalidated)) {

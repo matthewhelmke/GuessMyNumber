@@ -58,7 +58,7 @@ All implementations are expected to conform to the following rules. These are th
     - Guesses lower than a previous guess that was already too low
     - Guesses higher than a previous guess that was already too high
 
-1. Only valid guesses count. After removing leading and trailing spaces and tabs, a guess is valid when it consists only of the ASCII digits 0 to 9 and its value is from 1 to 100. Any other input gets a message and another try, and does not add to the guess counter:
+1. Only valid guesses count. A guess is one line of input, ending at a line feed; a carriage return, as a Windows line ending leaves before the line feed, is part of the line. After removing leading and trailing spaces and tabs, and nothing else, a guess is valid when it consists only of the ASCII digits 0 to 9 and its value is from 1 to 100. Any other input gets a message and another try, and does not add to the guess counter:
     - A sign, a decimal point, a space between digits, a letter, a non-ASCII digit such as `²`, or an empty line is not a whole number: "Only whole numbers from 1 to 100 are allowed."
     - A string of digits whose value is below 1 or above 100, however many digits it has, is out of range: the same message, followed by "Your guess is out of range."
 
@@ -134,11 +134,13 @@ Ada has no `continue`, so a `case` statement on the guess's status (not a number
 
 ### ALGOL 68
 
-ALGOL 68 was designed by an international committee and published in 1968. Few people write new programs in it today, but its ideas run through languages they do use: Dennis Ritchie credited it with shaping how C builds its types, and Stephen Bourne, who had worked on an ALGOL 68 compiler, gave his shell `fi` and `esac`. This version runs under **ALGOL 68 Genie** (`a68g guessnumber.a68`; on Debian/Ubuntu derivatives, `apt install algol68g`), which checks the whole program before running it. Four details are deliberate:
+ALGOL 68 was designed by an international committee and published in 1968. Few people write new programs in it today, but its ideas run through languages they do use: Dennis Ritchie credited it with shaping how C builds its types, and Stephen Bourne, who had worked on an ALGOL 68 compiler, gave his shell `fi` and `esac`. This version runs under **ALGOL 68 Genie** (`a68g guessnumber.a68`; on Debian/Ubuntu derivatives, `apt install algol68g`), which checks the whole program before running it. Five details are deliberate:
 
 - **`AND` evaluates both operands.** Unlike C's `&&`, it does not stop when the left side is false. The `trim` procedure therefore writes each loop condition as an `IF … FI` expression, so it never indexes an empty line. Genie offers a short-circuit `ANDTH`, but it prints a warning on every run.
 
 - **End of input is an event.** A procedure registered with `on logical file end` sets a flag, and the loop checks it right after reading a guess. The flag is cleared before each read, because a last line with no trailing newline still fires the event when the newline is read; without the reset, that final guess would be lost.
+
+- **A form feed is the end of a page, not a character.** Reading a line stops at one, so the guess never contains it. A procedure registered with `on page end` sets a flag instead, and a line that set it is not a whole number.
 
 - **Every run writes a `.Random.seed` file** to the current directory, holding the random generator's state. Genie never reads it back; it seeds itself from the clock, to the second, at startup, as the C version does with `time(0)`. The file is listed in `.gitignore`, since the tests run from the repository root.
 
@@ -156,7 +158,7 @@ Two things differ from the imperative versions out of necessity, not preference:
 
 - **No mutable variables.** Erlang values cannot be reassigned, so the shared state—the secret number, the guess count, and the bounds—is threaded through a tail-recursive loop. Each turn computes a new state and calls the next function with it. The Haskell version takes the same approach.
 
-- **Reading stdin.** `io:get_line/1` returns the line with its trailing newline, or the atom `eof` when input closes. A small `read_guess/0` helper trims the newline and exits cleanly on `eof`.
+- **Reading stdin.** A guess is read one character at a time, up to the line feed, with `io:get_chars/2`. `io:get_line/1` turns a carriage return and line feed into a plain line feed, which would make `30` with a Windows line ending a valid guess. `read_guess/0` exits cleanly on `eof`.
 
 ### Forth (Gforth)
 
@@ -187,7 +189,7 @@ The Pascal version targets **Free Pascal** (`fpc`) and reads input one line at a
 
 - **A guess with more than three digits is never converted.** The guess is checked to be all digits, and any guess with more than three digits after its leading zeros is over 100, so it is rejected before conversion. Free Pascal's `Val` reports some overflows through its result code but not all: it read 4294967326, which is 2³² + 30, as 30, and that guess won the game.
 
-- **The loop checks `EOF` before `ReadLn`.** A closed stdin ends the game cleanly instead of looping on empty reads. The prompt prints first, so a piped run that reaches the secret never hits the `EOF` branch.
+- **A guess is read a character at a time.** `ReadLn` also ends a line at a carriage return, so `ReadLineLF` reads up to the line feed with `Read`. The loop checks `EOF` before reading, so a closed stdin ends the game cleanly instead of looping on empty reads. The prompt prints first, so a piped run that reaches the secret never hits the `EOF` branch.
 
 
 ### Prolog
@@ -213,9 +215,9 @@ One important caveat:
 
 When running under Rscript, `readline()` does not reliably block for user input and may immediately return an empty string, causing busy loops or premature termination. Instead, the R version uses:
 
-`readLines("stdin", n = 1)`
+`readBin` on a binary connection to stdin, one byte at a time up to the line feed,
 
-wrapped in a small helper function to ensure correct blocking behavior, EOF detection, and portability. This choice is deliberate and documented in the source to save future readers from rediscovering the issue.
+wrapped in a small helper function to ensure correct blocking behavior and EOF detection. `readLines`, the usual alternative, also ends a line at a carriage return, so `3`, a carriage return, and `0` would read as two guesses. For the same reason the helper trims with `trimws(line, whitespace = "[ \t]")`, since plain `trimws` also removes a carriage return. These choices are deliberate and documented in the source to save future readers from rediscovering the issue.
 
 
 ### Rust
@@ -255,7 +257,7 @@ BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
 
 `./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it plays every command-line implementation through a set of scenarios, then diffs the normalized output of each against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
 
-Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, a bound of 100, the 8- and 10-guess taunts, the forced game over at 12, both careless-guess taunts, and each kind of invalid input, including the four that trip up a language's own number parser: a hexadecimal literal (`0x1E`), a four-digit number that a three-digit field would truncate to 30 (`1030`), and 2³² + 30 and 2⁶⁴ + 30, which unchecked 32- and 64-bit conversions wrap around to 30. One scenario ends without a final newline, as piped input can. Each scenario also names text the Python output must contain, such as the GAME OVER message. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
+Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, a bound of 100, the 8- and 10-guess taunts, the forced game over at 12, both careless-guess taunts, and each kind of invalid input, including the four that trip up a language's own number parser: a hexadecimal literal (`0x1E`), a four-digit number that a three-digit field would truncate to 30 (`1030`), and 2³² + 30 and 2⁶⁴ + 30, which unchecked 32- and 64-bit conversions wrap around to 30. Eleven more test that only spaces and tabs are trimmed and only a line feed ends a line. Six put a carriage return, a vertical tab, a form feed, a no-break space, an ideographic space, or the next-line character U+0085 at one end of a guess. Five put a carriage return, a form feed, U+0085, the line separator U+2028, or the paragraph separator U+2029 inside one, where a reader that ends lines there would see two short guesses instead of one bad one. One scenario ends without a final newline, as piped input can. Each scenario also names text the Python output must contain, such as the GAME OVER message. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
 
 When an implementation does not match every scenario yet, `tests/parity_known.txt` lists those pairs, with the cause of each; they report `KNOWN` and do not fail the check. The list only shrinks: a listed pair that starts matching reports `STALE` and fails the check until its line is deleted. `./tests/parity <language>` shows the diffs for a language's known divergences.
 

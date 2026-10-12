@@ -71,8 +71,10 @@ func main() {
 
 	var userguessunvalidated string
 
-	// read whole lines; fmt.Scanf("%s") reads one word and skips empty lines
-	input := bufio.NewScanner(os.Stdin)
+	// read whole lines, each ending at a line feed. fmt.Scanf("%s") reads one
+	// word and skips empty lines, and bufio.Scanner drops a carriage return
+	// before the line feed, which would turn "30\r" into a valid guess.
+	input := bufio.NewReader(os.Stdin)
 
 	totalguesses := 0
 
@@ -81,10 +83,13 @@ func main() {
 		fmt.Print("What is your guess? ")
 
 		// let the user input any number they want
-		if !input.Scan() {
+		// ReadString returns the line with its line feed, or at end of input a
+		// last line that has none, with an error
+		line, err := input.ReadString('\n')
+		if err != nil && line == "" {
 			break // end of input
 		}
-		userguessunvalidated = input.Text()
+		userguessunvalidated = strings.TrimSuffix(line, "\n")
 
 		// remove leading and trailing spaces and tabs
 		userguessunvalidated = strings.Trim(userguessunvalidated, " \t")

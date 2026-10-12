@@ -32,25 +32,37 @@
 
 # Open stdin once and reuse the connection. readLines("stdin", ...) opens a
 # fresh connection each call, which under Rscript reads only the first line
-# and then sees EOF on every subsequent call.
-.stdin_conn <- file("stdin", open = "r")
+# and then sees EOF on every subsequent call. The connection is binary because
+# the guess is read a byte at a time; see read_input.
+.stdin_conn <- file("stdin", open = "rb")
 
 read_input <- function(prompt = "") {
   cat(prompt)
   flush.console()
 
-  line <- tryCatch(
-    # warn = FALSE: a last line with no newline is still a guess, so the
-    # "incomplete final line" warning would only add noise to the output
-    readLines(.stdin_conn, n = 1, warn = FALSE),
-    error = function(e) character(0)
-  )
-
-  if (length(line) == 0) {
-    return(NA_character_)
+  # Collect bytes up to a line feed, which is dropped. readLines is not used
+  # because it also ends a line at a carriage return, so "3", a carriage
+  # return, and "0" would read as two guesses.
+  bytes <- raw(0)
+  repeat {
+    byte <- readBin(.stdin_conn, "raw", n = 1)
+    if (length(byte) == 0) {
+      # end of input; a last line with no line feed is still a guess
+      if (length(bytes) == 0) {
+        return(NA_character_)
+      }
+      break
+    }
+    if (byte == as.raw(10)) {
+      break
+    }
+    bytes <- c(bytes, byte)
   }
+  line <- rawToChar(bytes)
 
-  trimws(line)
+  # remove leading and trailing spaces and tabs; trimws on its own would also
+  # remove a carriage return
+  trimws(line, whitespace = "[ \t]")
 }
 
 cat("Welcome to Guess My Number!\n\n")
