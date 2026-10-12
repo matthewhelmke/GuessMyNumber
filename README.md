@@ -121,11 +121,11 @@ ALGOL 68 was designed by an international committee and published in 1968. Few p
 
 - **End of input is an event.** A procedure registered with `on logical file end` sets a flag, and the loop checks it right after reading a guess. The flag is cleared before each read, because a last line with no trailing newline still fires the event when the newline is read; without the reset, that final guess would be lost.
 
-- **The random generator must be seeded.** Genie returns the same sequence on every run until `first random` is called, so the program seeds it from the wall clock, to the second, as the C version does with `time(0)`.
+- **Every run writes a `.Random.seed` file** to the current directory, holding the random generator's state. Genie never reads it back; it seeds itself from the clock, to the second, at startup, as the C version does with `time(0)`. The file is listed in `.gitignore`, since the tests run from the repository root.
 
 - **Integers print with `whole (n, 0)`.** A plain `print` pads a number to a fixed width and adds a sign, which would not match the other versions.
 
-ALGOL 68 has no `continue` or `break`, no `trim`, and no string-to-integer conversion, so the loop ends on a `gameover` flag and the file defines short procedures for the rest. `getenv` (for the `GMN_SECRET` parity hook), `utc time`, and `first random` are Genie extensions rather than part of the 1968 language.
+ALGOL 68 has no `continue` or `break`, no `trim`, and no string-to-integer conversion, so the loop ends on a `gameover` flag and the file defines short procedures for the rest. Only `getenv`, which reads the `GMN_SECRET` parity hook, is a Genie extension rather than part of the 1968 language; `a68g --pedantic` flags nothing else.
 
 ### Erlang
 

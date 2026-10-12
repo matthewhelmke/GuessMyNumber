@@ -14,7 +14,7 @@ runs out.
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
-| ALGOL 68 | PASS | 15 ms | 56 |  |
+| ALGOL 68 | PASS | 14 ms | 49 |  |
 | Bash | PASS | 3 ms | 49 |  |
 | BASIC | SKIP | — | — | PC-BASIC INPUT statement does not read piped stdin |
 | C | PASS | 3 ms | 55 |  |

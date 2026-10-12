@@ -32,9 +32,10 @@ COMMENT
       reads a guess. The flag is cleared before each read, because reading
       the newline after a last line that has no newline also fires the event.
 
-    * The random generator is not seeded at startup; every run picks the
-      same number unless first random is called. It is seeded from the
-      wall clock, to the second, as the C version does with time(0).
+    * a68g seeds its random generator from the clock, to the second, when
+      it starts, as the C version does with time(0). Two games started in
+      the same second therefore pick the same number. Every run also writes
+      the generator's state to a .Random.seed file in the current directory.
 
     * The language has no trim and no string-to-integer conversion, so this
       file defines small procedures for both.
@@ -42,9 +43,10 @@ COMMENT
     * print pads an integer to a fixed width with a sign. whole (n, 0)
       prints it with no padding, the way the other versions do.
 
-    * getenv, utc time, and first random are ALGOL 68 Genie extensions, not
-      part of the 1968 language. getenv reads the GMN_SECRET parity hook,
-      and returns an empty string when the variable is unset.
+    * getenv is an ALGOL 68 Genie extension, not part of the 1968 language,
+      and the only one this file uses; a68g --pedantic flags nothing else.
+      It reads the GMN_SECRET parity hook, and returns an empty string when
+      the variable is unset.
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -80,7 +82,7 @@ BEGIN
       BEGIN
          BOOL alldigits := UPB s >= LWB s;
          FOR i FROM LWB s TO UPB s DO
-            IF NOT is digit (s[i]) THEN alldigits := FALSE FI
+            IF s[i] < "0" OR s[i] > "9" THEN alldigits := FALSE FI
          OD;
          alldigits
       END;
@@ -111,11 +113,8 @@ BEGIN
            newline,
            newline));
 
-   # Get a random number, or a fixed one from GMN_SECRET for parity testing.
-     utc time gives year, month, day, hour, minute, and second. #
-   []INT now = utc time;
-   first random (((now[3] * 24 + now[4]) * 60 + now[5]) * 60 + now[6]);
-   INT secretnumber := ENTIER (next random * 100) + 1;
+   # Get a random number, or a fixed one from GMN_SECRET for parity testing #
+   INT secretnumber := ENTIER (random * 100) + 1;
 
    STRING gmnsecret = getenv ("GMN_SECRET");
    IF is all digits (gmnsecret) THEN

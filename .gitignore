@@ -1,3 +1,6 @@
 # Local Claude Code working notes — not part of the published repo
 CLAUDE.md
 .vscode/
+
+# Written by ALGOL 68 Genie (a68g) to the current directory on every run
+.Random.seed
