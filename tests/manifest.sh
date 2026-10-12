@@ -6,14 +6,13 @@
 #   COMPILE[k]       — optional compile step; %OUT% is replaced with $tmpdir/<k>
 #   RUN[k]           — run command; %OUT% is replaced with the compiled binary
 #                      (when COMPILE is set) or the source file path
-#   STDIN_SUFFIX[k]  — optional extra bytes appended to stdin (e.g. "\n" for
-#                      languages that block on a "Press Enter" prompt at exit)
 #   SKIP[k]          — if set, language is skipped with this reason
 #
 # Win pattern is global (see WIN_REGEX in tests/run); override per language only
 # if a specific implementation uses unusual termination text.
 
 declare -A LANGS=(
+    [ada]="Ada"
     [algol68]="ALGOL 68"
     [bash]="Bash"
     [basic]="BASIC"
@@ -30,6 +29,7 @@ declare -A LANGS=(
     [lua]="Lua"
     [pascal]="Pascal"
     [perl]="Perl"
+    [prolog]="Prolog"
     [php]="PHP"
     [python]="Python"
     [r]="R"
@@ -39,6 +39,7 @@ declare -A LANGS=(
 )
 
 declare -A FILE=(
+    [ada]="guessnumber.adb"
     [algol68]="guessnumber.a68"
     [bash]="guessnumber.sh"
     [basic]="guessnumber.bas"
@@ -55,6 +56,7 @@ declare -A FILE=(
     [lua]="guessnumber.lua"
     [pascal]="guessnumber.pas"
     [perl]="guessnumber.pl"
+    [prolog]="guessnumber.pro"
     [php]="guessnumber.php"
     [python]="guessnumber.py"
     [r]="guessnumber.r"
@@ -64,6 +66,7 @@ declare -A FILE=(
 )
 
 declare -A COMPILE=(
+    [ada]="gnatmake -q -D %TMPDIR% -o %OUT% guessnumber.adb"
     [c]="gcc -o %OUT% guessnumber.c"
     [cobol]="cobc -x -o %OUT% guessnumber.cob"
     [fortran]="gfortran -o %OUT% guessnumber.f90"
@@ -73,6 +76,7 @@ declare -A COMPILE=(
 )
 
 declare -A RUN=(
+    [ada]="%OUT%"
     [algol68]="a68g guessnumber.a68"
     [bash]="bash guessnumber.sh"
     [c]="%OUT%"
@@ -87,19 +91,13 @@ declare -A RUN=(
     [lua]="lua guessnumber.lua"
     [pascal]="%OUT%"
     [perl]="perl guessnumber.pl"
+    [prolog]="swipl guessnumber.pro"
     [php]="php -f guessnumber.php"
     [python]="python3 guessnumber.py"
     [r]="Rscript guessnumber.r"
     [racket]="racket guessnumber.rkt"
     [ruby]="ruby guessnumber.rb"
     [rust]="%OUT%"
-)
-
-# Haskell and R both block on a trailing "Press Enter to exit" — feed one more
-# blank line after the convergence input.
-declare -A STDIN_SUFFIX=(
-    [haskell]=$'\n'
-    [r]=$'\n'
 )
 
 declare -A SKIP=(

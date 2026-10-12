@@ -10,10 +10,11 @@ runs out.
 
 ## Summary
 
-20 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **22 total**
+22 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **24 total**
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
+| Ada | PASS | 4 ms | 39 |  |
 | ALGOL 68 | PASS | 14 ms | 49 |  |
 | Bash | PASS | 3 ms | 49 |  |
 | BASIC | SKIP | — | — | PC-BASIC INPUT statement does not read piped stdin |
@@ -31,6 +32,7 @@ runs out.
 | Pascal | PASS | 28 ms | 55 |  | 
 | Perl | PASS | 4 ms | 38 |  |
 | PHP | PASS | 11 ms | 55 |  |
+| Prolog | PASS | 13 ms | 59 |  |
 | Python | PASS | 13 ms | 25 |  |
 | R | PASS | 140 ms | 55 |  |
 | Racket | PASS | 217 ms | 24 |  |

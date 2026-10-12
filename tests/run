@@ -75,9 +75,6 @@ run_one() {
 
     local stdin_data
     stdin_data="$(cat "$STDIN_FIXTURE")"
-    if [[ -n "${STDIN_SUFFIX[$lang]:-}" ]]; then
-        stdin_data="${stdin_data}${STDIN_SUFFIX[$lang]}"
-    fi
 
     local result_log="${RESULTS_DIR}/${lang}.log"
     local start_ms end_ms rc

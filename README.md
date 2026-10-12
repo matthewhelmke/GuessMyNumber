@@ -69,6 +69,7 @@ These rules are treated as a compatibility contract. Differences between languag
 
 The same game is currently implemented in the following languages:
 
+- Ada using GNAT                                        (`guessnumber.adb`)
 - ALGOL 68 using ALGOL 68 Genie                          (`guessnumber.a68`)
 - Bash                                                  (`guessnumber.sh`)
 - BASIC                                                 (`guessnumber.bas`)
@@ -86,6 +87,7 @@ The same game is currently implemented in the following languages:
 - Pascal                                                (`guessnumber.pas`)
 - Perl                                                  (`guessnumber.pl`)
 - PHP                                                   (`guessnumber.php`)
+- Prolog using SWI-Prolog                               (`guessnumber.pro`)
 - Python                                                (`guessnumber.py`)
 - R                                                     (`guessnumber.r`)
 - Racket (based on Scheme, which is based on Lisp)      (`guessnumber.rkt`)
@@ -107,15 +109,28 @@ All implementations use the same variable names wherever the concept appears, to
 | `totalguesses` | shared counter, incremented for every guess (user or computer) |
 | `lowmax` | current lower bound (starts at 1) |
 | `highmax` | current upper bound (starts at 100) |
-| `guessrange` | `highmax - lowmax` (guards against a zero-range edge case) |
 | `computerguess` | the computer's midpoint calculation |
 
-Some languages express these differently — Forth, for example, uses named memory locations rather than typed variables — but the names are preserved regardless.
+Some languages express these differently — Forth, for example, uses named memory locations rather than typed variables, and Erlang and Prolog capitalize them because both treat a capitalized name as a variable — but the names are preserved regardless.
 
 
 ## Extra notes on a couple of languages
 
-ALGOL 68, Erlang, Forth, Lua, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+Ada, ALGOL 68, Erlang, Forth, Lua, Pascal, Prolog, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+
+### Ada
+
+Ada was designed for the U.S. Department of Defense and standardized in 1983, and it is named after Ada Lovelace. It is still chosen where software must not fail, such as avionics, rail signaling, and spacecraft. This version is built with **GNAT**, the GNU Ada compiler (`gnatmake guessnumber.adb`, then `./guessnumber`; on Debian/Ubuntu derivatives, `apt install gnat`). Four details are deliberate:
+
+- **The guess is checked to be all digits before `Integer'Value` reads it.** `Integer'Value` also accepts a sign, surrounding spaces, an underscore between digits, and a based literal such as `16#1E#`, which is 30. A run of digits too long for an `Integer` raises `Constraint_Error`, which the program reports as out of range.
+
+- **`Trim` gets a character set.** Given a side such as `Both`, `Ada.Strings.Fixed.Trim` removes only spaces. Given a set holding a space and a tab, it removes both.
+
+- **Ada ignores case.** The shared variable names are written in lower case, as in the other versions, but a variable cannot share a type's name: `guess_status` would clash with the type `Guess_Status`, so the variable is `status`.
+
+- **End of input is an exception.** `Get_Line` raises `End_Error`, and a handler at the end of the procedure ends the game quietly.
+
+Ada has no `continue`, so a `case` statement on the guess's status (not a number, out of range, or valid) does the work of Python's early `continue`.
 
 ### ALGOL 68
 
@@ -173,6 +188,19 @@ The Pascal version targets **Free Pascal** (`fpc`) and reads input one line at a
 - **Parsing reports failure through a code, not an exception.** `Val` converts the trimmed string to an integer and sets a result code. The guess is checked to be all digits first, then `Val` parses it; a non-zero code means the digits overflowed an integer, which the range check then rejects. This matches how Python accepts the value with `int()` and rejects it on range.
 
 - **The loop checks `EOF` before `ReadLn`.** A closed stdin ends the game cleanly instead of looping on empty reads. The prompt prints first, so a piped run that reaches the secret never hits the `EOF` branch.
+
+
+### Prolog
+
+Prolog, created in Marseille in 1972, is a logic programming language: a program states facts and rules, and running it asks the system to prove a goal. It was one of the main languages of 1980s AI research. This version runs under **SWI-Prolog** (`swipl guessnumber.pro`; on Debian/Ubuntu derivatives, `apt install swi-prolog-core`). Four details are deliberate:
+
+- **The file is `guessnumber.pro`,** because `.pl`, Prolog's usual extension, belongs to the Perl version here.
+
+- **No mutable variables.** As in Haskell and Erlang, the game state passes from turn to turn through a tail-recursive loop. Prolog treats a capitalized name as a variable, so the shared names become `Secretnumber`, `Totalguesses`, and so on, as in Erlang.
+
+- **Input is read with the built-in `read_string/5`.** The better-known `read_line_to_string/2` lives in `library(readutil)`, which Debian and Ubuntu split across two packages; with only `swi-prolog-core` installed, loading it prints several errors about a missing shared object before the game starts. At the end of input, `read_string/5` returns an empty string and the separator -1.
+
+- **The guess is checked to be all digits before `number_string/2` reads it,** since that predicate would accept `0x1E` as 30. SWI-Prolog's integers have no size limit, so a very long number is simply out of range.
 
 
 ### R
@@ -273,11 +301,8 @@ I have chapters in [one of my books](https://www.amazon.com/Ubuntu-Linux-Unleash
 
 Perhaps something like one of these?
 
-- Ada
-- Algol
 - Common Lisp
 - Kotlin
-- Prolog
 - Zig
 
 Something else?? Ideas are also welcome, just file an issue.
