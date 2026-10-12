@@ -1,7 +1,5 @@
 # Guess My Number — Test Report
 
-Generated 2026-10-12 20:28:04 UTC by `./tests/run`.
-
 Per-language commands live in `tests/manifest.sh`. Stdin fixture is 20
 lines of "50" (`tests/fixtures/stdin.txt`). A run **passes** when the
 captured output ends with one of "Your guess is correct", "computer …
@@ -16,30 +14,30 @@ runs out.
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
-| Ada | PASS | 4 ms | 49 |  |
-| ALGOL 68 | PASS | 16 ms | 59 |  |
-| Bash | PASS | 3 ms | 25 |  |
+| Ada | PASS | 4 ms | 39 |  |
+| ALGOL 68 | PASS | 14 ms | 49 |  |
+| Bash | PASS | 3 ms | 49 |  |
 | BASIC | SKIP | — | — | PC-BASIC INPUT statement does not read piped stdin |
-| C | PASS | 3 ms | 58 |  |
-| COBOL | PASS | 5 ms | 58 |  |
-| Erlang | PASS | 111 ms | 48 |  |
-| Forth | PASS | 6 ms | 48 |  |
-| Fortran | PASS | 3 ms | 48 |  |
-| Go | PASS | 32 ms | 59 |  |
-| Haskell | PASS | 166 ms | 48 |  |
+| C | PASS | 3 ms | 55 |  |
+| COBOL | PASS | 4 ms | 38 |  |
+| Erlang | PASS | 106 ms | 55 |  |
+| Forth | PASS | 5 ms | 38 |  |
+| Fortran | PASS | 3 ms | 55 |  |
+| Go | PASS | 30 ms | 56 |  |
+| Haskell | PASS | 155 ms | 55 |  |
 | HTML | SKIP | — | — | JavaScript-in-browser implementation; no command-line entry point |
-| Java | PASS | 44 ms | 49 |  |
-| JavaScript | PASS | 21 ms | 58 |  |
-| Lua | PASS | 4 ms | 39 |  |
-| Pascal | PASS | 3 ms | 59 |  |
+| Java | PASS | 52 ms | 32 |  |
+| JavaScript | PASS | 21 ms | 55 |  |
+| Lua | PASS | 3 ms | 39 |  |
+| Pascal | PASS | 28 ms | 55 |  | 
 | Perl | PASS | 4 ms | 38 |  |
-| PHP | PASS | 12 ms | 48 |  |
-| Prolog | PASS | 14 ms | 25 |  |
-| Python | PASS | 15 ms | 18 |  |
-| R | PASS | 147 ms | 48 |  |
-| Racket | PASS | 245 ms | 38 |  |
-| Ruby | PASS | 37 ms | 58 |  |
-| Rust | PASS | 4 ms | 58 |  |
+| PHP | PASS | 11 ms | 55 |  |
+| Prolog | PASS | 13 ms | 59 |  |
+| Python | PASS | 13 ms | 25 |  |
+| R | PASS | 140 ms | 55 |  |
+| Racket | PASS | 217 ms | 24 |  |
+| Ruby | PASS | 36 ms | 48 |  |
+| Rust | PASS | 3 ms | 55 |  |
 
 ## Methodology
 
