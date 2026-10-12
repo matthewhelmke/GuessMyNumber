@@ -46,7 +46,7 @@ Here we go!
 
 # Get a random number, or a fixed one from GMN_SECRET for parity testing
 _gmn_secret = os.environ.get("GMN_SECRET", "")
-if _gmn_secret.isdigit() and 1 <= int(_gmn_secret) <= 100:
+if _gmn_secret.isascii() and _gmn_secret.isdigit() and 1 <= int(_gmn_secret) <= 100:
     secretnumber = int(_gmn_secret)
 else:
     secretnumber = random.randrange(100) + 1
@@ -63,11 +63,12 @@ while True:
     # let the user input any number they want
     userguessunvalidated = input("What is your guess? ")
 
-    # remove leading and trailing spaces
-    userguessunvalidated = str.strip(userguessunvalidated)
+    # remove leading and trailing spaces and tabs
+    userguessunvalidated = str.strip(userguessunvalidated, " \t")
 
-    # verify the guess is a number
-    if not str.isdigit(userguessunvalidated):
+    # verify the guess is a number; isdigit alone also accepts non-ASCII
+    # digits such as "²", which int() then rejects with a crash
+    if not (str.isascii(userguessunvalidated) and str.isdigit(userguessunvalidated)):
         print('''Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n''')
         continue
     else:
