@@ -10,6 +10,8 @@
   This Pascal version is a direct behavioral port of the canonical Python
   version. I built it with Claude Code using Claude Opus 4.8, then reviewed
   it myself.
+  Number parsing revised 2026-10-12 with assistance from Claude Code
+     (claude.ai/code) using the claude-opus-5-5 model
 
   To compile (Free Pascal):
     fpc guessnumber.pas
@@ -18,11 +20,11 @@
 
   Language notes (Pascal choices a reader should not mistake for bugs):
 
-    * Free Pascal's Val converts a string to an integer and reports failure
-      through a result code. The guess is first checked to be all digits,
-      then Val parses it; a non-zero code (an overflow on a very long run of
-      digits) is treated as out of range, matching how Python's int() accepts
-      the value and the range check then rejects it.
+    * The guess is checked to be all digits, then DigitsValue converts it.
+      More than three digits after the leading zeros is over 100, so
+      DigitsValue returns 101 without converting anything. This is not
+      caution: Free Pascal's Val reports some overflows through its result
+      code but not all, and read 4294967326, which is 2^32 + 30, as 30.
 
     * GetEnvironmentVariable (from SysUtils) reads the GMN_SECRET parity hook.
       An empty string means the variable is unset, so the secret stays random.
@@ -52,7 +54,7 @@ uses SysUtils;
 
 var
   secretnumber, userguess, computerguess: Integer;
-  totalguesses, lowmax, highmax, code: Integer;
+  totalguesses, lowmax, highmax: Integer;
   userguessunvalidated, gmnSecret: string;
 
 { True only for a non-empty string of ASCII digits. }
@@ -67,6 +69,22 @@ begin
       IsAllDigits := False;
       Exit;
     end;
+end;
+
+{ The value of a string of digits, or 101 when it has more than three digits
+  after its leading zeros, which is certainly over 100. Converting only three
+  digits means no number can overflow an Integer and wrap around into range. }
+function DigitsValue(const s: string): Integer;
+var
+  first: Integer;
+begin
+  first := 1;
+  while (first < Length(s)) and (s[first] = '0') do
+    first := first + 1;
+  if Length(s) - first + 1 > 3 then
+    DigitsValue := 101
+  else
+    DigitsValue := StrToInt(Copy(s, first, Length(s)));
 end;
 
 begin
@@ -89,8 +107,8 @@ begin
   gmnSecret := GetEnvironmentVariable('GMN_SECRET');
   if IsAllDigits(gmnSecret) then
   begin
-    Val(gmnSecret, userguess, code);
-    if (code = 0) and (userguess >= 1) and (userguess <= 100) then
+    userguess := DigitsValue(gmnSecret);
+    if (userguess >= 1) and (userguess <= 100) then
       secretnumber := userguess;
   end;
 
@@ -122,8 +140,8 @@ begin
     end;
 
     { make sure the guess is an integer in the right range }
-    Val(userguessunvalidated, userguess, code);
-    if (code <> 0) or (userguess < 1) or (userguess > 100) then
+    userguess := DigitsValue(userguessunvalidated);
+    if (userguess < 1) or (userguess > 100) then
     begin
       WriteLn('Only whole numbers from 1 to 100 are allowed. Your guess is out of range.');
       WriteLn('Please try again.');

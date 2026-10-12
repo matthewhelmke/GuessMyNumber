@@ -61,10 +61,12 @@ cat("The first one to guess the number correctly will win. Try to guess in\n")
 cat("as few turns as possible.\n\n")
 cat("Here we go!\n\n")
 
-# A fixed secret from GMN_SECRET for parity testing, otherwise a random one
+# A fixed secret from GMN_SECRET for parity testing, otherwise a random one.
+# as.numeric, as for a guess: as.integer turns a long number into NA, which
+# stops R with an error when it is compared.
 gmn_secret <- Sys.getenv("GMN_SECRET")
-if (grepl("^[0-9]+$", gmn_secret) && as.integer(gmn_secret) >= 1 && as.integer(gmn_secret) <= 100) {
-  secretnumber <- as.integer(gmn_secret)
+if (grepl("^[0-9]+$", gmn_secret) && as.numeric(gmn_secret) >= 1 && as.numeric(gmn_secret) <= 100) {
+  secretnumber <- as.numeric(gmn_secret)
 } else {
   secretnumber <- sample(1:100, 1)
 }

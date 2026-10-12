@@ -6,6 +6,8 @@
 
  Copyright (c) 2007 Matthew Helmke for the old Python 2 version
  Copyright (c) 2025 Matthew Helmke for the JavaScript + Node.js version (this one)
+ GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
+    (claude.ai/code) using the claude-opus-5-5 model
 
  To run:
    You must have Node.js installed
@@ -52,8 +54,10 @@ async function main() {
   console.log("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
   console.log("Here we go!\n");
 
-  // A fixed secret from GMN_SECRET for parity testing, otherwise a random one
-  const envSecret = parseInt(process.env.GMN_SECRET, 10);
+  // A fixed secret from GMN_SECRET for parity testing, otherwise a random one.
+  // The value must be all digits, like a guess, because parseInt reads "5x" as 5.
+  const envText = process.env.GMN_SECRET || "";
+  const envSecret = /^\d+$/.test(envText) ? parseInt(envText, 10) : 0;
   const secretnumber = (envSecret >= 1 && envSecret <= 100) ? envSecret : Math.floor(Math.random() * 100) + 1;
   let userguess = 0;
   let computerguess = 0;

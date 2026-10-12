@@ -52,24 +52,30 @@ main = do
   -- Start with no guesses yet and shared bounds: lowmax=1, highmax=100
   gameLoop secretnumber 0 1 100
 
+-- The GMN_SECRET value must be all digits, like a guess, but it is not trimmed
 secretFromEnv :: IO Int
 secretFromEnv = do
   envValue <- lookupEnv "GMN_SECRET"
-  case envValue >>= wholeNumber of
+  case envValue >>= digitsValue of
     Just n | n >= 1 && n <= 100 -> return (fromInteger n)
     _ -> randomRIO (1, 100)
 
 -- The value of the input if, after trimming spaces and tabs, it is all ASCII
--- digits. readMaybe is not used because it parses Haskell literals, so it
--- accepts "-5", "0x1E", and "(30)". The value is an unbounded Integer, so a very
--- long number cannot wrap around into the range 1 to 100 the way an Int would.
+-- digits.
 wholeNumber :: String -> Maybe Integer
-wholeNumber input
-  | not (null trimmed) && all isDigit trimmed = Just (read trimmed)
-  | otherwise = Nothing
+wholeNumber input = digitsValue trimmed
   where
     isBlank c = c == ' ' || c == '\t'
     trimmed = dropWhileEnd isBlank (dropWhile isBlank input)
+
+-- The value of the text if it is all ASCII digits. readMaybe is not used
+-- because it parses Haskell literals, so it accepts "-5", "0x1E", and "(30)".
+-- The value is an unbounded Integer, so a very long number cannot wrap around
+-- into the range 1 to 100 the way an Int would.
+digitsValue :: String -> Maybe Integer
+digitsValue text
+  | not (null text) && all isDigit text = Just (read text)
+  | otherwise = Nothing
 
 gameLoop :: Int -> Int -> Int -> Int -> IO ()
 gameLoop secretnumber totalguesses lowmax highmax = do

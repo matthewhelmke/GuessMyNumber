@@ -39,12 +39,21 @@ public class guessnumber {
             Random random = new Random();
             int lowmax = 1;
             int highmax = 100;
-            // Get a random number, or a fixed one from GMN_SECRET for parity testing
+            // Get a random number, or a fixed one from GMN_SECRET for parity testing.
+            // As with a guess, the value must be all digits, and parseInt can then
+            // fail only on a number too large for an int, which is out of range.
             int secretnumber = random.nextInt(highmax - lowmax + 1) + lowmax;
             String gmnSecret = System.getenv("GMN_SECRET");
-            if (gmnSecret != null && gmnSecret.matches("\\d+")
-                    && Integer.parseInt(gmnSecret) >= 1 && Integer.parseInt(gmnSecret) <= 100) {
-                secretnumber = Integer.parseInt(gmnSecret);
+            if (gmnSecret != null && gmnSecret.matches("\\d+")) {
+                int gmnValue;
+                try {
+                    gmnValue = Integer.parseInt(gmnSecret);
+                } catch (NumberFormatException e) {
+                    gmnValue = Integer.MAX_VALUE;
+                }
+                if (gmnValue >= 1 && gmnValue <= 100) {
+                    secretnumber = gmnValue;
+                }
             }
             int userguess;
             int computerguess;

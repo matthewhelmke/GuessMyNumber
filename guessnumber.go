@@ -58,9 +58,11 @@ func main() {
 	// Create a local random generator with current time as seed
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Get a random number, or a fixed one from GMN_SECRET for parity testing
+	// Get a random number, or a fixed one from GMN_SECRET for parity testing.
+	// The value must be all digits, like a guess, because Atoi accepts a sign.
 	secretnumber := rng.Intn(highmax-lowmax+1) + lowmax
-	if s, err := strconv.Atoi(os.Getenv("GMN_SECRET")); err == nil && s >= 1 && s <= 100 {
+	gmnSecret := os.Getenv("GMN_SECRET")
+	if s, err := strconv.Atoi(gmnSecret); isAllDigits(gmnSecret) && err == nil && s >= 1 && s <= 100 {
 		secretnumber = s
 	}
 

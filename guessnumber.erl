@@ -12,6 +12,8 @@
 %% This Erlang version is a direct behavioral port of the Python and Haskell
 %% versions. I built it with Claude Code using Claude Opus 4.8, then reviewed
 %% it myself.
+%% GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
+%%    (claude.ai/code) using the claude-opus-5-5 model
 %%
 %% To run:
 %%   escript guessnumber.erl
@@ -150,12 +152,14 @@ after_round(Secretnumber, Totalguesses, Lowmax, Highmax) ->
     end.
 
 %% Draw the secret number from the GMN_SECRET env hook, or a random 1..100.
+%% The value must pass the same check as a guess; string:to_integer/1 is not
+%% used because it accepts a sign, so "+5" would read as 5.
 secret_from_env() ->
     case os:getenv("GMN_SECRET") of
         false -> rand:uniform(100);
         Value ->
-            case string:to_integer(Value) of
-                {N, ""} when N >= 1, N =< 100 -> N;
+            case parse_guess(Value) of
+                {ok, N} -> N;
                 _ -> rand:uniform(100)
             end
     end.
