@@ -10,10 +10,11 @@ runs out.
 
 ## Summary
 
-19 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **21 total**
+20 pass · 0 warn · 0 fail · 0 fail-build · 0 timeout · 2 skip · **22 total**
 
 | Language | Status | Duration | Output lines | Notes |
 |---|---|---:|---:|---|
+| ALGOL 68 | PASS | 15 ms | 56 |  |
 | Bash | PASS | 3 ms | 49 |  |
 | BASIC | SKIP | — | — | PC-BASIC INPUT statement does not read piped stdin |
 | C | PASS | 3 ms | 55 |  |

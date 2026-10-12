@@ -14,6 +14,7 @@
 # if a specific implementation uses unusual termination text.
 
 declare -A LANGS=(
+    [algol68]="ALGOL 68"
     [bash]="Bash"
     [basic]="BASIC"
     [c]="C"
@@ -38,6 +39,7 @@ declare -A LANGS=(
 )
 
 declare -A FILE=(
+    [algol68]="guessnumber.a68"
     [bash]="guessnumber.sh"
     [basic]="guessnumber.bas"
     [c]="guessnumber.c"
@@ -71,6 +73,7 @@ declare -A COMPILE=(
 )
 
 declare -A RUN=(
+    [algol68]="a68g guessnumber.a68"
     [bash]="bash guessnumber.sh"
     [c]="%OUT%"
     [cobol]="%OUT%"

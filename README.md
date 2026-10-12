@@ -23,6 +23,7 @@ February 15, 2026 was when I first used any AI, specifically GitHub Copilot, whi
   - `Claude Sonnet 4.6`
   - `Claude Opus 4.7`
   - `Claude Opus 4.8`
+  - `Claude Opus 5.5`
 
 
 ## Game rules (behavioral contract)
@@ -64,6 +65,7 @@ These rules are treated as a compatibility contract. Differences between languag
 
 The same game is currently implemented in the following languages:
 
+- ALGOL 68 using ALGOL 68 Genie                          (`guessnumber.a68`)
 - Bash                                                  (`guessnumber.sh`)
 - BASIC                                                 (`guessnumber.bas`)
 - C                                                     (`guessnumber.c`)
@@ -109,7 +111,21 @@ Some languages express these differently — Forth, for example, uses named memo
 
 ## Extra notes on a couple of languages
 
-Erlang, Forth, Lua, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+ALGOL 68, Erlang, Forth, Lua, Pascal, R, and Rust get notes not because they are special, but because they required *documented tradeoffs* that future readers might otherwise misinterpret as mistakes.
+
+### ALGOL 68
+
+ALGOL 68 was designed by an international committee and published in 1968. Few people write new programs in it today, but its ideas run through languages they do use: Dennis Ritchie credited it with shaping how C builds its types, and Stephen Bourne, who had worked on an ALGOL 68 compiler, gave his shell `fi` and `esac`. This version runs under **ALGOL 68 Genie** (`a68g guessnumber.a68`; on Debian/Ubuntu derivatives, `apt install algol68g`), which checks the whole program before running it. Four details are deliberate:
+
+- **`AND` evaluates both operands.** Unlike C's `&&`, it does not stop when the left side is false. The `trim` procedure therefore writes each loop condition as an `IF … FI` expression, so it never indexes an empty line. Genie offers a short-circuit `ANDTH`, but it prints a warning on every run.
+
+- **End of input is an event.** A procedure registered with `on logical file end` sets a flag, and the loop checks it right after reading a guess. The flag is cleared before each read, because a last line with no trailing newline still fires the event when the newline is read; without the reset, that final guess would be lost.
+
+- **The random generator must be seeded.** Genie returns the same sequence on every run until `first random` is called, so the program seeds it from the wall clock, to the second, as the C version does with `time(0)`.
+
+- **Integers print with `whole (n, 0)`.** A plain `print` pads a number to a fixed width and adds a sign, which would not match the other versions.
+
+ALGOL 68 has no `continue` or `break`, no `trim`, and no string-to-integer conversion, so the loop ends on a `gameover` flag and the file defines short procedures for the rest. `getenv` (for the `GMN_SECRET` parity hook), `utc time`, and `first random` are Genie extensions rather than part of the 1968 language.
 
 ### Erlang
 

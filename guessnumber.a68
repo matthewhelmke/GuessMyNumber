@@ -1,0 +1,258 @@
+COMMENT
+  Guess my number game
+
+  An ALGOL 68 version of a silly game I made on my programmable
+  calculator when I was bored in math class in 1987, with a couple of
+  additions like input validation and computer guesses.
+
+  Copyright (c) 2026 Matthew Helmke for the ALGOL 68 version (this one)
+     with assistance from Claude Code (claude.ai/code)
+     using the claude-opus-5-5 model
+
+  To run (ALGOL 68 Genie):
+    a68g guessnumber.a68
+
+  Language notes (ALGOL 68 choices a reader should not mistake for bugs):
+
+    * Keywords are written in capitals, such as IF, FI, DO, and OD. This is
+      upper stropping, the way a68g tells keywords from names. IF and CASE
+      blocks close with the keyword reversed, which is where the Bourne
+      shell got fi and esac.
+
+    * AND evaluates both operands; it does not short-circuit as in C. The
+      trim procedure therefore guards each character test with an IF, so an
+      empty line is never indexed. a68g offers ANDTH as a short-circuit
+      form, but it prints a warning on every run.
+
+    * ALGOL 68 has no continue or break. Each turn is wrapped in IF blocks
+      instead, and the loop ends when the gameover flag is set.
+
+    * End of input is an event, not a return value. The procedure handed to
+      on logical file end sets a flag, which the loop checks right after it
+      reads a guess. The flag is cleared before each read, because reading
+      the newline after a last line that has no newline also fires the event.
+
+    * The random generator is not seeded at startup; every run picks the
+      same number unless first random is called. It is seeded from the
+      wall clock, to the second, as the C version does with time(0).
+
+    * The language has no trim and no string-to-integer conversion, so this
+      file defines small procedures for both.
+
+    * print pads an integer to a fixed width with a sign. whole (n, 0)
+      prints it with no padding, the way the other versions do.
+
+    * getenv, utc time, and first random are ALGOL 68 Genie extensions, not
+      part of the 1968 language. getenv reads the GMN_SECRET parity hook,
+      and returns an empty string when the variable is unset.
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+COMMENT
+
+BEGIN
+   # Remove leading and trailing spaces, tabs, and other control characters.
+     AND evaluates both of its operands, so each loop condition is an
+     IF that looks at a character only while one is left to look at. #
+   PROC trim = (STRING s) STRING:
+      BEGIN
+         INT first := LWB s, last := UPB s;
+         WHILE IF first <= last THEN ABS s[first] <= ABS " " ELSE FALSE FI
+         DO first +:= 1 OD;
+         WHILE IF last >= first THEN ABS s[last] <= ABS " " ELSE FALSE FI
+         DO last -:= 1 OD;
+         s[first:last]
+      END;
+
+   # True only for a non-empty string of the digits 0 to 9 #
+   PROC is all digits = (STRING s) BOOL:
+      BEGIN
+         BOOL alldigits := UPB s >= LWB s;
+         FOR i FROM LWB s TO UPB s DO
+            IF NOT is digit (s[i]) THEN alldigits := FALSE FI
+         OD;
+         alldigits
+      END;
+
+   # Convert a string of digits to a number. Any value above 100 is out of
+     range, so the value stops growing at 101; a long run of digits then
+     cannot overflow an integer. #
+   PROC digits to number = (STRING s) INT:
+      BEGIN
+         INT value := 0;
+         FOR i FROM LWB s TO UPB s DO
+            value := value * 10 + (ABS s[i] - ABS "0");
+            IF value > 100 THEN value := 101 FI
+         OD;
+         value
+      END;
+
+   # Print a description of the game, with rules, to the screen #
+   print (("Welcome to Guess My Number!", newline,
+           newline,
+           "The computer will select a random whole number between 1 and 100.", newline,
+           "Your goal is to guess that number. You will get a turn, then a computer", newline,
+           "player will get a turn. Each of you are aware of the other's guesses.", newline,
+           "The first one to guess the number correctly will win. Try to guess in", newline,
+           "as few turns as possible.", newline,
+           newline,
+           "Here we go!", newline,
+           newline,
+           newline));
+
+   # Get a random number, or a fixed one from GMN_SECRET for parity testing.
+     utc time gives year, month, day, hour, minute, and second. #
+   []INT now = utc time;
+   first random (((now[3] * 24 + now[4]) * 60 + now[5]) * 60 + now[6]);
+   INT secretnumber := ENTIER (next random * 100) + 1;
+
+   STRING gmnsecret = getenv ("GMN_SECRET");
+   IF is all digits (gmnsecret) THEN
+      INT value = digits to number (gmnsecret);
+      IF value >= 1 AND value <= 100 THEN secretnumber := value FI
+   FI;
+
+   # set all our initial values #
+   INT userguess := 0;
+   INT computerguess;
+   INT totalguesses := 0;
+   INT lowmax := 1;
+   INT highmax := 100;
+   STRING userguessunvalidated;
+   BOOL gameover := FALSE;
+
+   # set by the event procedure when a read finds no more input #
+   BOOL endofinput := FALSE;
+   on logical file end (stand in, (REF FILE f) BOOL: (endofinput := TRUE; TRUE));
+
+   # the main bit #
+   WHILE NOT gameover DO
+      print ("What is your guess? ");
+
+      # let the user input any number they want #
+      BOOL validguess := FALSE;
+      endofinput := FALSE;
+      read (userguessunvalidated);
+
+      IF endofinput THEN
+         # end of input #
+         gameover := TRUE
+      ELSE
+         read (newline);
+
+         # remove leading and trailing spaces #
+         userguessunvalidated := trim (userguessunvalidated);
+
+         # verify the guess is a whole number #
+         IF NOT is all digits (userguessunvalidated) THEN
+            print (("Only whole numbers from 1 to 100 are allowed.", newline,
+                    "Please try again.", newline,
+                    newline))
+         ELSE
+            # make sure the guess is an integer in the right range #
+            userguess := digits to number (userguessunvalidated);
+            IF userguess < 1 OR userguess > 100 THEN
+               print (("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.", newline,
+                       "Please try again.", newline,
+                       newline))
+            ELSE
+               validguess := TRUE
+            FI
+         FI
+      FI;
+
+      IF validguess THEN
+         # this is a real guess, so count it #
+         totalguesses +:= 1;
+
+         # some taunts for silly errors in user guesses #
+         IF userguess < lowmax THEN
+            print (("That guess was lower than a previous guess that was too low. Pay attention!", newline,
+                    newline))
+         FI;
+         IF userguess > highmax THEN
+            print (("Wake up! That guess was higher than an earlier guess that was too high.", newline,
+                    newline))
+         FI;
+
+         # evaluate the guess #
+         IF userguess = secretnumber THEN
+            print ((newline,
+                    "*********************************************", newline,
+                    "   Your guess is correct! Congratulations!", newline,
+                    "   It took ", whole (totalguesses, 0), " total guesses.", newline,
+                    "*********************************************", newline,
+                    newline));
+            gameover := TRUE
+         ELIF userguess > secretnumber THEN
+            print (("Your guess is too high.", newline,
+                    newline));
+            # don't let the computer choose this number or anything higher
+              than this as long as a reasonable user guess was made #
+            IF userguess <= highmax THEN highmax := userguess - 1 FI
+         ELSE
+            print (("Your guess is too low.", newline,
+                    newline));
+            # don't let the computer choose this number or anything lower
+              than this as long as a reasonable user guess was made #
+            IF userguess >= lowmax THEN lowmax := userguess + 1 FI
+         FI
+      FI;
+
+      IF validguess AND NOT gameover THEN
+         # the computer's guess uses a binary-search midpoint within current bounds #
+         computerguess := (lowmax + highmax) OVER 2;
+         totalguesses +:= 1;
+
+         IF computerguess = secretnumber THEN
+            print (("**********************************************", newline,
+                    "   The computer's guess of ", whole (computerguess, 0), " is correct!", newline,
+                    "   It took ", whole (totalguesses, 0), " total guesses.", newline,
+                    "**********************************************", newline,
+                    newline));
+            gameover := TRUE
+         ELIF computerguess > secretnumber THEN
+            print (("The computer guessed ", whole (computerguess, 0), " and that was too high.", newline,
+                    "Please try again.", newline,
+                    newline));
+            highmax := computerguess - 1
+         ELSE
+            print (("The computer guessed ", whole (computerguess, 0), " and that was too low.", newline,
+                    "Please try again.", newline,
+                    newline));
+            lowmax := computerguess + 1
+         FI
+      FI;
+
+      # these taunts are just for my amusement and to keep the game from being too terribly long #
+      IF validguess AND NOT gameover THEN
+         IF totalguesses = 8 THEN
+            print ((newline,
+                    "This is a hard number, isn't it?", newline,
+                    newline))
+         ELIF totalguesses = 12 THEN
+            print ((newline,
+                    "Wow! You are really bad at this.", newline,
+                    newline))
+         ELIF totalguesses >= 16 THEN
+            print ((newline,
+                    "You're taking too long, I can't handle it any more.", newline,
+                    newline,
+                    "G A M E   O V E R", newline,
+                    newline));
+            gameover := TRUE
+         FI
+      FI
+   OD
+END
