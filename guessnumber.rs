@@ -137,9 +137,9 @@ fn main() {
         // more taunts and a forced guess limit
         if totalguesses == 8 {
             println!("\nThis is a hard number, isn't it?\n");
-        } else if totalguesses == 12 {
+        } else if totalguesses == 10 {
             println!("\nWow! You are really bad at this.\n");
-        } else if totalguesses >= 16 {
+        } else if totalguesses >= 12 {
             println!("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n");
             exit(0);
         }

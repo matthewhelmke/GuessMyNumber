@@ -216,11 +216,11 @@
           DISPLAY " "
           DISPLAY "This is a hard number, isn't it?"
           DISPLAY " "
-        WHEN TOTALGUESSES = 12
+        WHEN TOTALGUESSES = 10
           DISPLAY " "
           DISPLAY "Wow! You are really bad at this."
           DISPLAY " "
-        WHEN TOTALGUESSES >= 16
+        WHEN TOTALGUESSES >= 12
           DISPLAY " "
           DISPLAY "You're taking too long, I can't handle it any more."
           DISPLAY " "

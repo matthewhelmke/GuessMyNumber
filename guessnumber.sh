@@ -114,9 +114,9 @@ while :; do
   # more taunts and a forced guess limit
   if ((totalguesses == 8)); then
     printf "\nThis is a hard number, isn't it?\n\n"
-  elif ((totalguesses == 12)); then
+  elif ((totalguesses == 10)); then
     printf "\nWow! You are really bad at this.\n\n"
-  elif ((totalguesses >= 16)); then
+  elif ((totalguesses >= 12)); then
     printf "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n"
     break
   fi

@@ -129,9 +129,9 @@ while (true) {
     // more taunts and a forced guess limit
     if ($totalguesses == 8) {
         echo "\nThis is a hard number, isn't it?\n\n";
-    } elseif ($totalguesses == 12) {
+    } elseif ($totalguesses == 10) {
         echo "\nWow! You are really bad at this.\n\n";
-    } elseif ($totalguesses >= 16) {
+    } elseif ($totalguesses >= 12) {
         echo "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
         exit;
     }

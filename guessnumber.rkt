@@ -99,8 +99,8 @@ Here we go!\n\n")
         ; more taunts and a forced guess limit
         (cond
           [(= totalguesses 8) (printf "\nThis is a hard number, isn't it?\n\n")]
-          [(= totalguesses 12) (printf "\nWow! You are really bad at this.\n\n")]
-          [(>= totalguesses 16)
+          [(= totalguesses 10) (printf "\nWow! You are really bad at this.\n\n")]
+          [(>= totalguesses 12)
            (printf "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
            (exit)])
 

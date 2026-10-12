@@ -120,9 +120,9 @@ func main() {
 		// more taunts and a forced guess limit
 		if totalguesses == 8 {
 			fmt.Println("\nThis is a hard number, isn't it?\n")
-		} else if totalguesses == 12 {
+		} else if totalguesses == 10 {
 			fmt.Println("\nWow! You are really bad at this.\n")
-		} else if totalguesses >= 16 {
+		} else if totalguesses >= 12 {
 			fmt.Println("\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n")
 			break
 		}

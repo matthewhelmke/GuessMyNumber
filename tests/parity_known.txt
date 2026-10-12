@@ -16,7 +16,9 @@ bash    unicode-superscript    # same as above, for ²
 c       empty-line             # an empty line is skipped instead of reported non-numeric
 c       two-numbers            # "30 40" is not rejected as non-numeric
 
-cobol   careless-low           # LOWMAX is PIC 99, so 100 truncates to 00 and the computer can never find 100
+# COBOL also loops at end of input, printing the out-of-range message until
+# tests/parity cuts its output off; that is the long tail in its diffs.
+cobol   bound-at-100           # LOWMAX is PIC 99, so 100 truncates to 00 and the computer can never find 100
 cobol   empty-line             # an empty line is not reported non-numeric
 cobol   trim-tabs              # tabs are not trimmed
 

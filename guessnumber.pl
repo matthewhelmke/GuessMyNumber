@@ -136,9 +136,9 @@ while (1) {
     # more taunts and a forced guess limit
     if ($totalguesses == 8) {
         print "\nThis is a hard number, isn't it?\n\n";
-    } elsif ($totalguesses == 12) {
+    } elsif ($totalguesses == 10) {
         print "\nWow! You are really bad at this.\n\n";
-    } elsif ($totalguesses >= 16) {
+    } elsif ($totalguesses >= 12) {
         print "\nYou're taking too long, I can't handle it any more.\n\nG A M E   O V E R\n";
         exit;
     }

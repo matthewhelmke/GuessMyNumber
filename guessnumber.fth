@@ -176,10 +176,10 @@ require random.fs
 \ these taunts are just for amusement and to keep the game from being too terribly long
 : check-taunts ( -- )
   totalguesses @ 8  = if cr ." This is a hard number, isn't it?" cr cr then
-  totalguesses @ 12 = if cr ." Wow! You are really bad at this." cr cr then ;
+  totalguesses @ 10 = if cr ." Wow! You are really bad at this." cr cr then ;
 
 : check-game-over ( -- done? )
-  totalguesses @ 16 >= if
+  totalguesses @ 12 >= if
     cr ." You're taking too long, I can't handle it any more." cr cr
     ." G A M E   O V E R" cr cr
     true exit

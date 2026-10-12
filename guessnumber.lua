@@ -156,13 +156,13 @@ This is a hard number, isn't it?
 
 ]])
     end
-    if totalguesses == 12 then
+    if totalguesses == 10 then
         io.write([[
 Wow! You are really bad at this.
 
 ]])
     end
-    if totalguesses >= 16 then
+    if totalguesses >= 12 then
         io.write([[
 You're taking too long, I can't handle it any more.
 
