@@ -50,6 +50,7 @@ lua     decimal
 lua     empty-line
 lua     huge-number
 lua     leading-zeros
+lua     no-final-newline
 lua     letters
 lua     over-100
 lua     sign-minus
