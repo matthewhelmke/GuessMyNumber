@@ -59,9 +59,11 @@ fn main() {
     println!("Here we go!\n");
 
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    // A fixed secret from GMN_SECRET for parity testing, otherwise a time-based one
-    let secretnumber = match std::env::var("GMN_SECRET").ok().and_then(|s| s.parse::<i32>().ok()) {
-        Some(n) if (1..=100).contains(&n) => n,
+    // A fixed secret from GMN_SECRET for parity testing, otherwise a time-based one.
+    // The value must be all digits, like a guess, because parse accepts a sign.
+    let gmn_secret = std::env::var("GMN_SECRET").unwrap_or_default();
+    let secretnumber = match gmn_secret.parse::<i32>() {
+        Ok(n) if gmn_secret.chars().all(|c| c.is_ascii_digit()) && (1..=100).contains(&n) => n,
         _ => (now % 100) as i32 + 1,
     };
 

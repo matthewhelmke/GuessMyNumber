@@ -50,9 +50,15 @@ declare -i lowmax=1
 declare -i highmax=100
 declare -i computerguess
 
-# Get a random number, or a fixed one from GMN_SECRET for parity testing
-if [[ "$GMN_SECRET" =~ ^[0123456789]+$ ]] && (( 10#$GMN_SECRET >= 1 && 10#$GMN_SECRET <= 100 )); then
-  secretnumber=$(( 10#$GMN_SECRET ))
+# Get a random number, or a fixed one from GMN_SECRET for parity testing. The
+# value gets the same checks as a guess: digits only, then leading zeros removed
+# and at most three digits left, so arithmetic cannot wrap a long number into range
+gmn_secret=$GMN_SECRET
+while [[ $gmn_secret == 0?* ]]; do
+  gmn_secret=${gmn_secret#0}
+done
+if [[ $gmn_secret =~ ^[0123456789]+$ ]] && (( ${#gmn_secret} <= 3 && gmn_secret >= 1 && gmn_secret <= 100 )); then
+  secretnumber=$gmn_secret
 else
   (( secretnumber = RANDOM % 100 + 1 ))
 fi

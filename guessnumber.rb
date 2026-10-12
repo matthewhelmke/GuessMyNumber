@@ -43,9 +43,14 @@ puts ""
 
 # Get a random number
 
-# A fixed secret from GMN_SECRET for parity testing, otherwise a random one
-env_secret = ENV["GMN_SECRET"].to_i
-secretnumber = (env_secret >= 1 && env_secret <= 100) ? env_secret : (rand(0-99) + 1)
+# A fixed secret from GMN_SECRET for parity testing, otherwise a random one.
+# The value must be all digits, like a guess, because to_i reads "5x" as 5.
+env_secret = ENV["GMN_SECRET"].to_s
+if env_secret =~ /\A\d+\z/ && env_secret.to_i >= 1 && env_secret.to_i <= 100
+    secretnumber = env_secret.to_i
+else
+    secretnumber = rand(0-99) + 1
+end
 
 # set all our initial values
 

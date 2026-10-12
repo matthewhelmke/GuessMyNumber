@@ -42,12 +42,18 @@ PROGRAM GuessMyNumber
   CALL RANDOM_SEED()
 
   ! Use a fixed secret from GMN_SECRET when set (for parity testing),
-  ! otherwise a random integer between 1 and 100
+  ! otherwise a random integer between 1 and 100. As with a guess, VERIFY
+  ! requires all digits, since a list-directed READ accepts a sign. The value
+  ! is not trimmed: env_len counts trailing spaces that the padding of
+  ! env_secret would otherwise hide. A value longer than env_secret sets
+  ! env_status to -1 and is ignored.
   gmn_secret_val = 0
   env_iostat = 1
   CALL GET_ENVIRONMENT_VARIABLE("GMN_SECRET", env_secret, env_len, env_status)
-  IF (env_status == 0) THEN
-    READ(env_secret, *, IOSTAT=env_iostat) gmn_secret_val
+  IF (env_status == 0 .AND. env_len > 0) THEN
+    IF (VERIFY(env_secret(1:env_len), "0123456789") == 0) THEN
+      READ(env_secret(1:env_len), *, IOSTAT=env_iostat) gmn_secret_val
+    END IF
   END IF
   IF (env_iostat == 0 .AND. gmn_secret_val >= 1 .AND. gmn_secret_val <= 100) THEN
     secretnumber = gmn_secret_val

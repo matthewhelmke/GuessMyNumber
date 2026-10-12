@@ -43,29 +43,6 @@ VARIABLE uguess-len
 \ random.fs provides the random word; utime seeds it from the system clock (both Gforth extensions)
 require random.fs
 
-: init-game ( -- )
-  utime drop seed !
-  rnd drop                          \ advance once: the LCG's first step from a 64-bit timestamp is low-entropy
-  \ a fixed secret from GMN_SECRET for parity testing, otherwise a random 1..100
-  s" GMN_SECRET" getenv               \ ( c-addr u )
-  dup 0= if
-    2drop  100 random 1 +             \ unset: random 1..100
-  else
-    s>number? if                      \ ( d ) valid number
-      d>s                             \ ( n ) drop the high cell
-      dup 1 101 within 0= if          \ out of [1,100]?
-        drop 100 random 1 +
-      then
-    else
-      2drop  100 random 1 +           \ not a number
-    then
-  then
-  secretnumber !
-  0 userguess !
-  0 totalguesses !
-  1 lowmax !
-  100 highmax ! ;
-
 \ print a description of the game, with rules, to the screen
 : print-welcome ( -- )
   ." Welcome to Guess My Number!" cr cr
@@ -106,16 +83,37 @@ require random.fs
   0. 2swap >number  ( ud c-addr' u' )
   nip nip nip 0= ;
 
-\ convert a string to an integer; returns ( n true ) for a string of digits,
-\ ( 0 false ) for anything else. More than three digits after the leading
-\ zeros is over 100, so it returns 101 rather than converting a long number,
-\ which would wrap around and could land between 1 and 100.
-: parse-integer ( c-addr u -- n flag )
-  skip-spaces skip-trailing-spaces skip-leading-zeros
+\ convert a string of digits to an integer; returns ( n true ) for a string of
+\ digits, ( 0 false ) for anything else. More than three digits after the
+\ leading zeros is over 100, so it returns 101 rather than converting a long
+\ number, which would wrap around and could land between 1 and 100.
+: parse-digits ( c-addr u -- n flag )
+  skip-leading-zeros
   2dup all-digits? 0= if 2drop 0 false exit then
   dup 3 > if 2drop 101 true exit then
   0. 2swap >number  ( ud c-addr' u' )
   2drop drop true ;
+
+\ convert a guess to an integer, ignoring leading and trailing spaces and tabs
+: parse-integer ( c-addr u -- n flag )
+  skip-spaces skip-trailing-spaces parse-digits ;
+
+\ a fixed secret from GMN_SECRET for parity testing, otherwise a random 1..100.
+\ The value must be digits only, as a guess must be, but it is not trimmed;
+\ an unset variable gives an empty string, which is not digits.
+: secret-from-env ( -- n )
+  s" GMN_SECRET" getenv parse-digits  ( n flag )
+  over 1 101 within and if exit then
+  drop 100 random 1 + ;
+
+: init-game ( -- )
+  utime drop seed !
+  rnd drop                          \ advance once: the LCG's first step from a 64-bit timestamp is low-entropy
+  secret-from-env secretnumber !
+  0 userguess !
+  0 totalguesses !
+  1 lowmax !
+  100 highmax ! ;
 
 \ read a line into userguessunvalidated and try to parse it as an integer
 : read-user-input ( -- n flag )

@@ -17,6 +17,11 @@
 # A listed pair that now matches reports STALE and does fail it, so the list can
 # only shrink: fix a language, then delete its line.
 #
+# The GMN_SECRET hook is checked too. Each case in HOOK_CASES sets GMN_SECRET to
+# an odd value, such as +5 or 0x05, guesses the number it might be read as, and
+# looks at whether that first guess wins. A version must take or ignore each
+# value exactly as Python does, so a lax parser in the hook cannot go unseen.
+#
 # Normalization policy: forgive only the differences a language's print
 # primitives force — trailing whitespace on a line, and runs of blank lines.
 # Normalization therefore strips trailing whitespace and collapses consecutive
@@ -79,6 +84,26 @@ play() {
         | head -c "$MAX_OUTPUT" | normalize
 }
 
+# Run one hook case with the prepared language, and print its verdict. Each
+# argument is a guess:value pair for one run, which sets GMN_SECRET to the value
+# and guesses once. The verdict is "takes" when every first guess wins, so each
+# value set the secret; "random" when one does not; and "error" when a run never
+# reached the first prompt. A random secret equals a guess one time in 100, so a
+# correct "random" reads as "takes" one time in a million.
+hook_verdict() {
+    local pair guess value out
+    for pair in "$@"; do
+        guess="${pair%%:*}"
+        value="${pair#*:}"
+        out="$(printf '%s\n' "$guess" | GMN_SECRET="$value" \
+            timeout --kill-after=5 "$TIMEOUT_SEC" bash -c "$RUN_CMD" 2>&1 \
+            | head -c "$MAX_OUTPUT")"
+        if ! grep -q 'What is your guess?' <<<"$out"; then echo error; return; fi
+        if ! grep -q 'It took 1 total guesses\.' <<<"$out"; then echo random; return; fi
+    done
+    echo takes
+}
+
 mapfile -t SCENARIOS < <(printf '%s\n' "${!SECRET[@]}" | sort)
 
 # --- Check the scenarios before trusting them ---------------------------------
@@ -100,6 +125,16 @@ for scenario in "${SCENARIOS[@]}"; do
             broken=1
         fi
     done <<<"${EXPECT[$scenario]}"
+done
+# The hook cases state what Python does, so Python must agree with every one.
+for case in "${HOOK_CASES[@]}"; do
+    IFS='|' read -r -a fields <<<"$case"
+    verdict="${fields[0]}" label="${fields[1]}"
+    got="$(hook_verdict "${fields[@]:2}")"
+    if [[ "$got" != "$verdict" ]]; then
+        echo "ERROR: hook case '$label' expects '$verdict', but Python gives '$got'" >&2
+        broken=1
+    fi
 done
 rm -rf "$reftmp"
 
@@ -131,7 +166,8 @@ fi
 
 fails=0
 known_total=0
-printf 'Parity check against Python: %d scenarios\n\n' "${#SCENARIOS[@]}"
+printf 'Parity check against Python: %d scenarios, %d hook cases\n\n' \
+    "${#SCENARIOS[@]}" "${#HOOK_CASES[@]}"
 for lang in "${TARGETS[@]}"; do
     if [[ -z "${LANGS[$lang]:-}" ]]; then
         printf '  %-10s NOT IN MANIFEST\n' "$lang"; fails=$((fails+1)); continue
@@ -173,9 +209,26 @@ for lang in "${TARGETS[@]}"; do
                 | head -n "$DIFF_LINES" | sed 's/^/        /')"$'\n'
         fi
     done
+
+    hooked=0
+    for case in "${HOOK_CASES[@]}"; do
+        IFS='|' read -r -a fields <<<"$case"
+        verdict="${fields[0]}" label="${fields[1]}"
+        got="$(hook_verdict "${fields[@]:2}")"
+        if [[ "$got" == "$verdict" ]]; then
+            hooked=$((hooked+1)); continue
+        fi
+        problems+=("HOOK:$label")
+        example="GMN_SECRET=$(printf '%q' "${fields[2]#*:}")"
+        case "$got" in
+            takes)  report+="        hook $label: values such as $example set the secret; Python ignores them"$'\n' ;;
+            random) report+="        hook $label: values such as $example were ignored; Python takes them"$'\n' ;;
+            *)      report+="        hook $label: $example stopped the program before its first prompt"$'\n' ;;
+        esac
+    done
     rm -rf "$tmpdir"
 
-    line="$(printf '  %-10s %2d match' "$lang" "$matched")"
+    line="$(printf '  %-10s %2d match, %2d hook' "$lang" "$matched" "$hooked")"
     [[ ${#known[@]} -gt 0 ]] && line+=", ${#known[@]} known"
     [[ ${#problems[@]} -gt 0 ]] && line+="  ${problems[*]}"
     printf '%s\n' "$line"

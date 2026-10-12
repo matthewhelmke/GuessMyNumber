@@ -59,8 +59,10 @@
     01 WS-LEADING-ZEROS PIC 999. *> leading zeros in the guess
     01 WS-SIGNIFICANT-DIGITS PIC 999. *> digits in the guess after its leading zeros
     01 WS-USER-GUESS PIC S9(3) COMP-3. *> guess converted to a number
-    01 WS-GMN-SECRET PIC X(10). *> raw GMN_SECRET env value, for parity testing
-    01 WS-GMN-SECRET-NUM PIC 9(9). *> GMN_SECRET parsed to a number
+    01 WS-GMN-SECRET-PTR USAGE POINTER. *> GMN_SECRET's value, from the C library's getenv
+    01 WS-GMN-SECRET-LEN PIC 9(9). *> its length, trailing spaces included
+    01 WS-GMN-SECRET PIC X(256). *> raw GMN_SECRET env value, for parity testing
+    01 WS-GMN-SECRET-NUM PIC 999. *> GMN_SECRET parsed to a number
 
 *> ***************************************************************
 
@@ -74,10 +76,31 @@
     *> for this game. Using the date, formatted as a number, provides a
     *> constantly-changing seed value, which helps.
     ComputeSecretNumber.
-      *> Use a fixed secret from GMN_SECRET when set, for parity testing
-      MOVE SPACES TO WS-GMN-SECRET
-      ACCEPT WS-GMN-SECRET FROM ENVIRONMENT "GMN_SECRET"
-      COMPUTE WS-GMN-SECRET-NUM = FUNCTION NUMVAL(WS-GMN-SECRET)
+      *> Use a fixed secret from GMN_SECRET when set, for parity testing. The
+      *> value gets the same checks as a guess, but it is not trimmed, so it is
+      *> read through getenv: ACCEPT FROM ENVIRONMENT pads the field with
+      *> spaces, which would hide any trailing ones. A value longer than
+      *> WS-GMN-SECRET is ignored.
+      MOVE 0 TO WS-GMN-SECRET-NUM
+      CALL "getenv" USING BY CONTENT Z"GMN_SECRET" RETURNING WS-GMN-SECRET-PTR
+      IF WS-GMN-SECRET-PTR NOT = NULL
+        MOVE FUNCTION CONTENT-LENGTH (WS-GMN-SECRET-PTR) TO WS-GMN-SECRET-LEN
+        IF WS-GMN-SECRET-LEN > 0
+            AND WS-GMN-SECRET-LEN <= FUNCTION LENGTH (WS-GMN-SECRET)
+          MOVE FUNCTION CONTENT-OF (WS-GMN-SECRET-PTR) TO WS-GMN-SECRET
+          IF WS-GMN-SECRET (1:WS-GMN-SECRET-LEN) IS NUMERIC
+            *> as with a guess, more than three digits after the leading zeros
+            *> is over 100, and too many for the three-digit WS-GMN-SECRET-NUM
+            MOVE 0 TO WS-LEADING-ZEROS
+            INSPECT WS-GMN-SECRET (1:WS-GMN-SECRET-LEN)
+              TALLYING WS-LEADING-ZEROS FOR LEADING "0"
+            IF WS-GMN-SECRET-LEN - WS-LEADING-ZEROS <= 3
+              COMPUTE WS-GMN-SECRET-NUM =
+                FUNCTION NUMVAL (WS-GMN-SECRET (1:WS-GMN-SECRET-LEN))
+            END-IF
+          END-IF
+        END-IF
+      END-IF
       IF WS-GMN-SECRET-NUM >= 1 AND WS-GMN-SECRET-NUM <= 100
         COMPUTE SECRETNUMBER = WS-GMN-SECRET-NUM
       ELSE

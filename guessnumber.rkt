@@ -8,6 +8,8 @@
 ;
 ; Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 ; Copyright (c) 2021 Matthew Helmke for the Racket version (this one)
+; GMN_SECRET hook revised 2026-10-12 with assistance from Claude Code
+;    (claude.ai/code) using the claude-opus-5-5 model
 ;
 ; To run:
 ;   racket guessnumber.rkt
@@ -107,9 +109,10 @@ Here we go!\n\n")
         (inquire-user secretnumber)])]))
 
 ; Call the function with "secretnumber" set from GMN_SECRET (for parity
-; testing) or, failing that, a random number between 1 and 100
+; testing) or, failing that, a random number between 1 and 100. The value
+; must be all digits, like a guess, because string->number also reads "+5".
 (define gmn-secret (let ([e (getenv "GMN_SECRET")])
-                     (and e (string->number e))))
+                     (and e (regexp-match? #rx"^[0-9]+$" e) (string->number e))))
 (inquire-user (if (and (exact-integer? gmn-secret) (<= 1 gmn-secret 100))
                   gmn-secret
                   (random 1 101)))

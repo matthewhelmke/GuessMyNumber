@@ -31,6 +31,7 @@ declare -A SECRET=(
     [over-100]=30
     [four-digits]=30
     [huge-number]=30
+    [overflow-32]=30
     [overflow-wrap]=30
     [hex-literal]=30
     [leading-zeros]=8
@@ -61,9 +62,42 @@ declare -A EXPECT=(
     [over-100]="$OUTOFRANGE"
     [four-digits]="$OUTOFRANGE"     # 1030 is 30 to a three-digit field that drops high-order digits
     [huge-number]="$OUTOFRANGE"
+    [overflow-32]="$OUTOFRANGE"     # 2^32 + 30: wraps to 30 in an unchecked 32-bit parse
     [overflow-wrap]="$OUTOFRANGE"   # 2^64 + 30: wraps to 30 in an unchecked 64-bit parse
     [hex-literal]="$NONNUMERIC"     # 0x1E is 30 to a parser that reads source-code literals
     [leading-zeros]="$FIRSTGUESSWIN"
     [unicode-superscript]="$NONNUMERIC"
     [unicode-arabic-digit]="$NONNUMERIC"
+)
+
+# GMN_SECRET hook cases. The hook takes a value exactly when Python does: ASCII
+# digits only, with no trimming, and a value from 1 to 100. Anything else must
+# leave the secret random. Each case is "verdict|label|guess:value|..." with
+# three guess:value pairs, one per run:
+#   takes   — each value must become the secret, so its guess wins at once
+#   random  — each value must be ignored; its guess is the number a lax parser
+#             would misread it as, so first-guess wins expose one
+# The three runs aim at three different numbers because some versions seed
+# their random secret from the clock in whole seconds, so runs started in the
+# same second share it. One secret cannot equal three different guesses.
+
+HOOK_CASES=(
+    "takes|plain|5:5|6:6|7:7"
+    "takes|leading-zero|5:05|6:06|7:07"
+    "takes|bound-100|98:98|99:99|100:100"
+    "random|plus-sign|5:+5|6:+6|7:+7"
+    "random|minus-sign|5:-5|6:-6|7:-7"
+    "random|leading-space|5: 5|6: 6|7: 7"
+    "random|trailing-space|5:5 |6:6 |7:7 "
+    $'random|leading-tab|5:\t5|6:\t6|7:\t7'
+    "random|trailing-letter|5:5x|6:6x|7:7x"
+    "random|decimal|5:5.0|6:6.0|7:7.0"
+    "random|hex-literal|5:0x05|6:0x06|7:0x07"
+    "random|two-digit-field|5:105|6:106|7:107"              # 105 is 05 to a two-digit field
+    "random|three-digit-field|5:1005|6:1006|7:1007"         # 1005 is 005 to a three-digit field
+    "random|nine-digit-field|5:1000000005|6:1000000006|7:1000000007"
+    "random|overflow-32|5:4294967301|6:4294967302|7:4294967303"     # 2^32 + n
+    "random|overflow-wrap|5:18446744073709551621|6:18446744073709551622|7:18446744073709551623"   # 2^64 + n
+    "random|superscript|5:⁵|6:⁶|7:⁷"
+    "random|arabic-digit|5:٥|6:٦|7:٧"
 )
