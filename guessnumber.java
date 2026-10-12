@@ -6,6 +6,8 @@
  *
  * Copyright (c) 2007 Matthew Helmke for the old Python 2 version
  * Copyright (c) 2025 Matthew Helmke for the Java version (this one)
+ * Input handling revised 2026-10-12 with assistance from Claude Code
+ *    (claude.ai/code) using the claude-opus-5-5 model
  *
  * To compile (Linux):
  *   javac guessnumber.java
@@ -57,10 +59,14 @@ public class guessnumber {
                 System.out.print("What is your guess? ");
 
                 // let the user input any number they want
-                if (!scanner.hasNext()) {
+                // read the whole line; scanner.next() would read one word and skip empty lines
+                if (!scanner.hasNextLine()) {
                     break; // end of input
                 }
-                String userguessunvalidated = scanner.next();
+                String userguessunvalidated = scanner.nextLine();
+
+                // remove leading and trailing spaces and tabs
+                userguessunvalidated = userguessunvalidated.replaceAll("^[ \\t]+|[ \\t]+$", "");
 
                 // verify the guess is a whole number
                 if (!userguessunvalidated.matches("\\d+")) {
@@ -68,8 +74,13 @@ public class guessnumber {
                     continue;
                 }
 
-                // verify the guess is in range
-                userguess = Integer.parseInt(userguessunvalidated);
+                // verify the guess is in range; the input is all digits, so parseInt
+                // can fail only when the number is too large for an int, which is out of range
+                try {
+                    userguess = Integer.parseInt(userguessunvalidated);
+                } catch (NumberFormatException e) {
+                    userguess = Integer.MAX_VALUE;
+                }
                 if (userguess < 1 || userguess > 100) {
                     System.out.println("Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n");
                     continue;

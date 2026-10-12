@@ -7,6 +7,8 @@
     additions like input validation and computer guesses.
 
   Copyright (c) 2026 Matthew Helmke for the Haskell version (this one)
+  Input handling revised 2026-10-12 with assistance from Claude Code
+     (claude.ai/code) using the claude-opus-5-5 model
 
   This Haskell version is a direct behavioral port of the Python, Bash, C,
   Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
@@ -32,7 +34,8 @@
 -}
 
 import System.Random (randomRIO)
-import Text.Read (readMaybe)
+import Data.Char (isDigit)
+import Data.List (dropWhileEnd)
 import Control.Monad (when)
 import System.Exit (exitSuccess)
 import System.Environment (lookupEnv)
@@ -52,23 +55,37 @@ main = do
 secretFromEnv :: IO Int
 secretFromEnv = do
   envValue <- lookupEnv "GMN_SECRET"
-  case envValue >>= readMaybe of
-    Just n | n >= 1 && n <= 100 -> return n
+  case envValue >>= wholeNumber of
+    Just n | n >= 1 && n <= 100 -> return (fromInteger n)
     _ -> randomRIO (1, 100)
+
+-- The value of the input if, after trimming spaces and tabs, it is all ASCII
+-- digits. readMaybe is not used because it parses Haskell literals, so it
+-- accepts "-5", "0x1E", and "(30)". The value is an unbounded Integer, so a very
+-- long number cannot wrap around into the range 1 to 100 the way an Int would.
+wholeNumber :: String -> Maybe Integer
+wholeNumber input
+  | not (null trimmed) && all isDigit trimmed = Just (read trimmed)
+  | otherwise = Nothing
+  where
+    isBlank c = c == ' ' || c == '\t'
+    trimmed = dropWhileEnd isBlank (dropWhile isBlank input)
 
 gameLoop :: Int -> Int -> Int -> Int -> IO ()
 gameLoop secretnumber totalguesses lowmax highmax = do
   putStr "What is your guess? "
   userguessunvalidated <- getLine
-  case readMaybe userguessunvalidated :: Maybe Int of
+  case wholeNumber userguessunvalidated of
     Nothing -> do
       putStrLn "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n"
       gameLoop secretnumber totalguesses lowmax highmax
-    Just userguess
-      | userguess < 1 || userguess > 100 -> do
+    Just value
+      | value < 1 || value > 100 -> do
           putStrLn "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n"
           gameLoop secretnumber totalguesses lowmax highmax
       | otherwise -> do
+          let userguess = fromInteger value :: Int
+
           -- this is a real guess, so count it
           let totalguesses' = totalguesses + 1
 

@@ -7,6 +7,8 @@
 \ Copyright (c) 2026 Matthew Helmke for the Gforth version (this one)
 \    with assistance from Claude Code (claude.ai/code)
 \    using the claude-sonnet-4-6 model
+\ Input handling revised 2026-10-12 with assistance from Claude Code
+\    (claude.ai/code) using the claude-opus-5-5 model
 \
 \ To run:
 \   gforth guessnumber.fth
@@ -82,13 +84,38 @@ require random.fs
     1 /string
   repeat ;
 
-\ convert a string to an integer; returns ( n true ) on success, ( 0 false ) on failure
-: parse-integer ( c-addr u -- n flag )
-  skip-spaces
-  dup 0= if 2drop 0 false exit then
+\ drop trailing whitespace from a string; the standard -trailing drops only spaces, not tabs
+: skip-trailing-spaces ( c-addr u -- c-addr u' )
+  begin
+    dup 0 > if 2dup + 1- c@ bl <= else false then
+  while
+    1-
+  repeat ;
+
+\ skip leading zeros, keeping the last digit so that "0" stays "0"
+: skip-leading-zeros ( c-addr u -- c-addr' u' )
+  begin
+    dup 1 > if over c@ [char] 0 = else false then
+  while
+    1 /string
+  repeat ;
+
+\ true if the string is not empty and every character is a digit
+: all-digits? ( c-addr u -- flag )
+  dup 0= if 2drop false exit then
   0. 2swap >number  ( ud c-addr' u' )
-  nip 0=            ( lo hi flag )
-  if drop true else 2drop 0 false then ;
+  nip nip nip 0= ;
+
+\ convert a string to an integer; returns ( n true ) for a string of digits,
+\ ( 0 false ) for anything else. More than three digits after the leading
+\ zeros is over 100, so it returns 101 rather than converting a long number,
+\ which would wrap around and could land between 1 and 100.
+: parse-integer ( c-addr u -- n flag )
+  skip-spaces skip-trailing-spaces skip-leading-zeros
+  2dup all-digits? 0= if 2drop 0 false exit then
+  dup 3 > if 2drop 101 true exit then
+  0. 2swap >number  ( ud c-addr' u' )
+  2drop drop true ;
 
 \ read a line into userguessunvalidated and try to parse it as an integer
 : read-user-input ( -- n flag )

@@ -6,6 +6,8 @@
 !
 ! Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 ! Copyright (c) 2025 Matthew Helmke for the Fortran version (this one)
+! Input handling revised 2026-10-12 with assistance from Claude Code
+!    (claude.ai/code) using the claude-opus-5-5 model
 !
 ! To compile:
 !    gfortran guessnumber.f90 -o guessnumber
@@ -30,7 +32,7 @@ PROGRAM GuessMyNumber
   IMPLICIT none
   INTEGER :: secretnumber, userguess, computerguess, totalguesses, lowmax, highmax
   CHARACTER(len=100) :: input
-  INTEGER :: iostat_val
+  INTEGER :: iostat_val, i
   REAL :: random_real
   ! Variables for the GMN_SECRET parity-testing hook
   CHARACTER(len=100) :: env_secret
@@ -76,17 +78,27 @@ PROGRAM GuessMyNumber
     READ(*, '(A)', iostat=iostat_val) input
     IF (iostat_val /= 0) EXIT   ! end of input
 
-    ! verify the guess is a whole number
-    READ(input, *, iostat=iostat_val) userguess
-    IF (iostat_val /= 0) THEN
+    ! remove leading and trailing spaces and tabs: tabs become spaces, ADJUSTL
+    ! moves leading spaces to the end, and LEN_TRIM stops before trailing ones
+    DO i = 1, LEN_TRIM(input)
+      IF (input(i:i) == CHAR(9)) input(i:i) = " "
+    END DO
+    input = ADJUSTL(input)
+
+    ! verify the guess is a whole number: VERIFY returns 0 when every character
+    ! is a digit. A list-directed READ alone would accept a sign, or read
+    ! "30 40" as 30.
+    IF (LEN_TRIM(input) == 0 .OR. VERIFY(input(1:LEN_TRIM(input)), "0123456789") /= 0) THEN
       WRITE(*, '(A)') "Only whole numbers from 1 to 100 are allowed."
       WRITE(*, '(A)') "Please try again."
       WRITE(*, '(A)') ""
       CYCLE
     END IF
 
-    ! verify the guess is in range
-    IF (userguess < 1 .OR. userguess > 100) THEN
+    ! verify the guess is in range; the input is all digits, so READ can fail
+    ! only when the number is too large for an integer, which is out of range
+    READ(input, *, iostat=iostat_val) userguess
+    IF (iostat_val /= 0 .OR. userguess < 1 .OR. userguess > 100) THEN
       WRITE(*, '(A)') "Only whole numbers from 1 to 100 are allowed. Your guess is out of range."
       WRITE(*, '(A)') "Please try again."
       WRITE(*, '(A)') ""

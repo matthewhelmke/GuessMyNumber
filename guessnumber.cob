@@ -12,6 +12,8 @@
 *>
 *> Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 *> Copyright (c) 2021 Matthew Helmke for the COBOL version (this one)
+*> Input handling revised 2026-10-12 with assistance from Claude Code
+*>    (claude.ai/code) using the claude-opus-5-5 model
 *>
 *> To compile (Linux with GnuCOBOL):
 *>    cobc -x guessnumber.cob
@@ -49,11 +51,13 @@
     01 SECRETNUMBER PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 TOTALGUESSES PIC 99 usage comp-6. *> unsigned (positive) packed decimal
     01 WS-TOTALGUESSES-TRIMMED PIC Z9.
-    01 LOWMAX PIC 99 usage comp-6. *> unsigned (positive) packed decimal
+    01 LOWMAX PIC 999 usage comp-6. *> unsigned (positive) packed decimal; three digits, because it can reach 100
     01 HIGHMAX PIC 999 usage comp-6. *> unsigned (positive) packed decimal
     01 SEED PIC 999999999 usage comp-6. *> unsigned (positive) packed decimal
     01 PSEUDO-RANDOM-NUMBER usage comp-1. *> float-short
-    01 WS-USER-INPUT PIC X(10). *> raw line from the keyboard
+    01 WS-USER-INPUT PIC X(256). *> raw line from the keyboard
+    01 WS-LEADING-ZEROS PIC 999. *> leading zeros in the guess
+    01 WS-SIGNIFICANT-DIGITS PIC 999. *> digits in the guess after its leading zeros
     01 WS-USER-GUESS PIC S9(3) COMP-3. *> guess converted to a number
     01 WS-GMN-SECRET PIC X(10). *> raw GMN_SECRET env value, for parity testing
     01 WS-GMN-SECRET-NUM PIC 9(9). *> GMN_SECRET parsed to a number
@@ -97,31 +101,48 @@
 
     DISPLAY "What is your guess? " WITH NO ADVANCING.
 
-    ACCEPT WS-USER-INPUT.
+    MOVE SPACES TO WS-USER-INPUT.
+    ACCEPT WS-USER-INPUT
+      ON EXCEPTION
+        *> end of input. A last line with no newline raises this too, after
+        *> it has been read, so stop only when nothing was read.
+        IF WS-USER-INPUT = SPACES
+          STOP RUN
+        END-IF
+    END-ACCEPT.
 
     *> ***********************************************************
     *> Input validation section
     *> ***********************************************************
 
-    *> verify the guess is a whole number (TRIM removes the trailing spaces
-    *> the PIC X(10) field adds, which would otherwise fail NUMERIC)
-    IF FUNCTION TRIM (WS-USER-INPUT) IS NUMERIC
-      MOVE FUNCTION NUMVAL (WS-USER-INPUT) TO WS-USER-GUESS
-    ELSE
+    *> tabs count as spaces, so that TRIM removes them along with spaces
+    INSPECT WS-USER-INPUT REPLACING ALL X"09" BY SPACE.
+
+    *> verify the guess is a whole number. TRIM removes the leading spaces and
+    *> the trailing ones the PIC X field adds, which would otherwise fail
+    *> NUMERIC. An empty line is checked first, because NUMERIC accepts it.
+    IF WS-USER-INPUT = SPACES OR FUNCTION TRIM (WS-USER-INPUT) IS NOT NUMERIC
       DISPLAY "Only whole numbers from 1 to 100 are allowed."
       DISPLAY "Please try again."
       DISPLAY " "
       GO TO ENTERUSERGUESS
     END-IF.
 
-    IF FUNCTION INTEGER (WS-USER-GUESS) NOT = WS-USER-GUESS
-      DISPLAY "Only whole numbers from 1 to 100 are allowed."
-      DISPLAY "Please try again."
-      DISPLAY " "
-      GO TO ENTERUSERGUESS
-    END-IF.
+    *> count the digits after any leading zeros. More than three is over 100,
+    *> and too many to MOVE into the three-digit WS-USER-GUESS, which would
+    *> silently drop the high-order digits and turn 1030 into 30.
+    MOVE FUNCTION TRIM (WS-USER-INPUT) TO WS-USER-INPUT.
+    MOVE 0 TO WS-LEADING-ZEROS.
+    INSPECT WS-USER-INPUT TALLYING WS-LEADING-ZEROS FOR LEADING "0".
+    COMPUTE WS-SIGNIFICANT-DIGITS =
+      FUNCTION LENGTH (FUNCTION TRIM (WS-USER-INPUT)) - WS-LEADING-ZEROS.
 
     *> verify the guess is in range
+    IF WS-SIGNIFICANT-DIGITS > 3
+      MOVE 999 TO WS-USER-GUESS
+    ELSE
+      MOVE FUNCTION NUMVAL (WS-USER-INPUT) TO WS-USER-GUESS
+    END-IF.
     IF WS-USER-GUESS < 1 OR WS-USER-GUESS > 100
       DISPLAY "Only whole numbers from 1 to 100 are allowed. "
         "Your guess is out of range."

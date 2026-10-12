@@ -155,9 +155,11 @@ These are Gforth-specific and not portable to other Forth systems without modifi
 
 ### Lua
 
-The Lua version runs under the standard interpreter (`lua guessnumber.lua`; on Debian/Ubuntu derivatives, `apt install lua5.4`). Two details are deliberate:
+The Lua version runs under the standard interpreter (`lua guessnumber.lua`; on Debian/Ubuntu derivatives, `apt install lua5.4`). Three details are deliberate:
 
 - **Output uses `io.write`, not `print`.** Lua's `print` separates its arguments with tab characters and appends a newline, which would not match Python's spaces. `io.write` emits exactly the bytes given, so each message is assembled with explicit concatenation and newlines.
+
+- **The user-win banner writes its leading blank line separately.** A long string (`[[ ... ]]`) drops a newline that comes right after its opening brackets, so the blank line the banner starts with is passed to `io.write` as its own `"\n"`.
 
 - **`goto continue` ends a turn early.** Lua has no `continue` statement, so invalid input jumps to a `::continue::` label at the foot of the loop — the same effect Python gets from `continue`, spelled the way Lua allows.
 
@@ -225,9 +227,9 @@ BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
 
 `./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it plays every command-line implementation through a set of scenarios, then diffs the normalized output of each against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
 
-Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, a bound of 100, the 8- and 10-guess taunts, the forced game over at 12, both careless-guess taunts, and each kind of invalid input. Each scenario also names text the Python output must contain, such as the GAME OVER message. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
+Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, a bound of 100, the 8- and 10-guess taunts, the forced game over at 12, both careless-guess taunts, and each kind of invalid input, including the three that trip up a language's own number parser: a hexadecimal literal (`0x1E`), a four-digit number that a three-digit field would truncate to 30 (`1030`), and 2⁶⁴ + 30, which an unchecked 64-bit conversion wraps around to 30. One scenario ends without a final newline, as piped input can. Each scenario also names text the Python output must contain, such as the GAME OVER message. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
 
-Some implementations do not match every scenario yet. `tests/parity_known.txt` lists those pairs, with the cause of each; they report `KNOWN` and do not fail the check. The list only shrinks: a listed pair that starts matching reports `STALE` and fails the check until its line is deleted. `./tests/parity <language>` shows the diffs for a language's known divergences.
+When an implementation does not match every scenario yet, `tests/parity_known.txt` lists those pairs, with the cause of each; they report `KNOWN` and do not fail the check. The list only shrinks: a listed pair that starts matching reports `STALE` and fails the check until its line is deleted. `./tests/parity <language>` shows the diffs for a language's known divergences.
 
 The fixed secret comes from an environment variable. Every command-line implementation reads `GMN_SECRET` (a number from 1 to 100) as the secret when it is set, and falls back to a random number when it is not. Nothing changes for an ordinary run; the hook exists so the parity check can drive all versions through the same game.
 

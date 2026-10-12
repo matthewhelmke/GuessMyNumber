@@ -8,6 +8,8 @@
 #
 # Copyright (c) 2007 Matthew Helmke for the old Python 2 version
 # Copyright (c) 2020 Matthew Helmke for the Bash version (this one)
+# Input handling revised 2026-10-12 with assistance from Claude Code
+#    (claude.ai/code) using the claude-opus-5-5 model
 #
 # To run:
 #   ./guessnumber.sh
@@ -49,8 +51,8 @@ declare -i highmax=100
 declare -i computerguess
 
 # Get a random number, or a fixed one from GMN_SECRET for parity testing
-if [[ "$GMN_SECRET" =~ ^[0-9]+$ ]] && (( GMN_SECRET >= 1 && GMN_SECRET <= 100 )); then
-  secretnumber=$GMN_SECRET
+if [[ "$GMN_SECRET" =~ ^[0123456789]+$ ]] && (( 10#$GMN_SECRET >= 1 && 10#$GMN_SECRET <= 100 )); then
+  secretnumber=$(( 10#$GMN_SECRET ))
 else
   (( secretnumber = RANDOM % 100 + 1 ))
 fi
@@ -62,13 +64,25 @@ while :; do
   # so stop only when it fails without having read anything
   read userguessunvalidated || [[ -n "$userguessunvalidated" ]] || break
 
-  # verify the guess is a whole number
-  if [[ ! $userguessunvalidated =~ ^[0-9]+$ ]]; then
+  # verify the guess is a whole number. The digits are listed one by one
+  # because in a UTF-8 locale [0-9] also matches other scripts' digits.
+  if [[ ! $userguessunvalidated =~ ^[0123456789]+$ ]]; then
     printf "Only whole numbers from 1 to 100 are allowed.\nPlease try again.\n\n"
     continue
   fi
 
-  # verify the guess is in range
+  # remove leading zeros, which bash arithmetic would read as octal
+  while [[ $userguessunvalidated == 0?* ]]; do
+    userguessunvalidated=${userguessunvalidated#0}
+  done
+
+  # verify the guess is in range. Anything longer than three digits is over
+  # 100; checking the length first also keeps bash arithmetic from wrapping a
+  # very long number around into range.
+  if (( ${#userguessunvalidated} > 3 )); then
+    printf "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n"
+    continue
+  fi
   userguess=$userguessunvalidated
   if ((userguess < 1 || userguess > 100)); then
     printf "Only whole numbers from 1 to 100 are allowed. Your guess is out of range.\nPlease try again.\n\n"
