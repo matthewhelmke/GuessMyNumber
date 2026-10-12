@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 # Parity check — confirm every CLI implementation produces identical
-# user-visible output for the same game.
+# user-visible output for the same games.
 #
-# Each implementation runs under a fixed secret (GMN_SECRET) and a fixed input
-# fixture, so they all play the exact same game. The output is normalized and
-# diffed against Python, the canonical reference. A new language is "done" when
-# it matches here, so this doubles as the TDD gate for future implementations.
+# Each scenario in tests/scenarios.sh is one game: a fixed secret (GMN_SECRET)
+# and a fixed input from tests/fixtures/parity/<name>.txt. Every implementation
+# plays every scenario, and its normalized output is diffed against Python, the
+# canonical reference. A new language is "done" when it matches here, so this
+# doubles as the TDD gate for future implementations.
+#
+# Before comparing anything, the script checks that the Python reference still
+# reaches the path each scenario is named for (the EXPECT patterns). A scenario
+# whose game no longer reaches its path tests nothing, so that is an error.
+#
+# Known divergences: tests/parity_known.txt lists the language/scenario pairs
+# that are known not to match yet. Those report KNOWN and do not fail the run.
+# A listed pair that now matches reports STALE and does fail it, so the list can
+# only shrink: fix a language, then delete its line.
 #
 # Normalization policy: forgive only the differences a language's print
 # primitives force — trailing whitespace on a line, and runs of blank lines.
@@ -15,86 +25,166 @@
 #
 # Usage:
 #   ./tests/parity              — check every implementation
-#   ./tests/parity rust forth   — check a subset
+#   ./tests/parity rust forth   — check a subset, and show the diffs for its
+#                                 known divergences too
 #
-# Exit status is non-zero if any implementation diverges from Python. BASIC and
-# HTML are skipped (they cannot take piped stdin) and are verified by hand.
+# Exit status: 0 when nothing new diverges, 1 when something does (a DIFF, a
+# STALE entry, or a build or run failure), 2 when the scenarios themselves are
+# broken. BASIC and HTML are skipped (they cannot take piped stdin) and are
+# verified by hand.
 
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TESTS_DIR="${REPO_ROOT}/tests"
-FIXTURE="${TESTS_DIR}/fixtures/parity_stdin.txt"
-export GMN_SECRET=42
+FIXTURE_DIR="${TESTS_DIR}/fixtures/parity"
+KNOWN_FILE="${TESTS_DIR}/parity_known.txt"
 TIMEOUT_SEC=30
 DIFF_LINES=40   # cap each diff so the worklist stays readable
 
 # shellcheck source=tests/manifest.sh
 source "${TESTS_DIR}/manifest.sh"
+# shellcheck source=tests/scenarios.sh
+source "${TESTS_DIR}/scenarios.sh"
 cd "${REPO_ROOT}"
 
 normalize() { sed -e 's/[[:space:]]*$//' | cat -s; }
 
-# Print one implementation's normalized output. Returns non-zero if it can't run.
-render() {
-    local lang="$1"
-    local file="${FILE[$lang]:-}"
-    [[ -n "${SKIP[$lang]:-}" ]] && return 1
-    [[ -f "$file" ]] || return 1
-
-    local tmpdir out_path compile_cmd run_cmd
-    tmpdir="$(mktemp -d)"
-    out_path="${tmpdir}/${lang}"
+# Compile one language (if it needs it) into its own temp dir, and set RUN_CMD
+# to the command that runs it. Returns non-zero if it can't be built.
+prepare() {
+    local lang="$1" tmpdir="$2"
+    local out_path="${tmpdir}/${lang}" compile_cmd
+    [[ -f "${FILE[$lang]:-}" ]] || return 1
 
     if [[ -n "${COMPILE[$lang]:-}" ]]; then
         compile_cmd="${COMPILE[$lang]//%OUT%/$out_path}"
         compile_cmd="${compile_cmd//%TMPDIR%/$tmpdir}"
-        if ! eval "$compile_cmd" >/dev/null 2>&1; then
-            rm -rf "$tmpdir"; return 1
-        fi
+        eval "$compile_cmd" >/dev/null 2>&1 || return 1
     fi
 
-    run_cmd="${RUN[$lang]:-}"
-    run_cmd="${run_cmd//%OUT%/$out_path}"
-    run_cmd="${run_cmd//%TMPDIR%/$tmpdir}"
-
-    printf '%s' "$(cat "$FIXTURE")" | timeout --kill-after=5 "$TIMEOUT_SEC" \
-        bash -c "$run_cmd" 2>&1 | normalize
-    rm -rf "$tmpdir"
+    RUN_CMD="${RUN[$lang]:-}"
+    RUN_CMD="${RUN_CMD//%OUT%/$out_path}"
+    RUN_CMD="${RUN_CMD//%TMPDIR%/$tmpdir}"
 }
 
-REF="$(render python)" || { echo "ERROR: could not run the Python reference" >&2; exit 2; }
+# Play one scenario with the prepared language and print its normalized output.
+play() {
+    local scenario="$1"
+    GMN_SECRET="${SECRET[$scenario]}" timeout --kill-after=5 "$TIMEOUT_SEC" \
+        bash -c "$RUN_CMD" < "${FIXTURE_DIR}/${scenario}.txt" 2>&1 | normalize
+}
 
+mapfile -t SCENARIOS < <(printf '%s\n' "${!SECRET[@]}" | sort)
+
+# --- Check the scenarios before trusting them ---------------------------------
+
+broken=0
+declare -A REF
+reftmp="$(mktemp -d)"
+prepare python "$reftmp" || { echo "ERROR: could not run the Python reference" >&2; exit 2; }
+for scenario in "${SCENARIOS[@]}"; do
+    if [[ ! -f "${FIXTURE_DIR}/${scenario}.txt" || -z "${EXPECT[$scenario]:-}" ]]; then
+        echo "ERROR: scenario '$scenario' needs both a fixture and an EXPECT entry" >&2
+        broken=1; continue
+    fi
+    REF[$scenario]="$(play "$scenario")"
+    while IFS= read -r pattern; do
+        if ! grep -Eq -- "$pattern" <<<"${REF[$scenario]}"; then
+            echo "ERROR: scenario '$scenario' no longer reaches its path;" \
+                 "the Python output does not match: $pattern" >&2
+            broken=1
+        fi
+    done <<<"${EXPECT[$scenario]}"
+done
+rm -rf "$reftmp"
+
+# Known divergences: "language scenario  # why" per line. Each entry must name a
+# real language and scenario, or a typo would hide a divergence forever.
+declare -A KNOWN
+if [[ -f "$KNOWN_FILE" ]]; then
+    while read -r lang scenario _; do
+        [[ -z "$lang" || "$lang" == \#* ]] && continue
+        if [[ -z "${LANGS[$lang]:-}" || -z "${SECRET[$scenario]:-}" ]]; then
+            echo "ERROR: parity_known.txt names an unknown language or scenario: $lang $scenario" >&2
+            broken=1; continue
+        fi
+        KNOWN["$lang $scenario"]=1
+    done < "$KNOWN_FILE"
+fi
+
+[[ $broken -ne 0 ]] && exit 2
+
+# --- Compare every implementation against the reference -----------------------
+
+show_known=0
 if [[ $# -gt 0 ]]; then
     mapfile -t TARGETS < <(printf '%s\n' "$@")
+    show_known=1
 else
     mapfile -t TARGETS < <(printf '%s\n' "${!LANGS[@]}" | sort)
 fi
 
 fails=0
-printf 'Parity check against Python (GMN_SECRET=%s)\n\n' "$GMN_SECRET"
+known_total=0
+printf 'Parity check against Python: %d scenarios\n\n' "${#SCENARIOS[@]}"
 for lang in "${TARGETS[@]}"; do
     if [[ -z "${LANGS[$lang]:-}" ]]; then
-        printf '  %-10s NOT IN MANIFEST\n' "$lang"; continue
+        printf '  %-10s NOT IN MANIFEST\n' "$lang"; fails=$((fails+1)); continue
     fi
     if [[ -n "${SKIP[$lang]:-}" ]]; then
         printf '  %-10s SKIP  %s\n' "$lang" "${SKIP[$lang]}"; continue
     fi
-    out="$(render "$lang")" || { printf '  %-10s ERROR (could not run)\n' "$lang"; fails=$((fails+1)); continue; }
-    if [[ "$out" == "$REF" ]]; then
-        printf '  %-10s MATCH\n' "$lang"
-    else
-        printf '  %-10s DIFF\n' "$lang"
-        diff <(printf '%s\n' "$REF") <(printf '%s\n' "$out") \
-            | head -n "$DIFF_LINES" | sed 's/^/        /'
-        fails=$((fails+1))
+
+    tmpdir="$(mktemp -d)"
+    if ! prepare "$lang" "$tmpdir"; then
+        printf '  %-10s ERROR (could not build)\n' "$lang"
+        fails=$((fails+1)); rm -rf "$tmpdir"; continue
     fi
+
+    matched=0
+    known=()
+    problems=()
+    report=""
+    for scenario in "${SCENARIOS[@]}"; do
+        out="$(play "$scenario")"
+        listed="${KNOWN["$lang $scenario"]:-}"
+        if [[ "$out" == "${REF[$scenario]}" ]]; then
+            if [[ -n "$listed" ]]; then
+                problems+=("STALE:$scenario")
+                report+="        $scenario now matches; delete its line from parity_known.txt"$'\n'
+            else
+                matched=$((matched+1))
+            fi
+        else
+            if [[ -n "$listed" ]]; then
+                known+=("$scenario")
+                [[ $show_known -eq 0 ]] && continue
+                report+="        --- $scenario (known)"$'\n'
+            else
+                problems+=("DIFF:$scenario")
+                report+="        --- $scenario"$'\n'
+            fi
+            report+="$(diff <(printf '%s\n' "${REF[$scenario]}") <(printf '%s\n' "$out") \
+                | head -n "$DIFF_LINES" | sed 's/^/        /')"$'\n'
+        fi
+    done
+    rm -rf "$tmpdir"
+
+    line="$(printf '  %-10s %2d match' "$lang" "$matched")"
+    [[ ${#known[@]} -gt 0 ]] && line+=", ${#known[@]} known"
+    [[ ${#problems[@]} -gt 0 ]] && line+="  ${problems[*]}"
+    printf '%s\n' "$line"
+    [[ -n "$report" ]] && printf '%s' "$report"
+
+    known_total=$((known_total + ${#known[@]}))
+    fails=$((fails + ${#problems[@]}))
 done
 
 printf '\n'
 if [[ $fails -gt 0 ]]; then
-    printf '%d implementation(s) diverge from Python.\n' "$fails"
+    printf '%d new divergence(s) or stale known entries.\n' "$fails"
     exit 1
 fi
-printf 'All implementations match Python.\n'
+printf 'No new divergences. %d known divergence(s) remain in parity_known.txt.\n' "$known_total"
 exit 0

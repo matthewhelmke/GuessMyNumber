@@ -58,6 +58,10 @@ All implementations are expected to conform to the following rules. These are th
     - Guesses lower than a previous guess that was already too low
     - Guesses higher than a previous guess that was already too high
 
+1. Only valid guesses count. After removing leading and trailing spaces and tabs, a guess is valid when it consists only of the ASCII digits 0 to 9 and its value is from 1 to 100. Any other input gets a message and another try, and does not add to the guess counter:
+    - A sign, a decimal point, a space between digits, a letter, a non-ASCII digit such as `²`, or an empty line is not a whole number: "Only whole numbers from 1 to 100 are allowed."
+    - A string of digits whose value is below 1 or above 100, however many digits it has, is out of range: the same message, followed by "Your guess is out of range."
+
 These rules are treated as a compatibility contract. Differences between language versions should be mechanical, not behavioral.
 
 
@@ -219,13 +223,17 @@ BASIC and HTML are skipped for testing as neither has a piped-stdin entry point.
 
 ### Parity check
 
-`./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it runs every command-line implementation under a fixed secret and a fixed input, then diffs the normalized output against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
+`./tests/run` only confirms that a program terminates correctly; it does not compare output. `./tests/parity` goes further: it plays every command-line implementation through a set of scenarios, then diffs the normalized output of each against the Python version, the canonical reference. Two implementations "agree" only when their output matches line for line.
+
+Each scenario is one game: a fixed secret and a fixed input, listed in `tests/scenarios.sh` with its input in `tests/fixtures/parity/`. Between them, the scenarios reach both winners, the 8- and 12-guess taunts, both careless-guess taunts, and each kind of invalid input. No scenario reaches the forced game over at 16 guesses yet. Each scenario also names text the Python output must contain, such as the 12-guess taunt. If a change to the reference or a fixture stops a scenario from reaching its path, the check fails before comparing anything, because that scenario would no longer test what its name says.
+
+Some implementations do not match every scenario yet. `tests/parity_known.txt` lists those pairs, with the cause of each; they report `KNOWN` and do not fail the check. The list only shrinks: a listed pair that starts matching reports `STALE` and fails the check until its line is deleted. `./tests/parity <language>` shows the diffs for a language's known divergences.
 
 The fixed secret comes from an environment variable. Every command-line implementation reads `GMN_SECRET` (a number from 1 to 100) as the secret when it is set, and falls back to a random number when it is not. Nothing changes for an ordinary run; the hook exists so the parity check can drive all versions through the same game.
 
 Normalization forgives only the differences a language's print primitives force—trailing whitespace and runs of blank lines. Everything else must match.
 
-This makes `./tests/parity` the gate for a new implementation: add the file, give it the `GMN_SECRET` hook, and fix it until it matches Python. BASIC and HTML are excluded, since neither reads piped stdin; verify those by hand.
+This makes `./tests/parity` the gate for a new implementation: add the file, give it the `GMN_SECRET` hook, and fix it until it matches Python in every scenario. BASIC and HTML are excluded, since neither reads piped stdin; verify those by hand.
 
 
 ## License
