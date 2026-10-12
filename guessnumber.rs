@@ -53,13 +53,18 @@ use std::hash::BuildHasher;
 use std::io::{self, Write};
 use std::process::exit;
 
-fn read_line() -> String {
+// One line of input, or None when input has run out. read_line reads zero
+// bytes only at the end of input; an empty line still holds its newline.
+fn read_line() -> Option<String> {
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+    let bytes_read = io::stdin().read_line(&mut input).unwrap();
+    if bytes_read == 0 {
+        return None;
+    }
     // drop the newline, then leading and trailing spaces and tabs; trim() would
     // also remove other whitespace, such as a form feed or a no-break space
     let line = input.strip_suffix('\n').unwrap_or(&input);
-    line.trim_matches(|c| c == ' ' || c == '\t').to_string()
+    Some(line.trim_matches(|c| c == ' ' || c == '\t').to_string())
 }
 
 // A random number from 1 to 100. Rust's standard library has no random number
@@ -94,7 +99,11 @@ fn main() {
         print!("What is your guess? ");
         io::stdout().flush().unwrap();
 
-        let guess_input = read_line();
+        // the game ends quietly when input runs out
+        let guess_input = match read_line() {
+            Some(line) => line,
+            None => break,
+        };
 
         // verify the guess is a whole number
         if guess_input.is_empty() || !guess_input.chars().all(|c| c.is_ascii_digit()) {

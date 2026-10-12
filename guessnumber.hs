@@ -39,6 +39,7 @@ import Data.List (dropWhileEnd)
 import Control.Monad (when)
 import System.Exit (exitSuccess)
 import System.Environment (lookupEnv)
+import System.IO (isEOF)
 
 main :: IO ()
 main = do
@@ -80,6 +81,9 @@ digitsValue text
 gameLoop :: Int -> Int -> Int -> Int -> IO ()
 gameLoop secretnumber totalguesses lowmax highmax = do
   putStr "What is your guess? "
+  -- the game ends quietly when input runs out
+  endOfInput <- isEOF
+  when endOfInput exitSuccess
   userguessunvalidated <- getLine
   case wholeNumber userguessunvalidated of
     Nothing -> do

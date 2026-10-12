@@ -4,6 +4,7 @@
 # tests/fixtures/parity/<name>.txt, fed byte for byte. Every line ends in a
 # newline, as when a person presses Enter, except in no-final-newline, whose
 # only guess has none: piped input can end that way, and the guess still counts.
+# In end-of-input the input runs out mid-game, which ends the game quietly.
 #
 # Arrays:
 #   SECRET[name]  — the GMN_SECRET value for the game
@@ -16,6 +17,7 @@ declare -A SECRET=(
     [original]=42
     [user-win]=50
     [no-final-newline]=50
+    [end-of-input]=42
     [careless-low]=100
     [careless-high]=10
     [bound-at-100]=100
@@ -58,6 +60,7 @@ declare -A EXPECT=(
     [original]="The computer's guess of 42 is correct!"
     [user-win]="$FIRSTGUESSWIN"
     [no-final-newline]="$FIRSTGUESSWIN"
+    [end-of-input]="The computer guessed 25 and that was too low\\.$"
     [careless-low]=$'than a previous guess that was too low\nWow! You are really bad at this\\.\nG A M E   O V E R'
     [careless-high]="Wake up! That guess was higher"
     [bound-at-100]="The computer's guess of 100 is correct!"
