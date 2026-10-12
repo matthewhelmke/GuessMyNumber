@@ -8,8 +8,8 @@
  * Original versions:
  *   Copyright (c) 2007 Matthew Helmke
  *   Copyright (c) 2025 Matthew Helmke
- *   Input handling revised 2026-10-12 with assistance from Claude Code
- *      (claude.ai/code) using the claude-opus-5-5 model
+ *   Input handling and the random secret revised 2026-10-12 with assistance
+ *      from Claude Code (claude.ai/code) using the claude-opus-5-5 model
  *
  * This Rust version is a direct behavioral port of the Python, Bash, C,
  * Perl, PHP, Racket, COBOL, Go, Ruby, Java, Fortran, and JavaScript versions.
@@ -19,17 +19,22 @@
  * Because Rust is newer and I had to learn, I'm including the following
  * to make it easier for others in the same boat to try this out.
  *
- * To build and run, use Cargo.
+ * This file uses only Rust's standard library, so rustc, the Rust compiler,
+ * can build it directly.
  *
  * If you don't have Rust installed, use the official Rust installer:
  *
  * $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
  *
- * You may need to run `source $HOME/.cargo.env` for the automated changes
+ * You may need to run `source $HOME/.cargo/env` for the automated changes
  * to your $PATH to take effect.
  *
- * Then, from the directory where this file is located, compile the source
- * code with Cargo:
+ * Then, from the directory where this file is located, compile and run it:
+ *
+ * $ rustc guessnumber.rs
+ * $ ./guessnumber
+ *
+ * Cargo, Rust's project tool, works too. Create a new project:
  *
  * $ cargo new guessnumber
  *
@@ -43,9 +48,10 @@
  * modify it under the terms of the GNU General Public License.
  */
 
+use std::collections::hash_map::RandomState;
+use std::hash::BuildHasher;
 use std::io::{self, Write};
 use std::process::exit;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 fn read_line() -> String {
     let mut input = String::new();
@@ -53,18 +59,28 @@ fn read_line() -> String {
     input.trim().to_string()
 }
 
+// A random number from 1 to 100. Rust's standard library has no random number
+// generator, but each new RandomState, the type that seeds Rust's hash maps,
+// takes fresh keys from the operating system's random source. Hashing any value
+// with one gives 64 random bits, and the remainder after dividing by 100 picks
+// the secret. 2^64 does not divide evenly by 100, but the bias that leaves is
+// about one part in 10^17.
+fn random_secret() -> i32 {
+    let random_bits: u64 = RandomState::new().hash_one(0u8);
+    (random_bits % 100) as i32 + 1
+}
+
 fn main() {
     println!("Welcome to Guess My Number!\n");
     println!("The computer will select a random whole number between 1 and 100.\nYour goal is to guess that number. You will get a turn, then a computer\nplayer will get a turn. Each of you are aware of the other's guesses.\nThe first one to guess the number correctly will win. Try to guess in\nas few turns as possible.\n");
     println!("Here we go!\n");
 
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    // A fixed secret from GMN_SECRET for parity testing, otherwise a time-based one.
+    // A fixed secret from GMN_SECRET for parity testing, otherwise a random one.
     // The value must be all digits, like a guess, because parse accepts a sign.
     let gmn_secret = std::env::var("GMN_SECRET").unwrap_or_default();
     let secretnumber = match gmn_secret.parse::<i32>() {
         Ok(n) if gmn_secret.chars().all(|c| c.is_ascii_digit()) && (1..=100).contains(&n) => n,
-        _ => (now % 100) as i32 + 1,
+        _ => random_secret(),
     };
 
     let mut totalguesses: i32 = 0;

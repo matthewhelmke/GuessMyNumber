@@ -220,7 +220,7 @@ wrapped in a small helper function to ensure correct blocking behavior, EOF dete
 
 ### Rust
 
-The Rust implementation is a modern addition and was developed as a learning exercise. It uses Cargo for building. Care was taken to keep the control flow explicit and readable rather than aggressively idiomatic, in order to better match the structure of older C-like versions.
+The Rust implementation is a modern addition and was developed as a learning exercise. It uses only the standard library, so it builds with `rustc guessnumber.rs` and needs no Cargo project, though Cargo works too. The standard library has no random number generator, so the secret comes from `RandomState`, the type that seeds Rust's hash maps with keys from the operating system's random source. Care was taken to keep the control flow explicit and readable rather than aggressively idiomatic, in order to better match the structure of older C-like versions.
 
 
 ## Philosophy
